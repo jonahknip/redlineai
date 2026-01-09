@@ -1096,7 +1096,7 @@
         </div>
 
         <footer>
-            <p>Powered by <a href="https://redlineai.co" target="_blank">RedlineAI</a> &bull; Built for Abonmarche</p>
+            <p><a href="https://redline.ai" target="_blank">Redline.ai</a> &bull; AI-Powered QA/QC for Civil Engineering</p>
             <p>Questions? <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" target="_blank">Contact Jonah Knip</a></p>
         </footer>
     </div>
@@ -1104,11 +1104,18 @@
     <!-- Email Modal -->
     <div class="modal-overlay" id="emailModal">
         <div class="modal">
-            <h3>Email Report</h3>
-            <input type="email" id="emailTo" placeholder="Enter recipient email">
+            <h3>Email Report via Outlook</h3>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">This will open Outlook with the report. For the best formatting, also attach the Word export.</p>
+            <input type="email" id="emailTo" placeholder="Recipient email (e.g., pm@abonmarche.com)" value="">
             <div class="modal-actions">
                 <button class="btn btn-cancel" id="emailCancel">Cancel</button>
-                <button class="btn" id="emailSend">Send</button>
+                <button class="btn" id="emailSend">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:4px;">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    Open in Outlook
+                </button>
             </div>
         </div>
     </div>
@@ -1355,6 +1362,10 @@
                 return;
             }
             
+            const sendBtn = document.getElementById('emailSend');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = 'Opening Outlook...';
+            
             try {
                 const response = await fetch('/api/email', {
                     method: 'POST',
@@ -1362,19 +1373,27 @@
                     body: JSON.stringify({
                         email: email,
                         report: currentReport,
-                        project_name: currentProjectName
+                        project_name: currentProjectName,
+                        review_type: reviewLabels[selectedReview] || 'QA/QC Review'
                     })
                 });
                 
                 const data = await response.json();
                 if (data.success && data.mailto_link) {
+                    // Open mailto link to launch Outlook
                     window.location.href = data.mailto_link;
                     emailModal.classList.remove('visible');
+                    
+                    // Show success message
+                    showStatus('success', 'Outlook opened! Complete and send your email.');
                 } else {
                     alert(data.error || 'Failed to prepare email.');
                 }
             } catch (err) {
                 alert('Email error: ' + err.message);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Open in Outlook';
             }
         });
 

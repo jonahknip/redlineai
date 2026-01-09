@@ -589,7 +589,7 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
             return {'success': False, 'error': str(e)}
 
     def generate_ai_report(self, use_vision: bool = True, checklist: dict = None, custom_instructions: str = "") -> str:
-        """Generate a professional Abonmarche-style QA/QC checklist report using OpenAI"""
+        """Generate a professional QA/QC review report optimized for Word/PDF export"""
         if not OPENAI_AVAILABLE:
             return self.generate_summary_report()
         
@@ -617,11 +617,13 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         
         # Build the checklist items for AI to evaluate
         checklist_items_text = ""
+        total_items = 0
         if checklist and checklist.get('sections'):
             for section in checklist.get('sections', []):
                 section_title = section.get('title', 'General')
                 checklist_items_text += f"\n\n### {section_title}\n"
                 for item in section.get('items', []):
+                    total_items += 1
                     item_id = item.get('id', '')
                     item_text = item.get('text', '')
                     required = "REQUIRED" if item.get('required') else "Optional"
@@ -629,10 +631,11 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         
         checklist_name = checklist.get('name', 'QA/QC Review') if checklist else 'General Review'
         checklist_phase = checklist.get('phase', '') if checklist else ''
+        review_date = datetime.now().strftime('%B %d, %Y')
         
-        prompt = f"""You are a senior Civil Engineering Project Manager at Abonmarche performing a QA/QC review.
+        prompt = f"""You are a senior Civil Engineering Project Manager performing a formal QA/QC plan review.
 
-PLANSET INFORMATION:
+PROJECT INFORMATION:
 - Project Name: {info.project_name or 'Not identified'}
 - Project Number: {info.project_number or 'Not identified'}  
 - Location: {info.location or 'Not identified'}
@@ -641,6 +644,7 @@ PLANSET INFORMATION:
 - PE License: {info.engineer_license or 'Not identified'}
 - Total Sheets: {self.analysis.total_sheets}
 - Disciplines: {', '.join(self.analysis.disciplines_covered) or 'None identified'}
+- Key Features: {', '.join(self.analysis.key_features) or 'None identified'}
 
 VISION ANALYSIS OF PLAN SHEETS:
 {vision_results}
@@ -648,125 +652,162 @@ VISION ANALYSIS OF PLAN SHEETS:
 EXTRACTED TEXT FROM PLANS:
 {sample_text[:3000]}
 
-CHECKLIST TO EVALUATE: {checklist_name} ({checklist_phase})
+REVIEW TYPE: {checklist_name} ({checklist_phase})
+TOTAL CHECKLIST ITEMS: {total_items}
+
+CHECKLIST ITEMS TO EVALUATE:
 {checklist_items_text}
 
-Generate an HTML QA/QC checklist report in Abonmarche's official format. For EACH checklist item, determine:
-- PASS: Item requirement is clearly met based on the plan analysis
-- FAIL: Item requirement is NOT met or has issues
-- N/A: Item does not apply to this project
-- REVIEW: Cannot determine from available information, needs manual review
+Generate a PROFESSIONAL QA/QC REVIEW REPORT in clean HTML format suitable for Word/PDF export.
 
-OUTPUT FORMAT - Generate this EXACT HTML structure:
+For EACH checklist item, assign a status:
+- [PASS] = Requirement clearly verified/met in the plans
+- [FAIL] = Requirement NOT met, missing, or has issues  
+- [N/A] = Does not apply to this project scope
+- [REVIEW] = Cannot determine from plans, requires manual verification
 
-<div class="qaqc-report">
-  <div class="report-header">
-    <div class="header-logo">
-      <div class="logo-text">ABONMARCHE</div>
-      <div class="logo-tagline">ENGINEERS | ARCHITECTS | SURVEYORS</div>
-    </div>
-    <div class="header-title">
-      <h1>{checklist_name}</h1>
-      <p class="review-phase">{checklist_phase} Design Phase Review</p>
-    </div>
-  </div>
+USE THIS EXACT HTML STRUCTURE:
+
+<div style="font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; max-width: 850px; margin: 0 auto; color: #333;">
   
-  <div class="project-info-grid">
-    <div class="info-row"><span class="label">Project Name:</span><span class="value">[Project Name]</span></div>
-    <div class="info-row"><span class="label">Project Number:</span><span class="value">[Number]</span></div>
-    <div class="info-row"><span class="label">Location:</span><span class="value">[Location]</span></div>
-    <div class="info-row"><span class="label">Client:</span><span class="value">[Client]</span></div>
-    <div class="info-row"><span class="label">Review Date:</span><span class="value">{datetime.now().strftime('%B %d, %Y')}</span></div>
-    <div class="info-row"><span class="label">Reviewed By:</span><span class="value">AI-Assisted Review (RedlineAI)</span></div>
-    <div class="info-row"><span class="label">Total Sheets:</span><span class="value">[Count]</span></div>
-    <div class="info-row"><span class="label">Engineer:</span><span class="value">[Engineer]</span></div>
+  <!-- COVER/HEADER -->
+  <div style="text-align: center; padding: 40px 20px; border-bottom: 4px solid #C8102E; margin-bottom: 30px;">
+    <p style="font-size: 12px; color: #666; letter-spacing: 3px; margin: 0;">ABONMARCHE</p>
+    <h1 style="font-size: 28px; color: #1B365D; margin: 20px 0 10px 0; font-weight: 600;">{checklist_name}</h1>
+    <p style="font-size: 16px; color: #666; margin: 0;">{checklist_phase} Design Phase Review</p>
+    <p style="font-size: 14px; color: #999; margin-top: 20px;">Review Date: {review_date}</p>
   </div>
 
-  <div class="summary-stats">
-    <div class="stat stat-pass"><span class="stat-num">[#]</span><span class="stat-label">PASS</span></div>
-    <div class="stat stat-fail"><span class="stat-num">[#]</span><span class="stat-label">FAIL</span></div>
-    <div class="stat stat-review"><span class="stat-num">[#]</span><span class="stat-label">REVIEW</span></div>
-    <div class="stat stat-na"><span class="stat-num">[#]</span><span class="stat-label">N/A</span></div>
-  </div>
-
-  [FOR EACH SECTION:]
-  <div class="checklist-section">
-    <div class="section-header">[SECTION TITLE]</div>
-    <table class="checklist-table">
-      <thead>
-        <tr>
-          <th class="col-status">Status</th>
-          <th class="col-id">ID</th>
-          <th class="col-item">Checklist Item</th>
-          <th class="col-notes">Notes/Comments</th>
-        </tr>
-      </thead>
-      <tbody>
-        [FOR EACH ITEM IN SECTION:]
-        <tr>
-          <td class="status-cell"><span class="status-badge status-[pass/fail/review/na]">[STATUS]</span></td>
-          <td class="id-cell">[ITEM-ID]</td>
-          <td class="item-cell">[Item description]</td>
-          <td class="notes-cell">[Your specific observation or reason for status]</td>
-        </tr>
-      </tbody>
+  <!-- PROJECT INFORMATION TABLE -->
+  <div style="margin-bottom: 30px;">
+    <h2 style="font-size: 14px; color: #1B365D; border-bottom: 2px solid #1B365D; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Project Information</h2>
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <tr>
+        <td style="padding: 8px 12px; border: 1px solid #ddd; background: #f8f9fa; font-weight: 600; width: 30%;">Project Name</td>
+        <td style="padding: 8px 12px; border: 1px solid #ddd;">[FROM ANALYSIS]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 12px; border: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Project Number</td>
+        <td style="padding: 8px 12px; border: 1px solid #ddd;">[FROM ANALYSIS]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 12px; border: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Location</td>
+        <td style="padding: 8px 12px; border: 1px solid #ddd;">[FROM ANALYSIS]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 12px; border: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Client/Owner</td>
+        <td style="padding: 8px 12px; border: 1px solid #ddd;">[FROM ANALYSIS]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 12px; border: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Engineer of Record</td>
+        <td style="padding: 8px 12px; border: 1px solid #ddd;">[FROM ANALYSIS]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 12px; border: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Total Sheets</td>
+        <td style="padding: 8px 12px; border: 1px solid #ddd;">[FROM ANALYSIS]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 12px; border: 1px solid #ddd; background: #f8f9fa; font-weight: 600;">Reviewed By</td>
+        <td style="padding: 8px 12px; border: 1px solid #ddd;">AI-Assisted Review (Redline.ai)</td>
+      </tr>
     </table>
   </div>
 
-  <div class="findings-section">
-    <h2>Key Findings & Action Items</h2>
-    <div class="findings-critical">
-      <h3>Critical Issues (Must Address)</h3>
-      <ul>[List any FAIL items that are REQUIRED]</ul>
+  <!-- REVIEW SUMMARY -->
+  <div style="margin-bottom: 30px;">
+    <h2 style="font-size: 14px; color: #1B365D; border-bottom: 2px solid #1B365D; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Review Summary</h2>
+    <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px;">
+      <tr>
+        <td style="padding: 15px; border: 1px solid #ddd; background: #e8f5e9;"><strong style="font-size: 24px; color: #2e7d32;">[#]</strong><br><span style="color: #2e7d32;">PASS</span></td>
+        <td style="padding: 15px; border: 1px solid #ddd; background: #ffebee;"><strong style="font-size: 24px; color: #c62828;">[#]</strong><br><span style="color: #c62828;">FAIL</span></td>
+        <td style="padding: 15px; border: 1px solid #ddd; background: #fff3e0;"><strong style="font-size: 24px; color: #ef6c00;">[#]</strong><br><span style="color: #ef6c00;">REVIEW</span></td>
+        <td style="padding: 15px; border: 1px solid #ddd; background: #f5f5f5;"><strong style="font-size: 24px; color: #666;">[#]</strong><br><span style="color: #666;">N/A</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- FOR EACH SECTION - CHECKLIST TABLE -->
+  <div style="margin-bottom: 25px;">
+    <h2 style="font-size: 14px; color: white; background: #1B365D; padding: 10px 15px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">[SECTION TITLE]</h2>
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+      <tr style="background: #f0f0f0;">
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: center; width: 70px;">Status</th>
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left; width: 90px;">ID</th>
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Checklist Item</th>
+        <th style="padding: 10px; border: 1px solid #ddd; text-align: left; width: 35%;">Comments</th>
+      </tr>
+      <!-- FOR EACH ITEM: -->
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><span style="display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: bold; background: [COLOR]; color: white;">[STATUS]</span></td>
+        <td style="padding: 8px; border: 1px solid #ddd; font-family: monospace; font-size: 11px; color: #666;">[ID]</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">[Item text]</td>
+        <td style="padding: 8px; border: 1px solid #ddd; color: #666; font-size: 11px;">[Your specific comment/observation]</td>
+      </tr>
+    </table>
+  </div>
+  <!-- REPEAT FOR ALL SECTIONS -->
+
+  <!-- KEY FINDINGS -->
+  <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-left: 4px solid #C8102E;">
+    <h2 style="font-size: 14px; color: #1B365D; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 1px;">Key Findings & Recommendations</h2>
+    
+    <h3 style="font-size: 13px; color: #c62828; margin: 15px 0 8px 0;">Critical Issues (Action Required)</h3>
+    <ul style="margin: 0; padding-left: 20px; font-size: 12px;">
+      <li>[List each FAIL item with specific issue and recommendation]</li>
+    </ul>
+    
+    <h3 style="font-size: 13px; color: #ef6c00; margin: 15px 0 8px 0;">Items Requiring Manual Review</h3>
+    <ul style="margin: 0; padding-left: 20px; font-size: 12px;">
+      <li>[List each REVIEW item with what needs to be verified]</li>
+    </ul>
+    
+    <h3 style="font-size: 13px; color: #1B365D; margin: 15px 0 8px 0;">General Observations</h3>
+    <p style="font-size: 12px; margin: 0; color: #555;">[Provide overall assessment of plan quality, completeness, and any patterns noticed]</p>
+  </div>
+
+  <!-- SIGNATURE BLOCK -->
+  <div style="margin-top: 40px; display: flex; justify-content: space-between; gap: 30px;">
+    <div style="flex: 1; text-align: center;">
+      <div style="border-bottom: 1px solid #333; margin-bottom: 5px; height: 30px;"></div>
+      <p style="font-size: 11px; color: #666; margin: 0;">QA/QC Reviewer</p>
     </div>
-    <div class="findings-review">
-      <h3>Items Requiring Manual Review</h3>
-      <ul>[List items marked REVIEW with reason]</ul>
+    <div style="flex: 1; text-align: center;">
+      <div style="border-bottom: 1px solid #333; margin-bottom: 5px; height: 30px;"></div>
+      <p style="font-size: 11px; color: #666; margin: 0;">Date</p>
     </div>
-    <div class="findings-notes">
-      <h3>General Observations</h3>
-      <p>[Overall assessment of the planset quality and completeness]</p>
+    <div style="flex: 1; text-align: center;">
+      <div style="border-bottom: 1px solid #333; margin-bottom: 5px; height: 30px;"></div>
+      <p style="font-size: 11px; color: #666; margin: 0;">Project Manager</p>
     </div>
   </div>
 
-  <div class="signature-section">
-    <div class="sig-block">
-      <div class="sig-line"></div>
-      <p>QA/QC Reviewer Signature</p>
-    </div>
-    <div class="sig-block">
-      <div class="sig-line"></div>
-      <p>Date</p>
-    </div>
-    <div class="sig-block">
-      <div class="sig-line"></div>
-      <p>Project Manager Approval</p>
-    </div>
+  <!-- FOOTER -->
+  <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center;">
+    <p style="font-size: 10px; color: #999; margin: 0;">Generated by Redline.ai | Abonmarche QA/QC Review System | {review_date}</p>
   </div>
-  
-  <div class="report-footer">
-    <p>Generated by RedlineAI | Abonmarche QA/QC System | {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
-  </div>
+
 </div>
 
-IMPORTANT:
-- Evaluate EVERY checklist item - do not skip any
-- Provide specific, actionable notes for each item
-- Be thorough but concise in your notes
-- Use professional engineering language
-- If you cannot verify something from the plans, mark it REVIEW not PASS
-- Return ONLY the HTML, no markdown code blocks"""
+CRITICAL INSTRUCTIONS:
+1. Evaluate EVERY SINGLE checklist item - include ALL {total_items} items
+2. Use inline styles for Word/PDF compatibility (no CSS classes)
+3. Status badge colors: PASS=#2e7d32, FAIL=#c62828, REVIEW=#ef6c00, N/A=#666
+4. Provide specific, actionable comments for EACH item (not generic)
+5. Fill in ALL project information from the analysis
+6. Count statuses accurately for the summary
+7. Be conservative - if uncertain, use REVIEW not PASS
+8. Return ONLY the HTML, no markdown code blocks or explanations"""
 
         try:
             client = OpenAI(api_key=api_key)
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a senior civil engineering QA/QC reviewer at Abonmarche. Generate professional, thorough checklist reviews in clean HTML format. Evaluate each item carefully based on the plan analysis provided."},
+                    {"role": "system", "content": "You are a senior civil engineering QA/QC reviewer. Generate professional, thorough plan review reports in clean HTML with inline styles. Your reports must be suitable for direct export to Word or PDF. Evaluate every checklist item carefully and provide specific observations."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=8000,
-                temperature=0.3
+                max_tokens=12000,
+                temperature=0.2
             )
             
             html_report = response.choices[0].message.content
