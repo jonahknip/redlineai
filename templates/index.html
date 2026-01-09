@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redline.ai | AI-Powered Drawing Analysis</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#C8102E">
+    <meta name="description" content="The First Accurate Full Drawing Analyzer - AI-Powered QA/QC for Civil Engineering">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Redline.ai">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    
+    <!-- Icons -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23C8102E'/><text x='50' y='62' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='32'>R</text></svg>">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     <style>
         * {
             box-sizing: border-box;
@@ -790,6 +803,19 @@ ${currentReport}
             } catch (err) {
                 console.error('Failed to save to history:', err);
             }
+        }
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
         }
     </script>
 </body>
