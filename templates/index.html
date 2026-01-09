@@ -1079,26 +1079,14 @@
                     <div class="report-header">
                         <h3 id="reportTitle">QA/QC Review Report</h3>
                         <div class="report-actions">
-                            <button class="btn btn-secondary" id="copyBtn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                                </svg>
-                                Copy
-                            </button>
-                            <button class="btn btn-secondary" id="exportWordBtn">
+                            <button class="btn" id="exportPdfBtn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                     <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="12" y1="18" x2="12" y2="12"/>
+                                    <polyline points="9 15 12 12 15 15"/>
                                 </svg>
-                                Word
-                            </button>
-                            <button class="btn" id="emailBtn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                    <polyline points="22,6 12,13 2,6"/>
-                                </svg>
-                                Email
+                                Export PDF
                             </button>
                         </div>
                     </div>
@@ -1111,25 +1099,6 @@
             <p><a href="https://redline.ai" target="_blank">Redline.ai</a> &bull; AI-Powered QA/QC for Civil Engineering</p>
             <p>Questions? <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" target="_blank">Contact Jonah Knip</a></p>
         </footer>
-    </div>
-
-    <!-- Email Modal -->
-    <div class="modal-overlay" id="emailModal">
-        <div class="modal">
-            <h3>Email Report via Outlook</h3>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">This will open Outlook with the report. For the best formatting, also attach the Word export.</p>
-            <input type="email" id="emailTo" placeholder="Recipient email (e.g., pm@abonmarche.com)" value="">
-            <div class="modal-actions">
-                <button class="btn btn-cancel" id="emailCancel">Cancel</button>
-                <button class="btn" id="emailSend">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:4px;">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                        <polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                    Open in Outlook
-                </button>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -1293,49 +1262,15 @@
             status.className = 'status';
         }
 
-        // Copy button
-        document.getElementById('copyBtn').addEventListener('click', async function() {
-            const text = reportContent.innerText || reportContent.textContent;
-            
-            try {
-                if (reportContent.innerHTML && reportContent.classList.contains('ai-report')) {
-                    const blob = new Blob([reportContent.innerHTML], { type: 'text/html' });
-                    const textBlob = new Blob([text], { type: 'text/plain' });
-                    await navigator.clipboard.write([new ClipboardItem({
-                        'text/html': blob,
-                        'text/plain': textBlob
-                    })]);
-                } else {
-                    await navigator.clipboard.writeText(text);
-                }
-                this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-                setTimeout(() => {
-                    this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
-                }, 2000);
-            } catch (err) {
-                // Fallback
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-                setTimeout(() => {
-                    this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
-                }, 2000);
-            }
-        });
-
-        // Export to Word
-        document.getElementById('exportWordBtn').addEventListener('click', async function() {
+        // Export to PDF
+        document.getElementById('exportPdfBtn').addEventListener('click', async function() {
             if (!currentReport) return;
             
             this.disabled = true;
             this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner"><circle cx="12" cy="12" r="10"/></svg> Exporting...';
             
             try {
-                const response = await fetch('/api/export/word', {
+                const response = await fetch('/api/export/pdf', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1350,78 +1285,21 @@
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `${currentProjectName.replace(/\s+/g, '_')}_${selectedReview}_Review.docx`;
+                    a.download = `${currentProjectName.replace(/[^a-zA-Z0-9]/g, '_')}_${selectedReview}_Review.pdf`;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
                     a.remove();
+                    showStatus('success', 'PDF exported successfully!');
                 } else {
-                    alert('Export failed. Please try again.');
+                    const errData = await response.json();
+                    showStatus('error', 'Export failed: ' + (errData.error || 'Unknown error'));
                 }
             } catch (err) {
-                alert('Export error: ' + err.message);
+                showStatus('error', 'Export error: ' + err.message);
             } finally {
                 this.disabled = false;
-                this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Word';
-            }
-        });
-
-        // Email modal
-        const emailModal = document.getElementById('emailModal');
-        
-        document.getElementById('emailBtn').addEventListener('click', () => {
-            emailModal.classList.add('visible');
-        });
-
-        document.getElementById('emailCancel').addEventListener('click', () => {
-            emailModal.classList.remove('visible');
-        });
-
-        document.getElementById('emailSend').addEventListener('click', async () => {
-            const email = document.getElementById('emailTo').value.trim();
-            if (!email) {
-                alert('Please enter an email address.');
-                return;
-            }
-            
-            const sendBtn = document.getElementById('emailSend');
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = 'Opening Outlook...';
-            
-            try {
-                const response = await fetch('/api/email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: email,
-                        report: currentReport,
-                        project_name: currentProjectName,
-                        review_type: reviewLabels[selectedReview] || 'QA/QC Review'
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.success && data.mailto_link) {
-                    // Open mailto link to launch Outlook
-                    window.location.href = data.mailto_link;
-                    emailModal.classList.remove('visible');
-                    
-                    // Show success message
-                    showStatus('success', 'Outlook opened! Complete and send your email.');
-                } else {
-                    alert(data.error || 'Failed to prepare email.');
-                }
-            } catch (err) {
-                alert('Email error: ' + err.message);
-            } finally {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Open in Outlook';
-            }
-        });
-
-        emailModal.addEventListener('click', (e) => {
-            if (e.target === emailModal) {
-                emailModal.classList.remove('visible');
+                this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg> Export PDF';
             }
         });
 
