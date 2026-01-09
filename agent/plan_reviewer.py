@@ -704,25 +704,38 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
             training_store = get_training_store()
             stats = training_store.get_statistics()
             print(f"[DEBUG] Training store has {stats['total_examples']} examples")
+            print(f"[DEBUG] Training stats: {stats['by_status']}")
             
             if stats['total_examples'] > 0:
-                # Generate few-shot examples for the first few items
+                # Generate few-shot examples - use a representative sample across all items
+                # Group examples by status to ensure diversity
                 example_prompts = []
-                for item in checklist_items_for_ai[:5]:  # Get examples for first 5 items
+                items_with_examples = set()
+                
+                # Get examples for items that have training data (prioritize items with comments)
+                for item in checklist_items_for_ai:
+                    if len(example_prompts) >= 10:  # Cap at 10 diverse examples
+                        break
+                    
                     item_examples = generate_few_shot_prompt(
                         item['id'], 
                         item['text'], 
                         training_store, 
-                        n_examples=2
+                        n_examples=3  # Get 3 examples per item
                     )
-                    if item_examples:
+                    if item_examples and item['id'] not in items_with_examples:
                         example_prompts.append(item_examples)
+                        items_with_examples.add(item['id'])
                 
                 if example_prompts:
-                    few_shot_examples = "\n".join(example_prompts[:3])  # Use up to 3
-                    print(f"[DEBUG] Added {len(example_prompts)} few-shot examples to prompt")
+                    few_shot_examples = "\n".join(example_prompts)
+                    print(f"[DEBUG] Added {len(example_prompts)} few-shot example sets to prompt")
+                else:
+                    print(f"[DEBUG] No matching examples found for checklist items")
         except Exception as e:
             print(f"[DEBUG] Could not load training examples: {e}")
+            import traceback
+            traceback.print_exc()
             few_shot_examples = ""
         
         if checklist_items_for_ai and OPENAI_AVAILABLE and api_key:

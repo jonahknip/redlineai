@@ -439,9 +439,16 @@ class TrainingDataStore:
             example_keywords = set(example.checklist_item_text.lower().split())
             overlap = len(keywords & example_keywords)
             if overlap > 0:
-                scored.append((overlap, example))
+                # Prioritize examples with comments (more valuable for training)
+                # Also boost examples that aren't just "REVIEW"
+                bonus = 0
+                if example.comment and len(example.comment) > 10:
+                    bonus += 3  # Significant boost for good comments
+                if example.status in ('PASS', 'FAIL'):
+                    bonus += 1  # Slight boost for decisive statuses
+                scored.append((overlap + bonus, example))
         
-        # Sort by overlap and return top N
+        # Sort by score and return top N
         scored.sort(key=lambda x: x[0], reverse=True)
         return [e for _, e in scored[:n_results]]
     
