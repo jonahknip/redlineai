@@ -798,6 +798,10 @@ Provide specific, actionable comments referencing what you observed. Return ONLY
             try:
                 client = OpenAI(api_key=api_key)
                 
+                print(f"[DEBUG] Sending evaluation request to GPT-4o...")
+                print(f"[DEBUG] Prompt length: {len(eval_prompt)} chars")
+                print(f"[DEBUG] Few-shot examples length: {len(few_shot_examples)} chars")
+                
                 # Get AI evaluation
                 eval_response = client.chat.completions.create(
                     model="gpt-4o",
@@ -808,6 +812,8 @@ Provide specific, actionable comments referencing what you observed. Return ONLY
                     max_tokens=8000,
                     temperature=0.1
                 )
+                
+                print(f"[DEBUG] Got response from GPT-4o")
                 
                 eval_text = eval_response.choices[0].message.content.strip()
                 # Clean markdown if present
@@ -824,6 +830,8 @@ Provide specific, actionable comments referencing what you observed. Return ONLY
                 
             except Exception as e:
                 print(f"AI evaluation error: {e}")
+                import traceback
+                traceback.print_exc()
                 # Default all to REVIEW if AI fails
                 eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification'} for item in checklist_items_for_ai}
         else:
