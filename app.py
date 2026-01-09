@@ -262,7 +262,21 @@ def health():
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
-        'version': '0.1.0'
+        'version': '0.1.0',
+        'api_key_configured': bool(os.environ.get('OPENAI_API_KEY'))
+    })
+
+
+@app.route('/api/debug')
+def debug():
+    """Debug endpoint to check configuration."""
+    return jsonify({
+        'api_key_set': bool(os.environ.get('OPENAI_API_KEY')),
+        'api_key_prefix': os.environ.get('OPENAI_API_KEY', '')[:8] + '...' if os.environ.get('OPENAI_API_KEY') else None,
+        'upload_folder': str(UPLOAD_FOLDER),
+        'upload_folder_exists': UPLOAD_FOLDER.exists(),
+        'checklists_dir': str(Path(__file__).parent / 'checklists'),
+        'checklists_exist': (Path(__file__).parent / 'checklists').exists()
     })
 
 
