@@ -16,7 +16,6 @@ Pillow==10.1.0
 # Document Generation
 python-docx==1.1.0
 openpyxl==3.1.2
-weasyprint==60.1
 
 # Utilities
 python-dotenv==1.0.0

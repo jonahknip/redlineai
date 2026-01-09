@@ -380,7 +380,7 @@ def export_word():
 
 @app.route('/api/export/pdf', methods=['POST'])
 def export_pdf():
-    """Export report as PDF document"""
+    """Export report as printable HTML document (opens print dialog for PDF)"""
     try:
         data = request.get_json()
         report_html = data.get('report', '')
@@ -397,6 +397,7 @@ def export_pdf():
 <html>
 <head>
 <meta charset="UTF-8">
+<title>{project_name} - QA/QC Review</title>
 <style>
 body {{ font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; max-width: 800px; margin: 0 auto; padding: 40px; }}
 h1 {{ color: #1B365D; border-bottom: 3px solid #C8102E; padding-bottom: 10px; }}
@@ -404,6 +405,7 @@ h2 {{ color: #1B365D; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin
 table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
 th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
 th {{ background: #f5f5f5; color: #1B365D; }}
+@media print {{ body {{ padding: 20px; }} }}
 </style>
 </head>
 <body>
@@ -411,34 +413,16 @@ th {{ background: #f5f5f5; color: #1B365D; }}
 </body>
 </html>"""
         
-        # Try WeasyPrint first, fall back to basic HTML
-        try:
-            from weasyprint import HTML
-            buffer = BytesIO()
-            HTML(string=full_html).write_pdf(buffer)
-            buffer.seek(0)
-            mimetype = 'application/pdf'
-            extension = 'pdf'
-            logger.info(f"PDF generated successfully with WeasyPrint")
-        except ImportError as e:
-            logger.warning(f"WeasyPrint not available: {e}, falling back to HTML")
-            # Fallback: return HTML file if WeasyPrint not available
-            buffer = BytesIO(full_html.encode('utf-8'))
-            mimetype = 'text/html'
-            extension = 'html'
-        except Exception as e:
-            logger.error(f"WeasyPrint error: {e}, falling back to HTML")
-            buffer = BytesIO(full_html.encode('utf-8'))
-            mimetype = 'text/html'
-            extension = 'html'
+        # Return HTML that will open in new tab for printing to PDF
+        buffer = BytesIO(full_html.encode('utf-8'))
         
         # Clean filename
         safe_name = ''.join(c if c.isalnum() or c in ' -_' else '_' for c in project_name)
-        filename = f"{safe_name}_{review_type}_Review_{datetime.now().strftime('%Y%m%d')}.{extension}"
+        filename = f"{safe_name}_{review_type}_Review_{datetime.now().strftime('%Y%m%d')}.html"
         
         return send_file(
             buffer,
-            mimetype=mimetype,
+            mimetype='text/html',
             as_attachment=True,
             download_name=filename
         )

@@ -1262,45 +1262,79 @@
             status.className = 'status';
         }
 
-        // Export to PDF
-        document.getElementById('exportPdfBtn').addEventListener('click', async function() {
+        // Export to PDF - opens print dialog
+        document.getElementById('exportPdfBtn').addEventListener('click', function() {
             if (!currentReport) return;
             
-            this.disabled = true;
-            this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner"><circle cx="12" cy="12" r="10"/></svg> Exporting...';
+            // Create a new window with the report for printing
+            const printWindow = window.open('', '_blank');
             
-            try {
-                const response = await fetch('/api/export/pdf', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        report: currentReport,
-                        project_name: currentProjectName,
-                        review_type: selectedReview
-                    })
-                });
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${currentProjectName.replace(/[^a-zA-Z0-9]/g, '_')}_${selectedReview}_Review.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    a.remove();
-                    showStatus('success', 'PDF exported successfully!');
-                } else {
-                    const errData = await response.json();
-                    showStatus('error', 'Export failed: ' + (errData.error || 'Unknown error'));
-                }
-            } catch (err) {
-                showStatus('error', 'Export error: ' + err.message);
-            } finally {
-                this.disabled = false;
-                this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg> Export PDF';
-            }
+            // Build print-friendly HTML
+            const printHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${currentProjectName} - ${reviewLabels[selectedReview] || 'QA/QC Review'}</title>
+<style>
+@media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+}
+.print-header {
+    background: #1B365D;
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.print-header h2 { margin: 0; font-size: 18px; }
+.print-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #C8102E;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.print-btn:hover { background: #A00D25; }
+.print-instructions {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 12px;
+    max-width: 250px;
+    z-index: 1000;
+}
+</style>
+</head>
+<body>
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+<div class="print-instructions no-print">
+    <strong>To save as PDF:</strong><br>
+    1. Click "Print / Save as PDF"<br>
+    2. Select "Save as PDF" as printer<br>
+    3. Click Save
+</div>
+${currentReport}
+</body>
+</html>`;
+            
+            printWindow.document.write(printHtml);
+            printWindow.document.close();
+            
+            showStatus('success', 'Report opened in new tab. Use Print > Save as PDF to export.');
         });
 
         // History
