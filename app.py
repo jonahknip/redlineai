@@ -707,13 +707,16 @@ def debug_info():
 @app.route('/api/test-openai', methods=['GET'])
 def test_openai():
     """Test OpenAI API connection"""
+    import httpx
     api_key = os.environ.get('OPENAI_API_KEY')
     if not api_key:
         return jsonify({'success': False, 'error': 'OPENAI_API_KEY not set'})
     
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=api_key)
+        # Create client with explicit http_client to avoid proxy issues
+        http_client = httpx.Client()
+        client = OpenAI(api_key=api_key, http_client=http_client)
         
         response = client.chat.completions.create(
             model="gpt-4o",
@@ -731,9 +734,11 @@ def test_openai():
             'key_prefix': api_key[:8] + '...'
         })
     except Exception as e:
+        import traceback
         return jsonify({
             'success': False,
             'error': str(e),
+            'traceback': traceback.format_exc(),
             'key_prefix': api_key[:8] + '...' if api_key else 'none'
         })
 
