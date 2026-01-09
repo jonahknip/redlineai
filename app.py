@@ -115,6 +115,12 @@ def start_review():
             custom_instructions=custom_instructions if custom_instructions else None
         )
         
+        # Add form metadata from user input
+        results['form_project_name'] = request.form.get('project_name', '')
+        results['form_project_number'] = request.form.get('project_number', '')
+        results['form_project_manager'] = request.form.get('project_manager', '')
+        results['form_reviewer'] = request.form.get('reviewer', '') or 'RedlineAI'
+        
         # Generate HTML report
         html_report = report_gen.generate_html_report(results)
         

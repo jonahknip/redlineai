@@ -4,7 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RedlineAI - AI-Powered Plan Review</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #C8102E;
+            --primary-dark: #a00d24;
+            --secondary: #1a365d;
+            --secondary-light: #2d4a6f;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -12,469 +33,824 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
             min-height: 100vh;
-            color: #333;
+            color: var(--gray-800);
         }
         
-        .container {
-            max-width: 1200px;
+        /* Navigation */
+        .nav {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-inner {
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* Header */
-        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 40px;
+            height: 64px;
         }
         
         .logo {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            text-decoration: none;
         }
         
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 10px;
+        .logo-mark {
             display: flex;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            gap: 4px;
         }
         
-        .logo-icon svg {
-            width: 35px;
-            height: 35px;
+        .logo-mark .bar {
+            width: 8px;
+            height: 28px;
+            background: var(--primary);
+        }
+        
+        .logo-mark .bar:first-child {
+            border-radius: 2px 0 0 2px;
+        }
+        
+        .logo-mark .bar:last-child {
+            border-radius: 0 2px 2px 0;
         }
         
         .logo-text {
-            font-size: 28px;
+            font-size: 22px;
             font-weight: 700;
-            color: white;
-            letter-spacing: -1px;
+            color: var(--secondary);
+            letter-spacing: -0.5px;
         }
         
         .logo-text span {
-            color: #e53e3e;
+            color: var(--primary);
         }
         
-        .contact-link {
-            color: rgba(255,255,255,0.8);
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .nav-link {
+            color: var(--gray-600);
             text-decoration: none;
             font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary);
+        }
+        
+        .nav-btn {
+            background: var(--secondary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background: var(--secondary-light);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--secondary) 0%, #0f172a 100%);
+            padding: 80px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        
+        .hero-content {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+        
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary) 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.7);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* Main Container */
+        .main {
+            max-width: 1200px;
+            margin: -60px auto 60px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .card-header .step-indicator {
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
-        .contact-link:hover {
-            color: white;
-        }
-        
-        /* Hero */
-        .hero {
-            text-align: center;
-            padding: 40px 0 60px;
-            color: white;
-        }
-        
-        .hero h1 {
-            font-size: 48px;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-        
-        .hero p {
-            font-size: 20px;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        /* Main Card */
-        .main-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-            color: white;
-            padding: 25px 30px;
-        }
-        
-        .card-header h2 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .card-header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-        
-        .card-body {
-            padding: 40px;
-        }
-        
-        /* Form */
-        .form-group {
-            margin-bottom: 30px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #1a365d;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #e53e3e;
-            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        /* File Upload */
-        .file-upload {
-            border: 3px dashed #e2e8f0;
-            border-radius: 15px;
-            padding: 50px 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8fafc;
-        }
-        
-        .file-upload:hover {
-            border-color: #e53e3e;
-            background: #fff5f5;
-        }
-        
-        .file-upload.dragover {
-            border-color: #e53e3e;
-            background: #fff5f5;
-        }
-        
-        .file-upload-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        .step {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--gray-100);
+            color: var(--gray-400);
+            transition: all 0.3s;
         }
         
-        .file-upload-icon svg {
-            width: 30px;
-            height: 30px;
+        .step.active {
+            background: var(--primary);
             color: white;
         }
         
-        .file-upload h3 {
-            color: #1a365d;
-            margin-bottom: 10px;
+        .step.completed {
+            background: var(--success);
+            color: white;
         }
         
-        .file-upload p {
-            color: #718096;
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: var(--gray-200);
+        }
+        
+        .card-body {
+            padding: 32px;
+        }
+        
+        /* Form Styles */
+        .form-section {
+            margin-bottom: 32px;
+        }
+        
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-label {
+            display: block;
             font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 12px;
         }
         
-        .file-upload input {
+        .form-label .required {
+            color: var(--primary);
+        }
+        
+        .form-hint {
+            font-size: 13px;
+            color: var(--gray-500);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+        
+        /* Phase Selection */
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        
+        .phase-card {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .phase-card input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .phase-card-inner {
+            padding: 24px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .phase-card:hover .phase-card-inner {
+            border-color: var(--gray-300);
+            background: var(--gray-50);
+        }
+        
+        .phase-card input:checked + .phase-card-inner {
+            border-color: var(--primary);
+            background: #fef2f2;
+        }
+        
+        .phase-card input:checked + .phase-card-inner .phase-icon {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .phase-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            transition: all 0.2s;
+        }
+        
+        .phase-icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--gray-600);
+        }
+        
+        .phase-card input:checked + .phase-card-inner .phase-icon svg {
+            color: white;
+        }
+        
+        .phase-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+        
+        .phase-desc {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+        
+        /* File Upload */
+        .upload-zone {
+            border: 2px dashed var(--gray-300);
+            border-radius: 12px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--gray-50);
+        }
+        
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: #fef2f2;
+        }
+        
+        .upload-zone input {
             display: none;
         }
         
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        
+        .upload-icon svg {
+            width: 32px;
+            height: 32px;
+            color: var(--primary);
+        }
+        
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+        
+        .upload-subtitle {
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+        
+        .upload-subtitle span {
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        /* File List */
         .file-list {
-            margin-top: 20px;
-            text-align: left;
+            margin-top: 16px;
         }
         
         .file-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 15px;
-            background: #f0f4f8;
+            gap: 12px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid var(--gray-200);
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
-        .file-item .name {
+        .file-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #fef2f2;
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #1a365d;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .file-icon svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+        
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .file-name {
+            font-size: 14px;
             font-weight: 500;
+            color: var(--gray-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        .file-item .remove {
-            background: none;
+        .file-size {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+        
+        .file-remove {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
             border: none;
-            color: #e53e3e;
+            background: var(--gray-100);
+            color: var(--gray-500);
             cursor: pointer;
-            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
         
-        /* Phase Options */
-        .phase-options {
+        .file-remove:hover {
+            background: #fef2f2;
+            color: var(--primary);
+        }
+        
+        /* Project Info */
+        .project-info-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
         }
         
-        .phase-option {
-            position: relative;
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
         }
         
-        .phase-option input {
-            position: absolute;
-            opacity: 0;
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
         }
         
-        .phase-option label {
-            display: block;
-            padding: 20px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+        .form-input::placeholder {
+            color: var(--gray-400);
         }
         
-        .phase-option label:hover {
-            border-color: #e53e3e;
-        }
-        
-        .phase-option input:checked + label {
-            border-color: #e53e3e;
-            background: #fff5f5;
-        }
-        
-        .phase-option .phase-name {
-            display: block;
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a365d;
-            margin-bottom: 5px;
-        }
-        
-        .phase-option .phase-desc {
-            font-size: 12px;
-            color: #718096;
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
         }
         
         /* Submit Button */
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
+            transition: all 0.2s;
+            border: none;
         }
         
-        .submit-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(229, 62, 62, 0.3);
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
         }
         
-        .submit-btn:disabled {
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+        }
+        
+        .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
         
-        /* Progress */
-        .progress-container {
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+        
+        /* Progress Section */
+        .progress-section {
             display: none;
-            margin-top: 30px;
-        }
-        
-        .progress-container.active {
-            display: block;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #e53e3e 0%, #c53030 100%);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .progress-text {
+            padding: 32px;
             text-align: center;
-            color: #718096;
-            font-size: 14px;
         }
         
-        /* Results */
-        .results-container {
-            display: none;
-            margin-top: 30px;
-        }
-        
-        .results-container.active {
+        .progress-section.active {
             display: block;
         }
         
-        .results-summary {
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            position: relative;
+        }
+        
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+        }
+        
+        .progress-ring .bg {
+            stroke: var(--gray-200);
+        }
+        
+        .progress-ring .progress {
+            stroke: var(--primary);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s;
+        }
+        
+        .progress-percent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        .progress-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+        
+        .progress-status {
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+        
+        /* Results Section */
+        .results-section {
+            display: none;
+        }
+        
+        .results-section.active {
+            display: block;
+        }
+        
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .results-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .results-title .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #d1fae5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .results-title .icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--success);
+        }
+        
+        .results-title h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .results-title p {
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
         
-        .summary-card {
-            padding: 25px;
+        .stat-card {
+            padding: 20px;
             border-radius: 12px;
             text-align: center;
         }
         
-        .summary-card.total {
-            background: #e3f2fd;
-            border: 2px solid #1a365d;
+        .stat-card.total {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+            color: white;
         }
         
-        .summary-card.passed {
-            background: #d4edda;
-            border: 2px solid #28a745;
+        .stat-card.passed {
+            background: #d1fae5;
+            color: #065f46;
         }
         
-        .summary-card.failed {
-            background: #f8d7da;
-            border: 2px solid #dc3545;
+        .stat-card.failed {
+            background: #fee2e2;
+            color: #991b1b;
         }
         
-        .summary-card.na {
-            background: #e9ecef;
-            border: 2px solid #6c757d;
+        .stat-card.na {
+            background: var(--gray-100);
+            color: var(--gray-600);
         }
         
-        .summary-card .number {
+        .stat-number {
             font-size: 36px;
             font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
         }
         
-        .summary-card .label {
-            font-size: 12px;
+        .stat-label {
+            font-size: 13px;
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-top: 5px;
         }
         
-        .results-actions {
+        /* Action Buttons */
+        .action-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         
         .action-btn {
             flex: 1;
-            min-width: 200px;
-            padding: 15px 25px;
-            border: 2px solid #1a365d;
+            min-width: 180px;
+            padding: 14px 20px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
             background: white;
-            color: #1a365d;
-            border-radius: 10px;
+            color: var(--gray-700);
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             text-decoration: none;
         }
         
         .action-btn:hover {
-            background: #1a365d;
-            color: white;
+            background: var(--gray-50);
+            border-color: var(--gray-400);
         }
         
         .action-btn.primary {
-            background: #1a365d;
+            background: var(--primary);
+            border-color: var(--primary);
             color: white;
         }
         
         .action-btn.primary:hover {
-            background: #2d4a6f;
+            background: var(--primary-dark);
         }
         
-        /* Report Frame */
-        .report-frame {
-            margin-top: 30px;
-            border: 1px solid #e2e8f0;
+        .action-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Report Preview */
+        .report-preview {
+            margin-top: 24px;
+            border: 1px solid var(--gray-200);
             border-radius: 12px;
             overflow: hidden;
         }
         
-        .report-frame iframe {
+        .report-preview-header {
+            padding: 16px 20px;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .report-preview-header h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .report-preview iframe {
             width: 100%;
-            height: 800px;
+            height: 700px;
             border: none;
+        }
+        
+        /* Error Message */
+        .error-message {
+            display: none;
+            padding: 16px 20px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            color: #991b1b;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+        
+        .error-message.active {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .error-message svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
         }
         
         /* Footer */
         footer {
+            padding: 40px 24px;
             text-align: center;
-            padding: 40px 20px;
-            color: rgba(255,255,255,0.6);
+            color: var(--gray-500);
             font-size: 14px;
         }
         
         footer a {
-            color: rgba(255,255,255,0.8);
+            color: var(--primary);
             text-decoration: none;
-        }
-        
-        footer a:hover {
-            color: white;
         }
         
         /* Responsive */
@@ -483,227 +859,294 @@
                 font-size: 32px;
             }
             
-            .phase-options {
+            .phase-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .results-summary {
+            .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .project-info-grid {
+                grid-template-columns: 1fr;
             }
         }
         
-        /* Loading Spinner */
+        /* Spinner */
         .spinner {
-            display: inline-block;
             width: 20px;
             height: 20px;
-            border: 2px solid #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
             border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
+            animation: spin 0.8s linear infinite;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
-        /* Error State */
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .error-message.active {
-            display: block;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2.5">
-                        <path d="M12 19V5M5 12l7-7 7 7"/>
-                    </svg>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/" class="logo">
+                <div class="logo-mark">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
                 </div>
                 <div class="logo-text">Redline<span>AI</span></div>
-            </div>
-            <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" class="contact-link" target="_blank">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                Contact Support
             </a>
-        </header>
-        
-        <div class="hero">
-            <h1>AI-Powered Plan Review</h1>
-            <p>Upload your civil engineering plans and get instant QA/QC checklist reviews powered by GPT-4 Vision</p>
+            <div class="nav-links">
+                <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" class="nav-link" target="_blank">Support</a>
+                <a href="#" class="nav-btn">New Review</a>
+            </div>
         </div>
-        
-        <div class="main-card">
+    </nav>
+    
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Powered by GPT-4 Vision
+            </div>
+            <h1>AI-Powered <span>Plan Review</span></h1>
+            <p>Upload your civil engineering plans and get a completed QA/QC checklist in minutes, matching your exact Abonmarche review forms.</p>
+        </div>
+    </section>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <div class="card">
             <div class="card-header">
-                <h2>Start New Review</h2>
-                <p>Select review phase, upload PDFs, and get your completed checklist</p>
+                <h2>New Plan Review</h2>
+                <div class="step-indicator">
+                    <div class="step active" id="step1">1</div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step2">2</div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step3">3</div>
+                </div>
             </div>
             
-            <div class="card-body">
+            <!-- Form Section -->
+            <div class="card-body" id="formSection">
                 <form id="reviewForm">
                     <!-- Phase Selection -->
-                    <div class="form-group">
-                        <label>Select Review Phase</label>
-                        <div class="phase-options">
+                    <div class="form-section">
+                        <label class="form-label">
+                            Select Review Phase <span class="required">*</span>
+                        </label>
+                        <div class="phase-grid">
                             {% for checklist in checklists %}
-                            <div class="phase-option">
-                                <input type="radio" name="phase" id="phase-{{ checklist.phase }}" value="{{ checklist.phase }}" {% if loop.first %}checked{% endif %}>
-                                <label for="phase-{{ checklist.phase }}">
-                                    <span class="phase-name">{{ checklist.phase }}</span>
-                                    <span class="phase-desc">{{ checklist.item_count }} items</span>
-                                </label>
-                            </div>
+                            <label class="phase-card">
+                                <input type="radio" name="phase" value="{{ checklist.phase }}" {% if loop.first %}checked{% endif %}>
+                                <div class="phase-card-inner">
+                                    <div class="phase-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="phase-name">{{ checklist.phase }}</div>
+                                    <div class="phase-desc">{{ checklist.item_count }} items</div>
+                                </div>
+                            </label>
                             {% endfor %}
                         </div>
                     </div>
                     
                     <!-- File Upload -->
-                    <div class="form-group">
-                        <label>Upload Plan Sheets (PDF)</label>
-                        <div class="file-upload" id="dropZone">
-                            <div class="file-upload-icon">
+                    <div class="form-section">
+                        <label class="form-label">
+                            Upload Plan Sheets <span class="required">*</span>
+                            <span class="form-hint">PDF files only, max 100MB total</span>
+                        </label>
+                        <div class="upload-zone" id="uploadZone">
+                            <div class="upload-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="17 8 12 3 7 8"/>
-                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                                 </svg>
                             </div>
-                            <h3>Drag & Drop PDF Files</h3>
-                            <p>or click to browse (multiple files supported)</p>
-                            <input type="file" id="fileInput" name="files" accept=".pdf" multiple>
+                            <div class="upload-title">Drop PDF files here</div>
+                            <div class="upload-subtitle">or <span>browse</span> to upload</div>
+                            <input type="file" id="fileInput" accept=".pdf" multiple>
                         </div>
                         <div class="file-list" id="fileList"></div>
                     </div>
                     
+                    <!-- Project Info -->
+                    <div class="form-section">
+                        <label class="form-label">Project Information <span class="form-hint">(Optional - auto-detected from plans)</span></label>
+                        <div class="project-info-grid">
+                            <input type="text" class="form-input" name="project_name" placeholder="Project Name">
+                            <input type="text" class="form-input" name="project_number" placeholder="Project Number">
+                            <input type="text" class="form-input" name="project_manager" placeholder="Project Manager">
+                            <input type="text" class="form-input" name="reviewer" placeholder="Reviewer Name">
+                        </div>
+                    </div>
+                    
                     <!-- Custom Instructions -->
-                    <div class="form-group">
-                        <label>Custom Review Instructions (Optional)</label>
-                        <textarea name="custom_instructions" placeholder="Add any specific items to look for, project-specific requirements, or areas of focus..."></textarea>
+                    <div class="form-section">
+                        <label class="form-label">
+                            Additional Instructions
+                            <span class="form-hint">(Optional)</span>
+                        </label>
+                        <textarea class="form-input" name="custom_instructions" placeholder="Add any specific items to look for, project requirements, or areas of focus..."></textarea>
                     </div>
                     
                     <!-- Submit -->
-                    <button type="submit" class="submit-btn" id="submitBtn">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
                         Start AI Review
                     </button>
                     
-                    <!-- Progress -->
-                    <div class="progress-container" id="progressContainer">
-                        <div class="progress-bar">
-                            <div class="progress-bar-fill" id="progressFill"></div>
-                        </div>
-                        <div class="progress-text" id="progressText">Initializing review...</div>
+                    <div class="error-message" id="errorMessage">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 8v4M12 16h.01"/>
+                        </svg>
+                        <span id="errorText"></span>
                     </div>
-                    
-                    <!-- Error -->
-                    <div class="error-message" id="errorMessage"></div>
                 </form>
+            </div>
+            
+            <!-- Progress Section -->
+            <div class="progress-section" id="progressSection">
+                <div class="progress-ring">
+                    <svg width="120" height="120">
+                        <circle class="bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress" cx="60" cy="60" r="52" 
+                                stroke-dasharray="327" 
+                                stroke-dashoffset="327"
+                                id="progressCircle"/>
+                    </svg>
+                    <div class="progress-percent" id="progressPercent">0%</div>
+                </div>
+                <div class="progress-title">Analyzing Plans...</div>
+                <div class="progress-status" id="progressStatus">Extracting sheets from PDF...</div>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="card-body results-section" id="resultsSection">
+                <div class="results-header">
+                    <div class="results-title">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                <path d="M22 4L12 14.01l-3-3"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Review Complete</h3>
+                            <p id="projectNameResult">Project Name</p>
+                        </div>
+                    </div>
+                </div>
                 
-                <!-- Results -->
-                <div class="results-container" id="resultsContainer">
-                    <div class="results-summary" id="resultsSummary">
-                        <div class="summary-card total">
-                            <div class="number" id="totalCount">0</div>
-                            <div class="label">Total Items</div>
-                        </div>
-                        <div class="summary-card passed">
-                            <div class="number" id="passedCount">0</div>
-                            <div class="label">Passed</div>
-                        </div>
-                        <div class="summary-card failed">
-                            <div class="number" id="failedCount">0</div>
-                            <div class="label">Failed</div>
-                        </div>
-                        <div class="summary-card na">
-                            <div class="number" id="naCount">0</div>
-                            <div class="label">N/A</div>
-                        </div>
+                <div class="stats-grid">
+                    <div class="stat-card total">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">Total Items</div>
                     </div>
-                    
-                    <div class="results-actions">
-                        <a href="#" class="action-btn primary" id="viewReportBtn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14 2 14 8 20 8"/>
-                            </svg>
-                            View Full Report
-                        </a>
-                        <a href="#" class="action-btn" id="downloadWordBtn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="7 10 12 15 17 10"/>
-                                <line x1="12" y1="15" x2="12" y2="3"/>
-                            </svg>
-                            Export to Word
-                        </a>
-                        <a href="#" class="action-btn" id="downloadExcelBtn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <line x1="3" y1="9" x2="21" y2="9"/>
-                                <line x1="3" y1="15" x2="21" y2="15"/>
-                                <line x1="9" y1="3" x2="9" y2="21"/>
-                                <line x1="15" y1="3" x2="15" y2="21"/>
-                            </svg>
-                            Export Quantities
-                        </a>
-                        <button class="action-btn" id="newReviewBtn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                            New Review
-                        </button>
+                    <div class="stat-card passed">
+                        <div class="stat-number" id="passedCount">0</div>
+                        <div class="stat-label">Passed</div>
                     </div>
-                    
-                    <div class="report-frame" id="reportFrame">
-                        <iframe id="reportIframe" title="Review Report"></iframe>
+                    <div class="stat-card failed">
+                        <div class="stat-number" id="failedCount">0</div>
+                        <div class="stat-label">Failed</div>
                     </div>
+                    <div class="stat-card na">
+                        <div class="stat-number" id="naCount">0</div>
+                        <div class="stat-label">N/A</div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="#" class="action-btn primary" id="viewReportBtn" target="_blank">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                        </svg>
+                        View Completed Checklist
+                    </a>
+                    <a href="#" class="action-btn" id="downloadWordBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                        Export to Word
+                    </a>
+                    <a href="#" class="action-btn" id="downloadExcelBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+                        </svg>
+                        Export Quantities
+                    </a>
+                    <button class="action-btn" id="newReviewBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        New Review
+                    </button>
+                </div>
+                
+                <div class="report-preview">
+                    <div class="report-preview-header">
+                        <h4>Completed QA/QC Checklist Preview</h4>
+                        <a href="#" id="openFullReportBtn" class="action-btn" style="padding: 8px 16px; min-width: auto;">
+                            Open Full Report
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <iframe id="reportIframe" title="Review Report"></iframe>
                 </div>
             </div>
         </div>
-        
-        <footer>
-            <p>RedlineAI v0.1.0 | Powered by GPT-4 Vision</p>
-            <p style="margin-top: 10px;">
-                <a href="mailto:jknip@abonmarche.com">jknip@abonmarche.com</a>
-            </p>
-        </footer>
-    </div>
+    </main>
+    
+    <footer>
+        <p>RedlineAI v0.1.0 &middot; Built for Abonmarche &middot; <a href="mailto:jknip@abonmarche.com">Contact</a></p>
+    </footer>
     
     <script>
-        // File handling
-        const dropZone = document.getElementById('dropZone');
+        // State
+        let selectedFiles = [];
+        let currentReviewId = null;
+        
+        // Elements
+        const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
-        let selectedFiles = [];
+        const form = document.getElementById('reviewForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formSection = document.getElementById('formSection');
+        const progressSection = document.getElementById('progressSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
         
-        dropZone.addEventListener('click', () => fileInput.click());
+        // File Upload Handlers
+        uploadZone.addEventListener('click', () => fileInput.click());
         
-        dropZone.addEventListener('dragover', (e) => {
+        uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropZone.classList.add('dragover');
+            uploadZone.classList.add('dragover');
         });
         
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
         });
         
-        dropZone.addEventListener('drop', (e) => {
+        uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('dragover');
+            uploadZone.classList.remove('dragover');
             handleFiles(e.dataTransfer.files);
         });
         
@@ -720,17 +1163,35 @@
             renderFileList();
         }
         
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
         function renderFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = '';
+                return;
+            }
+            
             fileList.innerHTML = selectedFiles.map((file, index) => `
                 <div class="file-item">
-                    <span class="name">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
+                    <div class="file-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <path d="M14 2v6h6"/>
                         </svg>
-                        ${file.name}
-                    </span>
-                    <button class="remove" onclick="removeFile(${index})">&times;</button>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button type="button" class="file-remove" onclick="removeFile(${index})">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
             `).join('');
         }
@@ -740,17 +1201,7 @@
             renderFileList();
         }
         
-        // Form submission
-        const form = document.getElementById('reviewForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        const errorMessage = document.getElementById('errorMessage');
-        const resultsContainer = document.getElementById('resultsContainer');
-        
-        let currentReviewId = null;
-        
+        // Form Submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -763,35 +1214,40 @@
             const formData = new FormData();
             formData.append('phase', document.querySelector('input[name="phase"]:checked').value);
             formData.append('custom_instructions', document.querySelector('textarea[name="custom_instructions"]').value);
+            formData.append('project_name', document.querySelector('input[name="project_name"]').value);
+            formData.append('project_number', document.querySelector('input[name="project_number"]').value);
+            formData.append('project_manager', document.querySelector('input[name="project_manager"]').value);
+            formData.append('reviewer', document.querySelector('input[name="reviewer"]').value);
             
             selectedFiles.forEach(file => {
                 formData.append('files', file);
             });
             
-            // UI updates
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner"></span>Processing...';
-            progressContainer.classList.add('active');
-            errorMessage.classList.remove('active');
-            resultsContainer.classList.remove('active');
+            // Show progress
+            hideError();
+            formSection.style.display = 'none';
+            progressSection.classList.add('active');
+            updateStep(2);
             
-            // Simulate progress (actual progress would need WebSocket)
+            // Simulate progress
             let progress = 0;
+            const statusMessages = [
+                'Extracting sheets from PDFs...',
+                'Classifying sheet types...',
+                'Analyzing with GPT-4 Vision...',
+                'Evaluating checklist items...',
+                'Generating completed form...'
+            ];
+            
             const progressInterval = setInterval(() => {
                 if (progress < 90) {
-                    progress += Math.random() * 10;
-                    progressFill.style.width = Math.min(progress, 90) + '%';
-                    
-                    const messages = [
-                        'Extracting sheets from PDFs...',
-                        'Analyzing sheet types...',
-                        'Running checklist evaluation...',
-                        'Processing with GPT-4 Vision...',
-                        'Generating report...'
-                    ];
-                    progressText.textContent = messages[Math.floor(progress / 20)] || messages[messages.length - 1];
+                    progress += Math.random() * 8;
+                    progress = Math.min(progress, 90);
+                    updateProgress(progress);
+                    document.getElementById('progressStatus').textContent = 
+                        statusMessages[Math.min(Math.floor(progress / 20), statusMessages.length - 1)];
                 }
-            }, 500);
+            }, 400);
             
             try {
                 const response = await fetch('/api/review', {
@@ -800,70 +1256,94 @@
                 });
                 
                 const data = await response.json();
-                
                 clearInterval(progressInterval);
                 
                 if (data.success) {
-                    progressFill.style.width = '100%';
-                    progressText.textContent = 'Review complete!';
+                    updateProgress(100);
+                    document.getElementById('progressStatus').textContent = 'Review complete!';
                     
-                    currentReviewId = data.review_id;
-                    showResults(data);
+                    setTimeout(() => {
+                        currentReviewId = data.review_id;
+                        showResults(data);
+                    }, 500);
                 } else {
+                    formSection.style.display = 'block';
+                    progressSection.classList.remove('active');
+                    updateStep(1);
                     showError(data.error || 'An error occurred during the review');
                 }
             } catch (err) {
                 clearInterval(progressInterval);
+                formSection.style.display = 'block';
+                progressSection.classList.remove('active');
+                updateStep(1);
                 showError('Failed to connect to server: ' + err.message);
             }
-            
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Start AI Review';
         });
         
+        function updateProgress(percent) {
+            const circle = document.getElementById('progressCircle');
+            const percentText = document.getElementById('progressPercent');
+            const circumference = 327;
+            const offset = circumference - (percent / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            percentText.textContent = Math.round(percent) + '%';
+        }
+        
+        function updateStep(step) {
+            document.querySelectorAll('.step').forEach((el, i) => {
+                el.classList.remove('active', 'completed');
+                if (i + 1 < step) el.classList.add('completed');
+                if (i + 1 === step) el.classList.add('active');
+            });
+        }
+        
         function showError(message) {
-            errorMessage.textContent = message;
+            errorText.textContent = message;
             errorMessage.classList.add('active');
-            progressContainer.classList.remove('active');
+        }
+        
+        function hideError() {
+            errorMessage.classList.remove('active');
         }
         
         function showResults(data) {
+            progressSection.classList.remove('active');
+            resultsSection.classList.add('active');
+            updateStep(3);
+            
             const summary = data.summary || {};
+            const project = data.project || {};
             
             document.getElementById('totalCount').textContent = summary.total_items || 0;
             document.getElementById('passedCount').textContent = summary.yes_count || 0;
             document.getElementById('failedCount').textContent = summary.no_count || 0;
             document.getElementById('naCount').textContent = summary.na_count || 0;
+            document.getElementById('projectNameResult').textContent = project.project_name || 'Plan Review';
             
             // Set up action buttons
-            document.getElementById('viewReportBtn').href = `/api/review/${currentReviewId}/report`;
+            const reportUrl = `/api/review/${currentReviewId}/report`;
+            document.getElementById('viewReportBtn').href = reportUrl;
+            document.getElementById('openFullReportBtn').href = reportUrl;
             document.getElementById('downloadWordBtn').href = `/api/review/${currentReviewId}/export/word`;
             document.getElementById('downloadExcelBtn').href = `/api/review/${currentReviewId}/export/excel`;
             
             // Load report in iframe
-            document.getElementById('reportIframe').src = `/api/review/${currentReviewId}/report`;
-            
-            resultsContainer.classList.add('active');
-            
-            // Scroll to results
-            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('reportIframe').src = reportUrl;
         }
         
         // New review button
         document.getElementById('newReviewBtn').addEventListener('click', () => {
             selectedFiles = [];
             renderFileList();
-            resultsContainer.classList.remove('active');
-            progressContainer.classList.remove('active');
-            errorMessage.classList.remove('active');
+            resultsSection.classList.remove('active');
+            progressSection.classList.remove('active');
+            formSection.style.display = 'block';
+            updateStep(1);
+            updateProgress(0);
             form.reset();
+            hideError();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-        
-        // View report button - open in new tab
-        document.getElementById('viewReportBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            window.open(`/api/review/${currentReviewId}/report`, '_blank');
         });
     </script>
 </body>

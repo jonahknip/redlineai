@@ -1,5 +1,5 @@
 """
-Report Generator - Generate completed checklist reports in various formats
+Report Generator - Generate completed checklist reports matching Abonmarche form format
 """
 
 import io
@@ -18,22 +18,8 @@ from docx.oxml import OxmlElement
 
 class ReportGenerator:
     """
-    Generates completed QA/QC checklist reports matching Abonmarche format.
-    Outputs HTML, Word (.docx), and PDF formats.
+    Generates completed QA/QC checklist reports matching exact Abonmarche format.
     """
-    
-    # Status styling
-    STATUS_COLORS = {
-        'YES': '#28a745',  # Green
-        'NO': '#dc3545',   # Red
-        'N/A': '#6c757d'   # Gray
-    }
-    
-    STATUS_SYMBOLS = {
-        'YES': '&#10004;',  # Checkmark
-        'NO': '&#10008;',   # X
-        'N/A': '&#8211;'    # En dash
-    }
     
     def __init__(self):
         """Initialize the report generator."""
@@ -41,430 +27,542 @@ class ReportGenerator:
     
     def generate_html_report(self, review_results: Dict[str, Any]) -> str:
         """
-        Generate an HTML report that looks like the Abonmarche checklist forms.
-        
-        Args:
-            review_results: Results from ChecklistEngine.run_review()
-            
-        Returns:
-            HTML string of the completed checklist
+        Generate an HTML report that exactly matches the Abonmarche fillable form style.
         """
         project = review_results.get('project_summary', {})
         summary = review_results.get('summary', {})
+        phase = review_results.get('phase', '')
+        
+        # Get form metadata
+        form_project_name = review_results.get('form_project_name') or project.get('project_name', '')
+        form_project_number = review_results.get('form_project_number') or project.get('project_number', '')
+        form_project_manager = review_results.get('form_project_manager', '')
+        form_reviewer = review_results.get('form_reviewer', 'RedlineAI')
+        form_date = datetime.now().strftime('%m/%d/%Y')
         
         html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{review_results.get('checklist_name', 'QA/QC Review')} - {project.get('project_name', 'Project')}</title>
+    <title>{phase} Engineering QA/QC Review - {form_project_name}</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
         * {{
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }}
+        
         body {{
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #1a1a1a;
             background: #f5f5f5;
+            padding: 20px;
         }}
+        
         .report-container {{
+            max-width: 850px;
+            margin: 0 auto;
             background: white;
-            padding: 40px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
         }}
+        
+        .page {{
+            padding: 40px 50px;
+            min-height: 1100px;
+            position: relative;
+        }}
+        
+        /* Header */
         .header {{
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            border-bottom: 2px solid #1a365d;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #C8102E;
         }}
+        
         .logo {{
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 8px;
         }}
-        .logo-icon {{
-            width: 50px;
-            height: 50px;
-            background: #1a365d;
-            border-radius: 50%;
+        
+        .logo-mark {{
             display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 3px;
         }}
-        .logo-icon span {{
-            color: #e53e3e;
+        
+        .logo-mark .bar {{
+            width: 12px;
+            height: 36px;
+            background: #C8102E;
+        }}
+        
+        .logo-text {{
             font-size: 28px;
-            font-weight: bold;
-        }}
-        .company-name {{
-            font-size: 24px;
-            font-weight: bold;
+            font-weight: 700;
             color: #1a365d;
+            letter-spacing: -0.5px;
         }}
-        .report-title {{
+        
+        .header-tagline {{
+            font-size: 11px;
+            color: #666;
             text-align: right;
         }}
-        .report-title h1 {{
-            margin: 0;
-            font-size: 20px;
-            color: #1a365d;
+        
+        /* Title */
+        .form-title {{
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 30px 0 25px;
         }}
-        .report-title .phase {{
-            font-size: 16px;
-            color: #e53e3e;
-            margin-top: 5px;
-        }}
+        
+        /* Project Info */
         .project-info {{
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
             margin-bottom: 30px;
         }}
-        .project-info .field {{
+        
+        .info-row {{
             display: flex;
+            align-items: baseline;
+            margin-bottom: 8px;
         }}
-        .project-info .label {{
-            font-weight: bold;
+        
+        .info-label {{
+            font-weight: 500;
             min-width: 120px;
-            color: #1a365d;
+            color: #1a1a1a;
         }}
-        .project-info .value {{
-            color: #333;
+        
+        .info-value {{
+            flex: 1;
+            border-bottom: 1px solid #333;
+            padding-bottom: 2px;
+            min-height: 18px;
         }}
-        .summary-box {{
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }}
-        .summary-item {{
-            text-align: center;
-            padding: 15px;
-            border-radius: 5px;
-        }}
-        .summary-item.total {{
-            background: #e3f2fd;
-            border: 2px solid #1a365d;
-        }}
-        .summary-item.yes {{
-            background: #d4edda;
-            border: 2px solid #28a745;
-        }}
-        .summary-item.no {{
-            background: #f8d7da;
-            border: 2px solid #dc3545;
-        }}
-        .summary-item.na {{
-            background: #e9ecef;
-            border: 2px solid #6c757d;
-        }}
-        .summary-item .number {{
-            font-size: 32px;
-            font-weight: bold;
-        }}
-        .summary-item .label {{
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-top: 5px;
-        }}
+        
+        /* Section */
         .section {{
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }}
+        
         .section-title {{
-            background: #1a365d;
-            color: white;
-            padding: 10px 15px;
-            font-weight: bold;
-            margin-bottom: 0;
+            font-size: 12px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #1a1a1a;
         }}
+        
+        .section-note {{
+            font-size: 10px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 10px;
+        }}
+        
+        /* Checklist Table */
         .checklist-table {{
             width: 100%;
             border-collapse: collapse;
+            font-size: 10px;
         }}
+        
         .checklist-table th {{
-            background: #e9ecef;
-            padding: 10px;
             text-align: center;
-            border: 1px solid #dee2e6;
-            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 4px;
+            border-bottom: 1px solid #333;
+            text-decoration: underline;
         }}
-        .checklist-table td {{
-            padding: 10px;
-            border: 1px solid #dee2e6;
-            vertical-align: top;
-        }}
-        .checklist-table .item-num {{
-            width: 50px;
-            text-align: center;
-            font-weight: bold;
-        }}
-        .checklist-table .item-text {{
-            width: 40%;
-        }}
-        .checklist-table .status {{
-            width: 80px;
-            text-align: center;
-            font-weight: bold;
-        }}
-        .checklist-table .comments {{
-            width: 40%;
-            font-size: 13px;
-            color: #555;
-        }}
-        .status-yes {{
-            color: #28a745;
-        }}
-        .status-no {{
-            color: #dc3545;
-        }}
-        .status-na {{
-            color: #6c757d;
-        }}
-        .next-phase-section {{
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 30px;
-        }}
-        .next-phase-section h2 {{
-            color: #856404;
-            margin-top: 0;
-        }}
-        .next-phase-list {{
-            list-style: none;
-            padding: 0;
-        }}
-        .next-phase-list li {{
-            padding: 10px;
-            background: white;
-            margin-bottom: 10px;
-            border-left: 4px solid #dc3545;
-        }}
-        .next-phase-list .item-id {{
-            font-weight: bold;
-            color: #dc3545;
-        }}
-        .quantities-section {{
-            margin-top: 30px;
-        }}
-        .quantities-section h2 {{
-            color: #1a365d;
-            border-bottom: 2px solid #1a365d;
-            padding-bottom: 10px;
-        }}
-        .quantity-table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }}
-        .quantity-table th {{
-            background: #1a365d;
-            color: white;
-            padding: 10px;
+        
+        .checklist-table th.item-col {{
             text-align: left;
+            text-decoration: none;
+            width: 55%;
         }}
-        .quantity-table td {{
-            padding: 10px;
-            border: 1px solid #dee2e6;
+        
+        .checklist-table th.check-col {{
+            width: 8%;
         }}
-        .footer {{
+        
+        .checklist-table th.comments-col {{
+            text-align: left;
+            width: 21%;
+        }}
+        
+        .checklist-table td {{
+            padding: 6px 4px;
+            vertical-align: top;
+            border-bottom: 1px solid #e0e0e0;
+        }}
+        
+        .checklist-table td.item-text {{
+            padding-right: 10px;
+        }}
+        
+        .checklist-table td.check-cell {{
+            text-align: center;
+        }}
+        
+        .checkbox {{
+            width: 14px;
+            height: 14px;
+            border: 1px solid #333;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }}
+        
+        .checkbox.checked {{
+            background: #e8f5e9;
+            color: #2e7d32;
+        }}
+        
+        .checkbox.checked-no {{
+            background: #ffebee;
+            color: #c62828;
+        }}
+        
+        .checkbox.checked-na {{
+            background: #f5f5f5;
+            color: #666;
+        }}
+        
+        .comments-cell {{
+            font-size: 9px;
+            color: #444;
+            max-width: 180px;
+            word-wrap: break-word;
+        }}
+        
+        /* Review Comments Section */
+        .review-comments {{
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #dee2e6;
-            text-align: center;
-            color: #6c757d;
-            font-size: 12px;
         }}
+        
+        .review-comments-title {{
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: underline;
+            margin-bottom: 15px;
+        }}
+        
+        .review-comments-content {{
+            min-height: 150px;
+            border-bottom: 1px solid #333;
+            padding: 10px 0;
+        }}
+        
+        .comment-item {{
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: #fff8e1;
+            border-left: 3px solid #ffc107;
+            font-size: 10px;
+        }}
+        
+        .comment-item.critical {{
+            background: #ffebee;
+            border-left-color: #c62828;
+        }}
+        
+        .comment-item strong {{
+            color: #c62828;
+        }}
+        
+        /* Footer */
+        .footer {{
+            position: absolute;
+            bottom: 30px;
+            left: 50px;
+            right: 50px;
+        }}
+        
+        .footer-logo {{
+            display: flex;
+            gap: 3px;
+        }}
+        
+        .footer-logo .bar {{
+            width: 8px;
+            height: 24px;
+            background: #C8102E;
+        }}
+        
+        .footer-text {{
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            margin-top: 15px;
+        }}
+        
+        /* Summary Box */
+        .summary-box {{
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }}
+        
+        .summary-stat {{
+            text-align: center;
+            flex: 1;
+        }}
+        
+        .summary-stat .number {{
+            font-size: 28px;
+            font-weight: 700;
+        }}
+        
+        .summary-stat .label {{
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #666;
+        }}
+        
+        .summary-stat.total .number {{ color: #1a365d; }}
+        .summary-stat.passed .number {{ color: #2e7d32; }}
+        .summary-stat.failed .number {{ color: #c62828; }}
+        .summary-stat.na .number {{ color: #666; }}
+        
+        /* Items Required Section */
+        .items-required {{
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff8e1;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+        }}
+        
+        .items-required h3 {{
+            color: #f57f17;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }}
+        
+        .items-required ul {{
+            list-style: none;
+        }}
+        
+        .items-required li {{
+            padding: 8px 0;
+            border-bottom: 1px solid #ffe082;
+            font-size: 11px;
+        }}
+        
+        .items-required li:last-child {{
+            border-bottom: none;
+        }}
+        
+        .items-required .item-id {{
+            font-weight: 700;
+            color: #c62828;
+        }}
+        
+        /* Print styles */
         @media print {{
             body {{
                 background: white;
-            }}
-            .report-container {{
-                box-shadow: none;
                 padding: 0;
             }}
-            .section {{
-                page-break-inside: avoid;
+            
+            .report-container {{
+                box-shadow: none;
+            }}
+            
+            .page {{
+                padding: 20px 30px;
+                min-height: auto;
+                page-break-after: always;
+            }}
+            
+            .summary-box {{
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }}
         }}
     </style>
 </head>
 <body>
     <div class="report-container">
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <span>A</span>
+        <div class="page">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-mark">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="logo-text">ABONMARCHE</div>
                 </div>
-                <div class="company-name">ABONMARCHE</div>
+                <div class="header-tagline">
+                    Engineering &bull; Architecture &bull; Land Surveying
+                </div>
             </div>
-            <div class="report-title">
-                <h1>QA/QC REVIEW CHECKLIST</h1>
-                <div class="phase">{review_results.get('checklist_name', review_results.get('phase', ''))} Review</div>
+            
+            <!-- Form Title -->
+            <h1 class="form-title">{phase} ENGINEERING QA/QC Review</h1>
+            
+            <!-- Project Info -->
+            <div class="project-info">
+                <div class="info-row">
+                    <span class="info-label">Project No.:</span>
+                    <span class="info-value">{form_project_number}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Project Name:</span>
+                    <span class="info-value">{form_project_name}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Project Manager:</span>
+                    <span class="info-value">{form_project_manager}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Reviewer:</span>
+                    <span class="info-value">{form_reviewer}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date:</span>
+                    <span class="info-value">{form_date}</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="project-info">
-            <div class="field">
-                <span class="label">Project:</span>
-                <span class="value">{project.get('project_name', 'N/A')}</span>
+            
+            <!-- Summary -->
+            <div class="summary-box">
+                <div class="summary-stat total">
+                    <div class="number">{summary.get('total_items', 0)}</div>
+                    <div class="label">Total Items</div>
+                </div>
+                <div class="summary-stat passed">
+                    <div class="number">{summary.get('yes_count', 0)}</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="summary-stat failed">
+                    <div class="number">{summary.get('no_count', 0)}</div>
+                    <div class="label">Failed</div>
+                </div>
+                <div class="summary-stat na">
+                    <div class="number">{summary.get('na_count', 0)}</div>
+                    <div class="label">N/A</div>
+                </div>
             </div>
-            <div class="field">
-                <span class="label">Project No:</span>
-                <span class="value">{project.get('project_number', 'N/A')}</span>
-            </div>
-            <div class="field">
-                <span class="label">Client:</span>
-                <span class="value">{project.get('client', 'N/A')}</span>
-            </div>
-            <div class="field">
-                <span class="label">Review Date:</span>
-                <span class="value">{datetime.now().strftime('%B %d, %Y')}</span>
-            </div>
-            <div class="field">
-                <span class="label">Location:</span>
-                <span class="value">{project.get('location', 'N/A')}</span>
-            </div>
-            <div class="field">
-                <span class="label">Sheets Reviewed:</span>
-                <span class="value">{review_results.get('total_sheets', 0)}</span>
-            </div>
-        </div>
-        
-        <div class="summary-box">
-            <div class="summary-item total">
-                <div class="number">{summary.get('total_items', 0)}</div>
-                <div class="label">Total Items</div>
-            </div>
-            <div class="summary-item yes">
-                <div class="number">{summary.get('yes_count', 0)}</div>
-                <div class="label">Passed</div>
-            </div>
-            <div class="summary-item no">
-                <div class="number">{summary.get('no_count', 0)}</div>
-                <div class="label">Failed</div>
-            </div>
-            <div class="summary-item na">
-                <div class="number">{summary.get('na_count', 0)}</div>
-                <div class="label">N/A</div>
-            </div>
-        </div>
 '''
         
         # Add each section
         for section in review_results.get('sections', []):
             html += f'''
-        <div class="section">
-            <div class="section-title">{section['title']}</div>
-            <table class="checklist-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Check Item</th>
-                        <th>Status</th>
-                        <th>AI Comments</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div class="section">
+                <div class="section-title">{section['title']}</div>
+                <table class="checklist-table">
+                    <thead>
+                        <tr>
+                            <th class="item-col"></th>
+                            <th class="check-col">YES</th>
+                            <th class="check-col">NO</th>
+                            <th class="check-col">N/A</th>
+                            <th class="comments-col">COMMENTS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 '''
-            for i, item in enumerate(section.get('items', []), 1):
+            for item in section.get('items', []):
                 status = item.get('status', 'N/A')
-                status_class = f"status-{status.lower().replace('/', '')}"
                 comments = item.get('comments', '')
-                if len(comments) > 200:
-                    comments = comments[:200] + '...'
+                if len(comments) > 100:
+                    comments = comments[:100] + '...'
+                
+                yes_check = '<span class="checkbox checked">&#10004;</span>' if status == 'YES' else '<span class="checkbox"></span>'
+                no_check = '<span class="checkbox checked-no">&#10004;</span>' if status == 'NO' else '<span class="checkbox"></span>'
+                na_check = '<span class="checkbox checked-na">&#10004;</span>' if status == 'N/A' else '<span class="checkbox"></span>'
                 
                 html += f'''
-                    <tr>
-                        <td class="item-num">{i}</td>
-                        <td class="item-text">{item.get('text', '')}</td>
-                        <td class="status {status_class}">{status}</td>
-                        <td class="comments">{comments}</td>
-                    </tr>
+                        <tr>
+                            <td class="item-text">{item.get('text', '')}</td>
+                            <td class="check-cell">{yes_check}</td>
+                            <td class="check-cell">{no_check}</td>
+                            <td class="check-cell">{na_check}</td>
+                            <td class="comments-cell">{comments}</td>
+                        </tr>
 '''
             
             html += '''
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
 '''
         
-        # Add items required for next phase
+        # Items required for next phase
         items_for_next = summary.get('items_for_next_phase', [])
         next_phase = review_results.get('next_phase')
         
         if items_for_next and next_phase:
             html += f'''
-        <div class="next-phase-section">
-            <h2>Items Required to Advance to {next_phase} Phase</h2>
-            <p>The following {len(items_for_next)} item(s) must be addressed before advancing:</p>
-            <ul class="next-phase-list">
+            <div class="items-required">
+                <h3>Items Required to Advance to {next_phase} Phase ({len(items_for_next)} items)</h3>
+                <ul>
 '''
             for item in items_for_next:
                 html += f'''
-                <li>
-                    <span class="item-id">{item.get('id', '')}:</span> {item.get('text', '')}
-                    <br><em>{item.get('comments', '')[:150]}...</em>
-                </li>
+                    <li>
+                        <span class="item-id">{item.get('id', '')}:</span> {item.get('text', '')}
+                    </li>
 '''
             html += '''
-            </ul>
-        </div>
+                </ul>
+            </div>
 '''
         
-        # Add quantities section if present
-        quantities = review_results.get('quantities', [])
-        if quantities:
-            html += '''
-        <div class="quantities-section">
-            <h2>Extracted Quantities</h2>
+        # Review Comments Section
+        html += '''
+            <div class="review-comments">
+                <div class="review-comments-title">Review Comments</div>
+                <div class="review-comments-content">
 '''
-            for qty_group in quantities:
-                html += f'''
-            <h4>{qty_group.get('sheet', '')}</h4>
-            <table class="quantity-table">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
-                        <th>Unit</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-'''
-                for qty in qty_group.get('quantities', []):
+        
+        # Add failed items as comments
+        for section in review_results.get('sections', []):
+            for item in section.get('items', []):
+                if item.get('status') == 'NO':
+                    comments = item.get('comments', 'Issue identified')
+                    if len(comments) > 200:
+                        comments = comments[:200] + '...'
                     html += f'''
-                    <tr>
-                        <td>{qty.get('item', '')}</td>
-                        <td>{qty.get('quantity', '')}</td>
-                        <td>{qty.get('unit', '')}</td>
-                        <td>{qty.get('location', '')}</td>
-                    </tr>
-'''
-                html += '''
-                </tbody>
-            </table>
-'''
-            html += '''
-        </div>
+                    <div class="comment-item critical">
+                        <strong>{item.get('id', '')}:</strong> {item.get('text', '')}<br>
+                        <em>{comments}</em>
+                    </div>
 '''
         
-        # Footer
-        html += f'''
-        <div class="footer">
-            <p>Generated by RedlineAI - AI-Powered Plan Review</p>
-            <p>Review Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-            <p>Files Reviewed: {', '.join(review_results.get('pdf_files', []))}</p>
+        html += '''
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="footer">
+                <div class="footer-logo">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="footer-text">
+                    Generated by RedlineAI &bull; abonmarche.com
+                </div>
+            </div>
         </div>
     </div>
 </body>
@@ -476,16 +574,17 @@ class ReportGenerator:
     def generate_word_report(self, review_results: Dict[str, Any]) -> io.BytesIO:
         """
         Generate a Word document report matching Abonmarche checklist format.
-        
-        Args:
-            review_results: Results from ChecklistEngine.run_review()
-            
-        Returns:
-            BytesIO buffer containing the Word document
         """
         doc = Document()
         project = review_results.get('project_summary', {})
         summary = review_results.get('summary', {})
+        phase = review_results.get('phase', '')
+        
+        # Get form metadata
+        form_project_name = review_results.get('form_project_name') or project.get('project_name', '')
+        form_project_number = review_results.get('form_project_number') or project.get('project_number', '')
+        form_project_manager = review_results.get('form_project_manager', '')
+        form_reviewer = review_results.get('form_reviewer', 'RedlineAI')
         
         # Set up styles
         style = doc.styles['Normal']
@@ -493,30 +592,26 @@ class ReportGenerator:
         style.font.size = Pt(10)
         
         # Header
-        header = doc.add_heading('ENGINEERING DEPARTMENT', level=1)
+        header = doc.add_heading(f'{phase} ENGINEERING QA/QC Review', level=1)
         header.alignment = WD_ALIGN_PARAGRAPH.CENTER
         
-        subtitle = doc.add_heading(f"{review_results.get('checklist_name', 'QA/QC')} REVIEW CHECKLIST", level=2)
-        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        
         # Project info table
-        info_table = doc.add_table(rows=4, cols=4)
+        info_table = doc.add_table(rows=5, cols=2)
         info_table.style = 'Table Grid'
         
         info_data = [
-            ('Client:', project.get('client', ''), 'Project Name:', project.get('project_name', '')),
-            ('Project No:', project.get('project_number', ''), 'Date:', datetime.now().strftime('%m/%d/%Y')),
-            ('Location:', project.get('location', ''), 'Reviewed By:', 'RedlineAI'),
-            ('Sheets:', str(review_results.get('total_sheets', 0)), 'Phase:', review_results.get('phase', ''))
+            ('Project No.:', form_project_number),
+            ('Project Name:', form_project_name),
+            ('Project Manager:', form_project_manager),
+            ('Reviewer:', form_reviewer),
+            ('Date:', datetime.now().strftime('%m/%d/%Y'))
         ]
         
-        for i, row_data in enumerate(info_data):
+        for i, (label, value) in enumerate(info_data):
             row = info_table.rows[i]
-            for j, text in enumerate(row_data):
-                cell = row.cells[j]
-                cell.text = str(text)
-                if j % 2 == 0:  # Labels
-                    cell.paragraphs[0].runs[0].bold = True
+            row.cells[0].text = label
+            row.cells[0].paragraphs[0].runs[0].bold = True
+            row.cells[1].text = str(value) if value else ''
         
         doc.add_paragraph()
         
@@ -524,7 +619,7 @@ class ReportGenerator:
         summary_para = doc.add_paragraph()
         summary_para.add_run('SUMMARY: ').bold = True
         summary_para.add_run(
-            f"Total Items: {summary.get('total_items', 0)} | "
+            f"Total: {summary.get('total_items', 0)} | "
             f"Passed: {summary.get('yes_count', 0)} | "
             f"Failed: {summary.get('no_count', 0)} | "
             f"N/A: {summary.get('na_count', 0)}"
@@ -536,40 +631,43 @@ class ReportGenerator:
         for section in review_results.get('sections', []):
             # Section header
             section_header = doc.add_paragraph()
-            section_header.add_run(section['title']).bold = True
+            run = section_header.add_run(section['title'])
+            run.bold = True
+            run.underline = True
             
             # Items table
-            table = doc.add_table(rows=1, cols=4)
+            table = doc.add_table(rows=1, cols=5)
             table.style = 'Table Grid'
             
             # Header row
             header_row = table.rows[0]
-            headers = ['#', 'CHECK ITEM', 'STATUS', 'COMMENTS']
+            headers = ['', 'YES', 'NO', 'N/A', 'COMMENTS']
             for i, header_text in enumerate(headers):
                 cell = header_row.cells[i]
                 cell.text = header_text
-                cell.paragraphs[0].runs[0].bold = True
+                if i > 0:
+                    cell.paragraphs[0].runs[0].bold = True
+                    cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
             
             # Item rows
-            for i, item in enumerate(section.get('items', []), 1):
+            for item in section.get('items', []):
                 row = table.add_row()
-                row.cells[0].text = str(i)
-                row.cells[1].text = item.get('text', '')
+                row.cells[0].text = item.get('text', '')
                 
                 status = item.get('status', 'N/A')
-                status_cell = row.cells[2]
-                status_cell.text = status
                 
-                # Color the status
-                if status == 'YES':
-                    status_cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(40, 167, 69)
-                elif status == 'NO':
-                    status_cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(220, 53, 69)
+                # Mark the appropriate checkbox
+                row.cells[1].text = '✓' if status == 'YES' else '☐'
+                row.cells[2].text = '✓' if status == 'NO' else '☐'
+                row.cells[3].text = '✓' if status == 'N/A' else '☐'
+                
+                for i in range(1, 4):
+                    row.cells[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                 
                 comments = item.get('comments', '')
-                if len(comments) > 100:
-                    comments = comments[:100] + '...'
-                row.cells[3].text = comments
+                if len(comments) > 50:
+                    comments = comments[:50] + '...'
+                row.cells[4].text = comments
             
             doc.add_paragraph()
         
@@ -585,6 +683,16 @@ class ReportGenerator:
                 para.add_run(f"{item.get('id', '')}: ").bold = True
                 para.add_run(item.get('text', ''))
         
+        # Review Comments
+        doc.add_heading('Review Comments', level=2)
+        
+        for section in review_results.get('sections', []):
+            for item in section.get('items', []):
+                if item.get('status') == 'NO':
+                    para = doc.add_paragraph()
+                    para.add_run(f"{item.get('id', '')}: ").bold = True
+                    para.add_run(item.get('text', ''))
+        
         # Save to buffer
         buffer = io.BytesIO()
         doc.save(buffer)
@@ -595,12 +703,6 @@ class ReportGenerator:
     def generate_excel_quantities(self, review_results: Dict[str, Any]) -> io.BytesIO:
         """
         Generate an Excel spreadsheet with extracted quantities.
-        
-        Args:
-            review_results: Results from ChecklistEngine.run_review()
-            
-        Returns:
-            BytesIO buffer containing the Excel file
         """
         import openpyxl
         from openpyxl.styles import Font, PatternFill, Alignment
@@ -611,7 +713,7 @@ class ReportGenerator:
         
         # Header styling
         header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="1A365D", end_color="1A365D", fill_type="solid")
+        header_fill = PatternFill(start_color="1a365d", end_color="1a365d", fill_type="solid")
         
         # Headers
         headers = ['Sheet', 'Item', 'Quantity', 'Unit', 'Location']
