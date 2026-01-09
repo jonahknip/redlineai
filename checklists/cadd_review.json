@@ -1,0 +1,98 @@
+{
+  "name": "CADD Drawing Review",
+  "phase": "CADD",
+  "next_phase": null,
+  "description": "CADD standards and drawing quality review - can be preliminary or final",
+  "review_types": ["PRELIMINARY", "FINAL"],
+  "sections": [
+    {
+      "title": "OVERALL DRAWINGS",
+      "items": [
+        {"id": "CADD-OVR-001", "text": "Run spell check on each sheet", "required": true},
+        {"id": "CADD-OVR-002", "text": "Check north arrow rotation, bar scale, and scale listed in title block match each other", "required": true},
+        {"id": "CADD-OVR-003", "text": "Check overall drawing appearance for missing layers, overlapping text, misplaced text & leaders, overall readability", "required": true},
+        {"id": "CADD-OVR-004", "text": "Check boring & coring log", "required": false},
+        {"id": "CADD-OVR-005", "text": "Check that Excel table sheet numbers are correct", "required": false},
+        {"id": "CADD-OVR-006", "text": "Check for labels on centerline stations, contours, streets, bodies of water, etc.", "required": true}
+      ]
+    },
+    {
+      "title": "TITLE SHEET",
+      "items": [
+        {"id": "CADD-TTL-001", "text": "Check for project outline on location map", "required": true},
+        {"id": "CADD-TTL-002", "text": "Check for P.O.B. & P.O.E. on location map", "required": true},
+        {"id": "CADD-TTL-003", "text": "Check index of sheets for matching page numbers & titles", "required": true},
+        {"id": "CADD-TTL-004", "text": "Check that the total number of sheets is correct everywhere it is listed", "required": true},
+        {"id": "CADD-TTL-005", "text": "Check that current title block is in use (Aerial and Simplex fonts only)", "required": true},
+        {"id": "CADD-TTL-006", "text": "Standard plan note should reference current MDOT standard specs", "required": true},
+        {"id": "CADD-TTL-007", "text": "Check for the Miss Dig note and 811 graphic", "required": true}
+      ]
+    },
+    {
+      "title": "EXISTING/PROPOSED CROSS SECTIONS",
+      "items": [
+        {"id": "CADD-XS-001", "text": "Check each section's road name and stationing against plan sheets", "required": true},
+        {"id": "CADD-XS-002", "text": "Check that cross sections are drawn to scale", "required": true}
+      ]
+    },
+    {
+      "title": "STANDARD DETAILS & NOTES",
+      "items": [
+        {"id": "CADD-STD-001", "text": "Check that there is a standard plan legend and that the line types are displaying correctly", "required": true},
+        {"id": "CADD-STD-002", "text": "Check all details for uniformity (text size, dimension style, etc.)", "required": true}
+      ]
+    },
+    {
+      "title": "EXISTING CONDITIONS",
+      "items": [
+        {"id": "CADD-EXC-001", "text": "Check that sheet number outline matches corresponding sheet, if applicable", "required": false},
+        {"id": "CADD-EXC-002", "text": "Check that benchmarks are present. Check that text matches survey notes", "required": true},
+        {"id": "CADD-EXC-003", "text": "Verify phasing areas, if applicable", "required": false},
+        {"id": "CADD-EXC-004", "text": "Check for P.O.B & P.O.E.", "required": true},
+        {"id": "CADD-EXC-005", "text": "Check that all existing manholes, gate valves/vaults, and fire hydrants are numbered", "required": true}
+      ]
+    },
+    {
+      "title": "REMOVAL SHEETS",
+      "items": [
+        {"id": "CADD-REM-001", "text": "Check that hatch scale and angle match legend", "required": true},
+        {"id": "CADD-REM-002", "text": "Do a spot check on quantities", "required": true}
+      ]
+    },
+    {
+      "title": "PLAN & PROFILE SHEETS",
+      "items": [
+        {"id": "CADD-PP-001", "text": "Check that structures are logically numbered and notes in plan match notes in profile. Curb catch basin labels should show 'EM' grade rather than 'RIM'. Do a spot sanity check on inverts", "required": true},
+        {"id": "CADD-PP-002", "text": "Check that benchmarks and buried utility caution notes are present where applicable", "required": true},
+        {"id": "CADD-PP-003", "text": "Check match line and 'see sheet' notes for correct sheet numbers", "required": true},
+        {"id": "CADD-PP-004", "text": "Check that hatch legend matches the hatches in use in style, scale, and rotation", "required": true},
+        {"id": "CADD-PP-005", "text": "Check that profile vertical scale is correct and that data bands have been mapped", "required": true},
+        {"id": "CADD-PP-006", "text": "Do a spot check on quantities", "required": true},
+        {"id": "CADD-PP-007", "text": "Spot check that RIM/EM grades match proposed surface or grading plan", "required": true}
+      ]
+    },
+    {
+      "title": "INTERSECTION DETAILS/GRADING PLAN",
+      "items": [
+        {"id": "CADD-INT-001", "text": "Check spot grades for blank or default text", "required": true},
+        {"id": "CADD-INT-002", "text": "Check that all pipes and utilities are hidden in viewport. Storm and sanitary manholes should be visible", "required": true},
+        {"id": "CADD-INT-003", "text": "Check RIM/EM grades with Plan/Profile sheet to match", "required": true}
+      ]
+    },
+    {
+      "title": "TRAFFIC MAINTENANCE PLAN",
+      "items": [
+        {"id": "CADD-TMP-001", "text": "Check that legend matches the plan", "required": true},
+        {"id": "CADD-TMP-002", "text": "Do a sanity check on all signs (if you were driving, do they make sense)", "required": true},
+        {"id": "CADD-TMP-003", "text": "Do a spot check on quantities", "required": true}
+      ]
+    },
+    {
+      "title": "SOIL EROSION / SEDIMENTATION PLAN",
+      "items": [
+        {"id": "CADD-ESC-001", "text": "Check that legend includes all soil keys used", "required": true},
+        {"id": "CADD-ESC-002", "text": "Do a spot check on quantities", "required": true}
+      ]
+    }
+  ]
+}

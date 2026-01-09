@@ -1,0 +1,168 @@
+{
+  "name": "90% Engineering QA/QC Review",
+  "phase": "90%",
+  "next_phase": "Final/Bid",
+  "description": "Final QC - specifications, bid documents, final details",
+  "sections": [
+    {
+      "title": "GENERAL REVIEW / ALL SHEETS",
+      "items": [
+        {"id": "90-GEN-001", "text": "Plan has uniform size of text and line weights", "required": true},
+        {"id": "90-GEN-002", "text": "Are all of the technician's initials correct for 'Design By', 'QA/QC', and 'PM'?", "required": true},
+        {"id": "90-GEN-003", "text": "Check boring & coring log listed properly and located on the plans", "required": true},
+        {"id": "90-GEN-004", "text": "Check Excel table sheet numbers are correct", "required": true},
+        {"id": "90-GEN-005", "text": "Review and confirm notes and details are modified with municipal requirements", "required": true},
+        {"id": "90-GEN-006", "text": "Confirm municipality is listed properly on notes and details and plan set", "required": true},
+        {"id": "90-GEN-007", "text": "Verify locations and sizes of existing utilities and that inverts are correct", "required": true},
+        {"id": "90-GEN-008", "text": "Are all elements being removed clearly identified?", "required": true},
+        {"id": "90-GEN-009", "text": "Are all elements remaining clearly identified?", "required": true},
+        {"id": "90-GEN-010", "text": "Provide notes to protect any resources to remain", "required": true},
+        {"id": "90-GEN-011", "text": "Review and coordinate the removal and demolition plan with the design layout", "required": true},
+        {"id": "90-GEN-012", "text": "Are all keynotes cross reference on the drawings correctly?", "required": true},
+        {"id": "90-GEN-013", "text": "Are the keynotes easily understood?", "required": true},
+        {"id": "90-GEN-014", "text": "Is all product information that is referenced thorough?", "required": true},
+        {"id": "90-GEN-015", "text": "Are site furnishings identified in pay items/keynotes and included in the specifications?", "required": false},
+        {"id": "90-GEN-016", "text": "Are the site materials from appropriate climatic region?", "required": true},
+        {"id": "90-GEN-017", "text": "Check lighting spacing (if applicable)", "required": false},
+        {"id": "90-GEN-018", "text": "Is irrigation required?", "required": false},
+        {"id": "90-GEN-019", "text": "Has draft of maintenance of traffic been created and discussed?", "required": true}
+      ]
+    },
+    {
+      "title": "UTILITIES & STRUCTURES",
+      "items": [
+        {"id": "90-UTL-001", "text": "Check Rim elevations are correct and listed # of structures reviewed in comments", "required": true},
+        {"id": "90-UTL-002", "text": "Verify that the proposed sewer and water is > 10 feet from each other", "required": true},
+        {"id": "90-UTL-003", "text": "Provided 18\" vertical separation between sewer and water", "required": true},
+        {"id": "90-UTL-004", "text": "Verify manholes can accommodate pipe sizes and alignment", "required": true},
+        {"id": "90-UTL-005", "text": "Verify Storm and Sanitary Sewer includes inverts, structure elevations, pipes slopes, STA", "required": true},
+        {"id": "90-UTL-006", "text": "Is potholing required to identify existing utility information and depths?", "required": false},
+        {"id": "90-UTL-007", "text": "Confirm existing and proposed utilities do not have conflicts", "required": true},
+        {"id": "90-UTL-008", "text": "Verify proper proposed covers are labeled on structure notes", "required": true},
+        {"id": "90-UTL-009", "text": "Provide minimum cover callouts on proposed water main", "required": true}
+      ]
+    },
+    {
+      "title": "CROSS SECTIONS & ALIGNMENT",
+      "items": [
+        {"id": "90-XS-001", "text": "Typical existing cross-section(s) reviewed and labeled", "required": true},
+        {"id": "90-XS-002", "text": "Typical proposed cross-sections(s) reviewed and labeled properly", "required": true},
+        {"id": "90-XS-003", "text": "Verify that the pavement sections are correct in existing and proposed cross-sections", "required": true},
+        {"id": "90-XS-004", "text": "Has the HMA Application Table been provided and updated?", "required": true},
+        {"id": "90-XS-005", "text": "Review Vertical Alignment (K Values & % Grade)", "required": true},
+        {"id": "90-XS-006", "text": "Review Horizontal Alignment (Radius & Super Elevation)", "required": true}
+      ]
+    },
+    {
+      "title": "ADA & ACCESSIBILITY",
+      "items": [
+        {"id": "90-ADA-001", "text": "Are proposed ADA ramps shown with proper removals limits identified for ADA work?", "required": true},
+        {"id": "90-ADA-002", "text": "Is running slope < 5%, and ramps identified with proper slopes/handrails (if applicable)?", "required": true},
+        {"id": "90-ADA-003", "text": "Are handrails proper diameter, height, and proper slope?", "required": true},
+        {"id": "90-ADA-004", "text": "Handrails extend 12\" minimum beyond level landing?", "required": true},
+        {"id": "90-ADA-005", "text": "Are all proposed non-motorized paths follow AASHTO guidelines?", "required": true}
+      ]
+    },
+    {
+      "title": "GRADING & MOT",
+      "items": [
+        {"id": "90-GRD-001", "text": "Provide final Maintenance of Traffic plan. Has phasing been approved by owner?", "required": true},
+        {"id": "90-GRD-002", "text": "Review grading plan. Review ADA routes, slopes, trip hazards, drainage, etc.", "required": true},
+        {"id": "90-GRD-003", "text": "Review and compare proposed grading with adjacent properties and streets", "required": true},
+        {"id": "90-GRD-004", "text": "Review intersection details for drainage, minimum slope, and ADA grades", "required": true},
+        {"id": "90-GRD-005", "text": "Review all building door openings are accounted for in design", "required": true},
+        {"id": "90-GRD-006", "text": "Are the proposed and existing contours easy to identify?", "required": true},
+        {"id": "90-GRD-007", "text": "Have all requirements been met for site amenities and playground items?", "required": false},
+        {"id": "90-GRD-008", "text": "Has the final layer state been applied before printing and layers reviewed on paper?", "required": true}
+      ]
+    },
+    {
+      "title": "TRAFFIC & EROSION CONTROL",
+      "items": [
+        {"id": "90-TRF-001", "text": "Provide traffic signal data on plans", "required": false},
+        {"id": "90-TRF-002", "text": "Provide SESC Design plan with proposed quantities", "required": true},
+        {"id": "90-TRF-003", "text": "Provide Stormwater Pollution Prevention Plan (SWPPP)", "required": true},
+        {"id": "90-TRF-004", "text": "Do details coordinate with local design ordinances?", "required": true}
+      ]
+    },
+    {
+      "title": "GENERAL CHECKS",
+      "items": [
+        {"id": "90-CHK-001", "text": "Confirm all spelling on plan notes, keynotes, and utility callouts (spell check)", "required": true},
+        {"id": "90-CHK-002", "text": "Confirm bands in profile have been updated to show correct elevation", "required": true},
+        {"id": "90-CHK-003", "text": "Does the sheet index correspond with all the sheets in the set?", "required": true},
+        {"id": "90-CHK-004", "text": "Is all sheet numbering correct?", "required": true}
+      ]
+    },
+    {
+      "title": "CALCULATIONS",
+      "items": [
+        {"id": "90-CALC-001", "text": "Calculations - Review geotechnical report", "required": true},
+        {"id": "90-CALC-002", "text": "Calculations - If site lighting has been proposed, review photometric requirements", "required": false},
+        {"id": "90-CALC-003", "text": "Calculations - Have the storm sewer calculations been completed and reviewed?", "required": true},
+        {"id": "90-CALC-004", "text": "Calculations - Have the retention/detention calculations been reviewed?", "required": true},
+        {"id": "90-CALC-005", "text": "Calculations - Has the sanitary sewer basis of design calculations been reviewed?", "required": true},
+        {"id": "90-CALC-006", "text": "Calculations - Has the water main basis of design calculations been reviewed?", "required": true},
+        {"id": "90-CALC-007", "text": "Calculations - Has the pavement design been reviewed?", "required": true},
+        {"id": "90-CALC-008", "text": "Calculations - After reviewing the geotechnical report, are there any concerns?", "required": true},
+        {"id": "90-CALC-009", "text": "Calculations - Review site distances and calculations", "required": true},
+        {"id": "90-CALC-010", "text": "Calculations - Review guardrail calculations if applicable", "required": false},
+        {"id": "90-CALC-011", "text": "Calculations - Review all taper lengths and include them on plans", "required": true},
+        {"id": "90-CALC-012", "text": "Calculations - Have retaining walls been calculated and reviewed?", "required": false}
+      ]
+    },
+    {
+      "title": "COST ESTIMATES",
+      "items": [
+        {"id": "90-COST-001", "text": "Cost Estimates - Have calculations on quantities been reviewed?", "required": true},
+        {"id": "90-COST-002", "text": "Cost Estimates - Pay item descriptions match the plans, specs, and special provision", "required": true},
+        {"id": "90-COST-003", "text": "Cost Estimates - Review units vs. plans and specifications are industry standards", "required": true},
+        {"id": "90-COST-004", "text": "Cost Estimates - Review unit pricing compares to industry standards", "required": true},
+        {"id": "90-COST-005", "text": "Cost Estimates - Is the proper contingency been applied to the cost estimate?", "required": true}
+      ]
+    },
+    {
+      "title": "PERMITS",
+      "items": [
+        {"id": "90-PER-001", "text": "Permits - Sanitary Sewer: has the permit application been developed and reviewed?", "required": true},
+        {"id": "90-PER-002", "text": "Permits - Water Main: has the permit application been developed and reviewed?", "required": true},
+        {"id": "90-PER-003", "text": "Permits - Rule 5/SESC: has the permit application been developed and reviewed?", "required": true},
+        {"id": "90-PER-004", "text": "Permits - MDOT: is an MDOT permit required and been developed and reviewed?", "required": false},
+        {"id": "90-PER-005", "text": "Permits - Drainage Board/Commissioner: Drain permits developed and reviewed?", "required": false},
+        {"id": "90-PER-006", "text": "Permits - Joint Permit Application: is a permit needed, or not required?", "required": false},
+        {"id": "90-PER-007", "text": "Permit - SHPO: has the SHPO application been applied for?", "required": false}
+      ]
+    },
+    {
+      "title": "SPECIFICATIONS",
+      "items": [
+        {"id": "90-SPEC-001", "text": "Specifications: 00200.3.01 Add Requirements from Bidders", "required": true},
+        {"id": "90-SPEC-002", "text": "Specifications: 00200.5.01 Revise Pre-Bid Conference Notes", "required": true},
+        {"id": "90-SPEC-003", "text": "Specifications: 00200.8.01 Change City/Client Name for Bid Security, etc. (Std = Owner)", "required": true},
+        {"id": "90-SPEC-004", "text": "Specifications: 00200.8.01 Review requirements for Bid Bond % (Std = 5%)", "required": true},
+        {"id": "90-SPEC-005", "text": "Specifications: 00200.13.01 review or change if copies can be obtained elsewhere", "required": true},
+        {"id": "90-SPEC-006", "text": "Specifications: 00200.15.01 Provide/Revise Requirements from Bidders", "required": true},
+        {"id": "90-SPEC-007", "text": "Specifications: 00200.15.02 Revise/Review recipient is deleted or is correct", "required": true},
+        {"id": "90-SPEC-008", "text": "Specifications: 00410.1.01 Insert Recipient of Bid", "required": true},
+        {"id": "90-SPEC-009", "text": "Specifications: 00410.5.01 Non-Collusion, Debarment (Federal), Familial (School)", "required": true},
+        {"id": "90-SPEC-010", "text": "Specifications: 00410.5.01 Add list of subcontractors and suppliers if required", "required": false},
+        {"id": "90-SPEC-011", "text": "Specifications: 00410.6.01 Revise Completion Dates", "required": true},
+        {"id": "90-SPEC-012", "text": "Specifications: 00410.7.01 Adjust Requirements from Bidders (Only if different)", "required": false},
+        {"id": "90-SPEC-013", "text": "Specifications: 00520.1.01 Add Description of Work", "required": true},
+        {"id": "90-SPEC-014", "text": "Specifications: 00520.2.01 Add Project Title", "required": true},
+        {"id": "90-SPEC-015", "text": "Specifications: 00520.3.01 Adjust Project Engineer", "required": true},
+        {"id": "90-SPEC-016", "text": "Specifications: 00520.4.02 Add Dates for Substantial Completion", "required": true},
+        {"id": "90-SPEC-017", "text": "Specifications: 00520.4.03 Adjust Liquidated Damages", "required": true},
+        {"id": "90-SPEC-018", "text": "Specifications: 00520.5.01 Add the words 'See Attached Bid' or revise", "required": true},
+        {"id": "90-SPEC-019", "text": "Specifications: 00520.6.02 Adjust Contract Pay Schedule (if applicable)", "required": false},
+        {"id": "90-SPEC-020", "text": "Specifications: 00520.6.02 Adjust Retainage % (if applicable)", "required": false},
+        {"id": "90-SPEC-021", "text": "Specifications: 00520.7.01 Adjust Interest Rate (if applicable, Std = 0%)", "required": false},
+        {"id": "90-SPEC-022", "text": "Specifications: 00520.8.01 Review and revise Supplementary Conditions", "required": true},
+        {"id": "90-SPEC-023", "text": "Specifications: have technical specifications and special provisions been reviewed?", "required": true},
+        {"id": "90-SPEC-024", "text": "Specifications: Review the Table of Contents with all specifications sections", "required": true},
+        {"id": "90-SPEC-025", "text": "Specifications: Has the advertisement for bids been reviewed and provided?", "required": true},
+        {"id": "90-SPEC-026", "text": "Specifications: Have copies of water, sanitary, SESC permit been included?", "required": true}
+      ]
+    }
+  ]
+}

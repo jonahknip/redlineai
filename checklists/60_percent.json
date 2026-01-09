@@ -1,0 +1,119 @@
+{
+  "name": "60% Engineering QA/QC Review",
+  "phase": "60%",
+  "next_phase": "90%",
+  "description": "Design development - utilities, grading, calculations, permits",
+  "sections": [
+    {
+      "title": "GENERAL REVIEW / ALL SHEETS",
+      "items": [
+        {"id": "60-GEN-001", "text": "Plan has uniform size of text and line weights", "required": true},
+        {"id": "60-GEN-002", "text": "Check boring & coring log listed properly and located on the plans", "required": true},
+        {"id": "60-GEN-003", "text": "Check Excel table sheet numbers are correct", "required": true},
+        {"id": "60-GEN-004", "text": "Review and confirm notes and details are modified with municipal requirements", "required": true},
+        {"id": "60-GEN-005", "text": "Confirm municipality is listed properly on notes and details and plan set", "required": true},
+        {"id": "60-GEN-006", "text": "Verify locations and sizes of existing utilities and that inverts are correct", "required": true},
+        {"id": "60-GEN-007", "text": "Are all elements being removed clearly identified?", "required": true},
+        {"id": "60-GEN-008", "text": "Are all elements remaining clearly identified?", "required": true},
+        {"id": "60-GEN-009", "text": "Provide notes to protect any resources to remain", "required": true},
+        {"id": "60-GEN-010", "text": "Review and coordinate the removal and demolition plan with the design layout", "required": true},
+        {"id": "60-GEN-011", "text": "Are all keynotes cross reference on the drawings correctly?", "required": true},
+        {"id": "60-GEN-012", "text": "Are the keynotes easily understood?", "required": true},
+        {"id": "60-GEN-013", "text": "Is all product information that is referenced thorough?", "required": true},
+        {"id": "60-GEN-014", "text": "Are site furnishings identified in pay items/keynotes and included in the specifications?", "required": false},
+        {"id": "60-GEN-015", "text": "Are the site materials from appropriate climatic region?", "required": true},
+        {"id": "60-GEN-016", "text": "Check lighting spacing (if applicable)", "required": false},
+        {"id": "60-GEN-017", "text": "Is irrigation required?", "required": false},
+        {"id": "60-GEN-018", "text": "Has draft of maintenance of traffic been created and discussed?", "required": true}
+      ]
+    },
+    {
+      "title": "UTILITIES & STRUCTURES",
+      "items": [
+        {"id": "60-UTL-001", "text": "Check Rim elevations are correct and listed # of structures reviewed in comments", "required": true},
+        {"id": "60-UTL-002", "text": "Verify that the proposed sewer and water is > 10 feet from each other", "required": true},
+        {"id": "60-UTL-003", "text": "Provided 18\" vertical separation between sewer and water", "required": true},
+        {"id": "60-UTL-004", "text": "Verify manholes can accommodate pipe sizes and alignment", "required": true},
+        {"id": "60-UTL-005", "text": "Verify Storm and Sanitary Sewer includes inverts, structure elevations, pipes slopes, STA", "required": true},
+        {"id": "60-UTL-006", "text": "Is potholing required to identify existing utility information and depths?", "required": false},
+        {"id": "60-UTL-007", "text": "Confirm existing and proposed utilities do not have conflicts", "required": true},
+        {"id": "60-UTL-008", "text": "Verify proper proposed covers are labeled on structure notes", "required": true},
+        {"id": "60-UTL-009", "text": "Provide minimum cover callouts on proposed water main", "required": true}
+      ]
+    },
+    {
+      "title": "CROSS SECTIONS & ALIGNMENT",
+      "items": [
+        {"id": "60-XS-001", "text": "Typical existing cross-section(s) reviewed and labeled", "required": true},
+        {"id": "60-XS-002", "text": "Typical proposed cross-sections(s) reviewed and labeled properly", "required": true},
+        {"id": "60-XS-003", "text": "Verify that the pavement sections are correct in existing and proposed cross-sections", "required": true},
+        {"id": "60-XS-004", "text": "Has the HMA Application Table been provided and updated?", "required": true},
+        {"id": "60-XS-005", "text": "Review Vertical Alignment (K Values & % Grade)", "required": true},
+        {"id": "60-XS-006", "text": "Review Horizontal Alignment (Radius & Super Elevation)", "required": true}
+      ]
+    },
+    {
+      "title": "ADA & ACCESSIBILITY",
+      "items": [
+        {"id": "60-ADA-001", "text": "Are proposed ADA ramps shown with proper removals limits identified for ADA work?", "required": true}
+      ]
+    },
+    {
+      "title": "TRAFFIC & EROSION CONTROL",
+      "items": [
+        {"id": "60-TRF-001", "text": "Provide traffic signal data on plans", "required": false},
+        {"id": "60-TRF-002", "text": "Provide SESC Design plan with proposed quantities", "required": true},
+        {"id": "60-TRF-003", "text": "Provide Stormwater Pollution Prevention Plan (SWPPP)", "required": true},
+        {"id": "60-TRF-004", "text": "Do details coordinate with local design ordinances?", "required": true}
+      ]
+    },
+    {
+      "title": "GENERAL CHECKS",
+      "items": [
+        {"id": "60-CHK-001", "text": "Confirm all spelling on plan notes, keynotes, and utility callouts (spell check)", "required": true},
+        {"id": "60-CHK-002", "text": "Confirm bands in profile have been updated to show correct elevation", "required": true},
+        {"id": "60-CHK-003", "text": "Does the sheet index correspond with all the sheets in the set?", "required": true},
+        {"id": "60-CHK-004", "text": "Is all sheet numbering correct?", "required": true}
+      ]
+    },
+    {
+      "title": "CALCULATIONS",
+      "items": [
+        {"id": "60-CALC-001", "text": "Calculations - Review geotechnical report", "required": true},
+        {"id": "60-CALC-002", "text": "Calculations - If site lighting has been proposed, review photometric requirements", "required": false},
+        {"id": "60-CALC-003", "text": "Calculations - Have the storm sewer calculations been completed and reviewed?", "required": true},
+        {"id": "60-CALC-004", "text": "Calculations - Have the retention/detention calculations been reviewed?", "required": true},
+        {"id": "60-CALC-005", "text": "Calculations - Has the sanitary sewer basis of design calculations been reviewed?", "required": true},
+        {"id": "60-CALC-006", "text": "Calculations - Has the water main basis of design calculations been reviewed?", "required": true},
+        {"id": "60-CALC-007", "text": "Calculations - Has the pavement design been reviewed?", "required": true},
+        {"id": "60-CALC-008", "text": "Calculations - After reviewing the geotechnical report, are there any concerns?", "required": true},
+        {"id": "60-CALC-009", "text": "Calculations - Review site distances and calculations", "required": true},
+        {"id": "60-CALC-010", "text": "Calculations - Review guardrail calculations if applicable", "required": false},
+        {"id": "60-CALC-011", "text": "Calculations - Review all taper lengths and include them on plans", "required": true},
+        {"id": "60-CALC-012", "text": "Calculations - Has retaining wall calculations been completed and reviewed?", "required": false}
+      ]
+    },
+    {
+      "title": "COST ESTIMATES",
+      "items": [
+        {"id": "60-COST-001", "text": "Cost Estimates - Have calculations on quantities been reviewed?", "required": true},
+        {"id": "60-COST-002", "text": "Cost Estimates - Pay item descriptions match the plans, specs, and special provision", "required": true},
+        {"id": "60-COST-003", "text": "Cost Estimates - Review units vs. plans and specifications are industry standards", "required": true},
+        {"id": "60-COST-004", "text": "Cost Estimates - Review unit pricing compares to industry standards", "required": true},
+        {"id": "60-COST-005", "text": "Cost Estimates - Is the proper contingency been applied to the cost estimate?", "required": true}
+      ]
+    },
+    {
+      "title": "PERMITS",
+      "items": [
+        {"id": "60-PER-001", "text": "Permits - Sanitary Sewer: has the permit application been developed and reviewed?", "required": true},
+        {"id": "60-PER-002", "text": "Permits - Water Main: has the permit application been developed and reviewed?", "required": true},
+        {"id": "60-PER-003", "text": "Permits - Rule 5/SESC: has the permit application been developed and reviewed?", "required": true},
+        {"id": "60-PER-004", "text": "Permits - MDOT: is an MDOT permit required and been developed and reviewed?", "required": false},
+        {"id": "60-PER-005", "text": "Permits - Drainage Board/Commissioner: Drain permits developed and reviewed?", "required": false},
+        {"id": "60-PER-006", "text": "Permits - Joint Permit Application: is a permit needed, or not required?", "required": false},
+        {"id": "60-PER-007", "text": "Permit - SHPO: has the SHPO application been applied for?", "required": false}
+      ]
+    }
+  ]
+}

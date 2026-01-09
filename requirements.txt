@@ -1,0 +1,21 @@
+# RedlineAI - AI-Powered Plan Review
+# Python 3.10+
+
+# Web Framework
+flask==3.0.0
+werkzeug==3.0.1
+gunicorn==21.2.0
+
+# OpenAI
+openai==1.6.1
+
+# PDF Processing
+PyMuPDF==1.23.8
+Pillow==10.1.0
+
+# Document Generation
+python-docx==1.1.0
+openpyxl==3.1.2
+
+# Utilities
+python-dotenv==1.0.0
