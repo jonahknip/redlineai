@@ -44,6 +44,7 @@ temp/
 *.pdf
 !test_data/**/*.pdf
 !checklists/**/*.pdf
+!static/demo/**/*.pdf
 
 # OS
 .DS_Store

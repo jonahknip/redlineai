@@ -356,6 +356,86 @@
             font-weight: 600;
         }
 
+        /* Demo Section */
+        .demo-divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85rem;
+        }
+
+        .demo-divider::before,
+        .demo-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+
+        .demo-divider span {
+            padding: 0 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.75rem;
+        }
+
+        .demo-btn {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(27, 54, 93, 0.8) 0%, rgba(27, 54, 93, 0.6) 100%);
+            border: 2px solid rgba(27, 54, 93, 0.8);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(200, 16, 46, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .demo-btn:hover::before {
+            left: 100%;
+        }
+
+        .demo-btn:hover {
+            border-color: #C8102E;
+            background: linear-gradient(135deg, rgba(200, 16, 46, 0.3) 0%, rgba(27, 54, 93, 0.6) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(200, 16, 46, 0.3);
+        }
+
+        .demo-btn svg {
+            flex-shrink: 0;
+            color: #C8102E;
+        }
+
+        .demo-btn svg.spinner {
+            animation: spin 1s linear infinite;
+            color: #fff;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* Review Options */
         .review-options {
             display: flex;
@@ -966,6 +1046,15 @@
                                 <p class="upload-text"><strong>Click to upload</strong> or drag & drop</p>
                                 <p class="file-name" id="fileName"></p>
                             </div>
+                            <div class="demo-divider">
+                                <span>or try a demo</span>
+                            </div>
+                            <button class="demo-btn" id="demoBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                Try Demo with Sample Plans
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -974,7 +1063,7 @@
 
         <!-- Footer -->
         <footer>
-            <button class="install-btn" id="installBtn" style="display: none;">
+            <button class="install-btn" id="installBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -982,7 +1071,7 @@
                 </svg>
                 Install App
             </button>
-            <p>Struggling? <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" target="_blank">Contact Mr. Greatness for help & support (;</a></p>
+            <p>Questions or feedback? <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" target="_blank">Contact the Creator</a></p>
         </footer>
     </div>
 
@@ -1244,6 +1333,41 @@
             }
         });
 
+        // Demo button handler
+        const demoBtn = document.getElementById('demoBtn');
+        demoBtn.addEventListener('click', async () => {
+            // Show loading state
+            demoBtn.innerHTML = `
+                <svg class="spinner" viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30 70" />
+                </svg>
+                Loading Demo Plans...
+            `;
+            demoBtn.style.pointerEvents = 'none';
+            
+            try {
+                // Fetch the demo PDF
+                const response = await fetch('/static/demo/SR19-Demo-Planset.pdf');
+                const blob = await response.blob();
+                const file = new File([blob], 'SR19-Demo-Planset.pdf', { type: 'application/pdf' });
+                
+                // Handle as if user uploaded it
+                handleFileUpload(file);
+            } catch (error) {
+                console.error('Error loading demo:', error);
+                addMessage('ai', 'Sorry, there was an error loading the demo plans. Please try uploading your own PDF.');
+            }
+            
+            // Reset button
+            demoBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Try Demo with Sample Plans
+            `;
+            demoBtn.style.pointerEvents = 'auto';
+        });
+
         function handleFileUpload(file) {
             uploadedFile = file;
             fileNameDisplay.textContent = file.name;
@@ -1453,63 +1577,31 @@ ${currentReport}
         // ============================================
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
-
-        // Listen for the beforeinstallprompt event
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
-            e.preventDefault();
-            // Stash the event so it can be triggered later
-            deferredPrompt = e;
-            // Show the install button
-            installBtn.style.display = 'inline-flex';
-            console.log('PWA install prompt available');
-        });
-
-        // Handle install button click
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) {
-                // If no deferred prompt, show instructions for manual install
-                alert('To install this app:\n\n' +
-                      'Chrome/Edge: Click the menu (⋮) > "Install Plan Set Review Agent"\n\n' +
-                      'Safari (iOS): Tap Share > "Add to Home Screen"\n\n' +
-                      'Safari (Mac): Click Share > "Add to Dock"');
-                return;
-            }
-            
-            // Show the install prompt
-            deferredPrompt.prompt();
-            
-            // Wait for the user to respond to the prompt
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to install prompt: ${outcome}`);
-            
-            // Clear the deferredPrompt
-            deferredPrompt = null;
-            
-            // Hide the install button
-            if (outcome === 'accepted') {
-                installBtn.style.display = 'none';
-            }
-        });
-
-        // Listen for successful install
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
+        
+        // Detect platform for appropriate install instructions
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const isMac = /Macintosh/.test(navigator.userAgent);
+        const isWindows = /Windows/.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
+        const isEdge = /Edg/.test(navigator.userAgent);
+        const isFirefox = /Firefox/.test(navigator.userAgent);
+        
+        // Check if already installed as PWA
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           window.navigator.standalone === true;
+        
+        if (isStandalone) {
+            // Hide install button if already installed
             installBtn.style.display = 'none';
-            deferredPrompt = null;
-        });
-
-        // Check if running as installed PWA
-        if (window.matchMedia('(display-mode: standalone)').matches || 
-            window.navigator.standalone === true) {
             console.log('Running as installed PWA');
-            installBtn.style.display = 'none';
         } else {
-            // Show install button hint for iOS Safari (which doesn't support beforeinstallprompt)
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-            if (isIOS && isSafari) {
-                installBtn.style.display = 'inline-flex';
+            // Always show install button (will show instructions if native prompt unavailable)
+            installBtn.style.display = 'inline-flex';
+            
+            // Customize button text for iOS
+            if (isIOS) {
                 installBtn.innerHTML = `
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
                         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
@@ -1520,6 +1612,64 @@ ${currentReport}
                 `;
             }
         }
+
+        // Listen for the beforeinstallprompt event (Chrome, Edge, etc.)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-flex';
+            console.log('PWA install prompt available');
+        });
+
+        // Handle install button click
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Use native install prompt
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to install prompt: ${outcome}`);
+                deferredPrompt = null;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+            } else {
+                // Show platform-specific instructions
+                let instructions = '';
+                
+                if (isIOS) {
+                    instructions = 'To install this app on your iPhone/iPad:\n\n' +
+                        '1. Tap the Share button (square with arrow) at the bottom of Safari\n' +
+                        '2. Scroll down and tap "Add to Home Screen"\n' +
+                        '3. Tap "Add" in the top right corner';
+                } else if (isMac && isSafari) {
+                    instructions = 'To install this app on macOS:\n\n' +
+                        '1. Click the Share button in the Safari toolbar\n' +
+                        '2. Click "Add to Dock"';
+                } else if (isChrome || isEdge) {
+                    instructions = 'To install this app:\n\n' +
+                        '1. Click the menu icon (⋮) in the top right corner\n' +
+                        '2. Click "Install Plan Set Review Agent" or "Install app"\n\n' +
+                        'Or look for the install icon (⊕) in the address bar';
+                } else if (isFirefox) {
+                    instructions = 'Firefox doesn\'t fully support PWA installation.\n\n' +
+                        'For the best experience, open this page in Chrome, Edge, or Safari.';
+                } else {
+                    instructions = 'To install this app:\n\n' +
+                        'Chrome/Edge: Click menu (⋮) > "Install app"\n' +
+                        'Safari (iOS): Tap Share > "Add to Home Screen"\n' +
+                        'Safari (Mac): Click Share > "Add to Dock"';
+                }
+                
+                alert(instructions);
+            }
+        });
+
+        // Listen for successful install
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            installBtn.style.display = 'none';
+            deferredPrompt = null;
+        });
 
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
