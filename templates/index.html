@@ -858,6 +858,33 @@
             display: none;
         }
 
+        /* Install Button */
+        .install-btn {
+            background: linear-gradient(135deg, #C8102E 0%, #a00d25 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(200, 16, 46, 0.4);
+        }
+
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(200, 16, 46, 0.6);
+        }
+
+        .install-btn svg {
+            flex-shrink: 0;
+        }
+
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
@@ -947,6 +974,14 @@
 
         <!-- Footer -->
         <footer>
+            <button class="install-btn" id="installBtn" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Install App
+            </button>
             <p>Struggling? <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" target="_blank">Contact Mr. Greatness for help & support (;</a></p>
         </footer>
     </div>
@@ -1413,12 +1448,98 @@ ${currentReport}
             }
         }
 
+        // ============================================
+        // PWA INSTALL FUNCTIONALITY
+        // ============================================
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        // Listen for the beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install button
+            installBtn.style.display = 'inline-flex';
+            console.log('PWA install prompt available');
+        });
+
+        // Handle install button click
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                // If no deferred prompt, show instructions for manual install
+                alert('To install this app:\n\n' +
+                      'Chrome/Edge: Click the menu (⋮) > "Install Plan Set Review Agent"\n\n' +
+                      'Safari (iOS): Tap Share > "Add to Home Screen"\n\n' +
+                      'Safari (Mac): Click Share > "Add to Dock"');
+                return;
+            }
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to install prompt: ${outcome}`);
+            
+            // Clear the deferredPrompt
+            deferredPrompt = null;
+            
+            // Hide the install button
+            if (outcome === 'accepted') {
+                installBtn.style.display = 'none';
+            }
+        });
+
+        // Listen for successful install
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            installBtn.style.display = 'none';
+            deferredPrompt = null;
+        });
+
+        // Check if running as installed PWA
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+            console.log('Running as installed PWA');
+            installBtn.style.display = 'none';
+        } else {
+            // Show install button hint for iOS Safari (which doesn't support beforeinstallprompt)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (isIOS && isSafari) {
+                installBtn.style.display = 'inline-flex';
+                installBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                        <polyline points="16 6 12 2 8 6"/>
+                        <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                    Add to Home Screen
+                `;
+            }
+        }
+
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/static/service-worker.js')
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed'));
+                    .then(reg => {
+                        console.log('SW registered:', reg.scope);
+                        
+                        // Check for updates
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New content available, show refresh prompt
+                                    console.log('New version available! Refresh to update.');
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.log('SW registration failed:', err));
             });
         }
     </script>

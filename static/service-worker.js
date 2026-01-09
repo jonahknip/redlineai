@@ -1,10 +1,12 @@
-// Redline.ai Service Worker
-const CACHE_NAME = 'redlineai-v1';
+// Plan Set Review Agent Service Worker
+const CACHE_NAME = 'plan-review-agent-v2';
 const STATIC_ASSETS = [
   '/',
   '/static/manifest.json',
   '/static/icons/icon-192.png',
-  '/static/icons/icon-512.png'
+  '/static/icons/icon-512.png',
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap'
 ];
 
 // Install event - cache static assets
