@@ -340,14 +340,30 @@
         .report-content {
             max-height: 500px;
             overflow-y: auto;
-            background: rgba(10, 10, 30, 0.9);
+            background: rgba(10, 10, 30, 0.95) !important;
             padding: 20px;
         }
 
         /* Override report HTML styles to match space theme */
         .report-content,
-        .report-content * {
+        .report-content *,
+        .report-content html,
+        .report-content body,
+        .report-content .report {
             color: rgba(255, 255, 255, 0.9) !important;
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+
+        /* Force override body background which has inline style */
+        .report-content body[style],
+        .report-content [style*="background: #fff"],
+        .report-content [style*="background:#fff"],
+        .report-content [style*="background: white"],
+        .report-content [style*="background-color: #fff"],
+        .report-content [style*="background-color:#fff"],
+        .report-content [style*="background-color: white"] {
+            background: transparent !important;
             background-color: transparent !important;
         }
 
@@ -1018,6 +1034,18 @@
                     currentReport = data.report;
                     currentProjectName = data.project_name || 'Planset Review';
 
+                    // Strip HTML wrapper from report (extract body content only)
+                    let cleanReport = data.report;
+                    const bodyMatch = cleanReport.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                    if (bodyMatch) {
+                        cleanReport = bodyMatch[1];
+                    }
+                    // Also remove any remaining html, head, style tags
+                    cleanReport = cleanReport.replace(/<html[^>]*>/gi, '');
+                    cleanReport = cleanReport.replace(/<\/html>/gi, '');
+                    cleanReport = cleanReport.replace(/<head>[\s\S]*?<\/head>/gi, '');
+                    cleanReport = cleanReport.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+
                     // Add success message with report
                     const reportHtml = `
                         <p>Review complete! I analyzed <strong>${data.page_count} pages</strong> and found the following:</p>
@@ -1034,7 +1062,7 @@
                                     Export PDF
                                 </button>
                             </div>
-                            <div class="report-content">${data.report}</div>
+                            <div class="report-content">${cleanReport}</div>
                         </div>
                     `;
                     addMessage('ai', reportHtml, true);
