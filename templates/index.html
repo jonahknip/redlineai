@@ -1242,6 +1242,14 @@
                     body: formData
                 });
 
+                // Check for HTTP errors first
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP Error:', response.status, errorText);
+                    showStatus('error', `Server error (${response.status}): ${errorText.substring(0, 200)}`);
+                    return;
+                }
+
                 const data = await response.json();
 
                 if (data.success) {
@@ -1266,9 +1274,11 @@
                     // Save to history
                     saveToHistory(data);
                 } else {
+                    console.error('API Error:', data.error);
                     showStatus('error', `Error: ${data.error}`);
                 }
             } catch (error) {
+                console.error('Fetch Error:', error);
                 showStatus('error', `Network error: ${error.message}`);
             }
         }
