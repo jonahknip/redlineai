@@ -589,7 +589,7 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
             return {'success': False, 'error': str(e)}
 
     def generate_ai_report(self, use_vision: bool = True, checklist: dict = None, custom_instructions: str = "") -> str:
-        """Generate a professional HTML report using OpenAI"""
+        """Generate a professional Abonmarche-style QA/QC checklist report using OpenAI"""
         if not OPENAI_AVAILABLE:
             return self.generate_summary_report()
         
@@ -600,8 +600,6 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         if not self.analysis.total_sheets:
             self.perform_full_analysis()
         
-        # Prepare analysis data for the AI
-        analysis_data = self.export_json()
         info = self.analysis.project_info
         
         # Get vision analysis if enabled
@@ -609,106 +607,171 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         if use_vision:
             vision_data = self.analyze_with_vision(checklist)
             if vision_data.get('success'):
-                vision_results = f"\n\nVISION ANALYSIS OF PLAN SHEETS:\n{vision_data['analysis']}"
+                vision_results = vision_data['analysis']
         
-        # Build checklist section if provided - handle sectioned format
-        checklist_section = ""
-        if checklist:
-            checklist_name = checklist.get('name', 'QA/QC Checklist')
-            checklist_phase = checklist.get('phase', '')
-            checklist_section = f"\n\n=== CHECKLIST: {checklist_name} ({checklist_phase}) ===\n"
-            checklist_section += f"Description: {checklist.get('description', '')}\n"
-            
-            # Check if we have sections (Abonmarche format) or just items
-            if checklist.get('sections'):
-                total_items = 0
-                required_items = 0
-                for section in checklist.get('sections', []):
-                    section_title = section.get('title', 'General')
-                    checklist_section += f"\n### {section_title}\n"
-                    for item in section.get('items', []):
-                        total_items += 1
-                        req = "REQUIRED" if item.get('required') else "Optional"
-                        if item.get('required'):
-                            required_items += 1
-                        checklist_section += f"- [{req}] {item.get('id', '')}: {item.get('text', '')}\n"
-                checklist_section += f"\nTotal items: {total_items} ({required_items} required)\n"
-            else:
-                # Flat items format (backward compatibility)
-                for item in checklist.get('items', []):
-                    req = "REQUIRED" if item.get('required') else "Optional"
-                    checklist_section += f"- [{req}] {item.get('text', '')}\n"
-        
-        # Build custom instructions section
-        custom_instructions_section = ""
-        if custom_instructions and custom_instructions.strip():
-            custom_instructions_section = f"\n\nSPECIAL INSTRUCTIONS FROM REVIEWER:\n{custom_instructions.strip()}\n"
-        
-        # Extract first few pages of text for context (limit to avoid token limits)
+        # Extract text from plan set for context
         sample_text = ""
-        for i, page in enumerate(self.doc[:5]):  # First 5 pages
+        for i, page in enumerate(self.doc[:5]):
             sample_text += f"\n--- Page {i+1} ---\n"
-            sample_text += page.get_text()[:2000]  # Limit per page
+            sample_text += page.get_text()[:2000]
         
-        prompt = f"""You are a senior Civil Engineering Project Manager reviewing a construction plan set. 
-Generate a professional, detailed review report in HTML format that looks like a formal Word document.
+        # Build the checklist items for AI to evaluate
+        checklist_items_text = ""
+        if checklist and checklist.get('sections'):
+            for section in checklist.get('sections', []):
+                section_title = section.get('title', 'General')
+                checklist_items_text += f"\n\n### {section_title}\n"
+                for item in section.get('items', []):
+                    item_id = item.get('id', '')
+                    item_text = item.get('text', '')
+                    required = "REQUIRED" if item.get('required') else "Optional"
+                    checklist_items_text += f"- [{item_id}] [{required}] {item_text}\n"
+        
+        checklist_name = checklist.get('name', 'QA/QC Review') if checklist else 'General Review'
+        checklist_phase = checklist.get('phase', '') if checklist else ''
+        
+        prompt = f"""You are a senior Civil Engineering Project Manager at Abonmarche performing a QA/QC review.
 
-ANALYSIS DATA:
+PLANSET INFORMATION:
 - Project Name: {info.project_name or 'Not identified'}
-- Project Number: {info.project_number or 'Not identified'}
+- Project Number: {info.project_number or 'Not identified'}  
 - Location: {info.location or 'Not identified'}
 - Owner/Client: {info.owner or 'Not identified'}
 - Engineer of Record: {info.engineer_of_record or 'Not identified'}
 - PE License: {info.engineer_license or 'Not identified'}
 - Total Sheets: {self.analysis.total_sheets}
-- Station Range: {self.analysis.station_range[0] or 'N/A'} to {self.analysis.station_range[1] or 'N/A'}
-- Completeness Score: {self.analysis.completeness_score:.0f}%
-- Disciplines Covered: {', '.join(self.analysis.disciplines_covered) or 'None identified'}
-- Key Features: {', '.join(self.analysis.key_features) or 'None identified'}
-- Review Flags: {', '.join(self.analysis.review_flags) or 'None'}
-- Sheet Index: {json.dumps(self.analysis.sheet_index, indent=2)}
+- Disciplines: {', '.join(self.analysis.disciplines_covered) or 'None identified'}
+
+VISION ANALYSIS OF PLAN SHEETS:
 {vision_results}
-{checklist_section}
-{custom_instructions_section}
 
-SAMPLE TEXT FROM PLAN SET:
-{sample_text[:4000]}
+EXTRACTED TEXT FROM PLANS:
+{sample_text[:3000]}
 
-Generate an HTML report with these sections:
-1. HEADER - Project title, date, reviewer info
-2. EXECUTIVE SUMMARY - Brief overview of the project scope and status
-3. PROJECT INFORMATION - Table with all project details
-4. PLAN SET CONTENTS - Summary of sheets and disciplines
-5. KEY FINDINGS - Important observations from the review
-6. ITEMS REQUIRING ATTENTION - Issues, missing items, flags
-7. RECOMMENDATIONS - Specific action items for the PM
-8. NEXT STEPS - Prioritized to-do list with checkboxes
+CHECKLIST TO EVALUATE: {checklist_name} ({checklist_phase})
+{checklist_items_text}
 
-Use professional styling:
-- Clean typography with proper headings (h1, h2, h3)
-- Tables with borders for data
-- Bullet points and numbered lists
-- Color coding: red for critical issues, orange for warnings, green for complete items
-- Professional blue header bar
-- Proper spacing and margins
+Generate an HTML QA/QC checklist report in Abonmarche's official format. For EACH checklist item, determine:
+- PASS: Item requirement is clearly met based on the plan analysis
+- FAIL: Item requirement is NOT met or has issues
+- N/A: Item does not apply to this project
+- REVIEW: Cannot determine from available information, needs manual review
 
-Return ONLY the HTML content (no markdown, no code blocks). Start with a <div> wrapper."""
+OUTPUT FORMAT - Generate this EXACT HTML structure:
+
+<div class="qaqc-report">
+  <div class="report-header">
+    <div class="header-logo">
+      <div class="logo-text">ABONMARCHE</div>
+      <div class="logo-tagline">ENGINEERS | ARCHITECTS | SURVEYORS</div>
+    </div>
+    <div class="header-title">
+      <h1>{checklist_name}</h1>
+      <p class="review-phase">{checklist_phase} Design Phase Review</p>
+    </div>
+  </div>
+  
+  <div class="project-info-grid">
+    <div class="info-row"><span class="label">Project Name:</span><span class="value">[Project Name]</span></div>
+    <div class="info-row"><span class="label">Project Number:</span><span class="value">[Number]</span></div>
+    <div class="info-row"><span class="label">Location:</span><span class="value">[Location]</span></div>
+    <div class="info-row"><span class="label">Client:</span><span class="value">[Client]</span></div>
+    <div class="info-row"><span class="label">Review Date:</span><span class="value">{datetime.now().strftime('%B %d, %Y')}</span></div>
+    <div class="info-row"><span class="label">Reviewed By:</span><span class="value">AI-Assisted Review (RedlineAI)</span></div>
+    <div class="info-row"><span class="label">Total Sheets:</span><span class="value">[Count]</span></div>
+    <div class="info-row"><span class="label">Engineer:</span><span class="value">[Engineer]</span></div>
+  </div>
+
+  <div class="summary-stats">
+    <div class="stat stat-pass"><span class="stat-num">[#]</span><span class="stat-label">PASS</span></div>
+    <div class="stat stat-fail"><span class="stat-num">[#]</span><span class="stat-label">FAIL</span></div>
+    <div class="stat stat-review"><span class="stat-num">[#]</span><span class="stat-label">REVIEW</span></div>
+    <div class="stat stat-na"><span class="stat-num">[#]</span><span class="stat-label">N/A</span></div>
+  </div>
+
+  [FOR EACH SECTION:]
+  <div class="checklist-section">
+    <div class="section-header">[SECTION TITLE]</div>
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th class="col-status">Status</th>
+          <th class="col-id">ID</th>
+          <th class="col-item">Checklist Item</th>
+          <th class="col-notes">Notes/Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        [FOR EACH ITEM IN SECTION:]
+        <tr>
+          <td class="status-cell"><span class="status-badge status-[pass/fail/review/na]">[STATUS]</span></td>
+          <td class="id-cell">[ITEM-ID]</td>
+          <td class="item-cell">[Item description]</td>
+          <td class="notes-cell">[Your specific observation or reason for status]</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="findings-section">
+    <h2>Key Findings & Action Items</h2>
+    <div class="findings-critical">
+      <h3>Critical Issues (Must Address)</h3>
+      <ul>[List any FAIL items that are REQUIRED]</ul>
+    </div>
+    <div class="findings-review">
+      <h3>Items Requiring Manual Review</h3>
+      <ul>[List items marked REVIEW with reason]</ul>
+    </div>
+    <div class="findings-notes">
+      <h3>General Observations</h3>
+      <p>[Overall assessment of the planset quality and completeness]</p>
+    </div>
+  </div>
+
+  <div class="signature-section">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <p>QA/QC Reviewer Signature</p>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <p>Date</p>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <p>Project Manager Approval</p>
+    </div>
+  </div>
+  
+  <div class="report-footer">
+    <p>Generated by RedlineAI | Abonmarche QA/QC System | {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+  </div>
+</div>
+
+IMPORTANT:
+- Evaluate EVERY checklist item - do not skip any
+- Provide specific, actionable notes for each item
+- Be thorough but concise in your notes
+- Use professional engineering language
+- If you cannot verify something from the plans, mark it REVIEW not PASS
+- Return ONLY the HTML, no markdown code blocks"""
 
         try:
             client = OpenAI(api_key=api_key)
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a professional civil engineering project manager. Generate clean, professional HTML reports."},
+                    {"role": "system", "content": "You are a senior civil engineering QA/QC reviewer at Abonmarche. Generate professional, thorough checklist reviews in clean HTML format. Evaluate each item carefully based on the plan analysis provided."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=4000,
-                temperature=0.7
+                max_tokens=8000,
+                temperature=0.3
             )
             
             html_report = response.choices[0].message.content
             
-            # Clean up any markdown code block markers if present
+            # Clean up any markdown code block markers
             html_report = html_report.strip()
             if html_report.startswith('```html'):
                 html_report = html_report[7:]

@@ -411,17 +411,270 @@
             height: 14px;
         }
 
-        /* Report Content - Abonmarche Form Style */
+        /* Report Content - Abonmarche QA/QC Form Style */
         .report-content {
             background: #FFF;
             border: 1px solid #ddd;
             border-top: none;
             border-radius: 0 0 10px 10px;
             padding: 0;
-            max-height: 600px;
+            max-height: 700px;
             overflow-y: auto;
         }
 
+        /* QA/QC Report Styling */
+        .report-content .qaqc-report {
+            font-family: 'Segoe UI', 'Calibri', Arial, sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .report-content .report-header {
+            background: linear-gradient(135deg, #1B365D 0%, #2A4A7A 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0;
+        }
+
+        .report-content .header-logo .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #C8102E;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        .report-content .header-logo .logo-tagline {
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            opacity: 0.9;
+        }
+
+        .report-content .header-title {
+            text-align: right;
+        }
+
+        .report-content .header-title h1 {
+            font-size: 1.3rem;
+            margin: 0 0 4px 0;
+            color: white;
+            border: none;
+            padding: 0;
+        }
+
+        .report-content .header-title .review-phase {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .report-content .project-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px 24px;
+            padding: 20px 24px;
+            background: #F8F9FA;
+            border-bottom: 2px solid #E0E0E0;
+        }
+
+        .report-content .info-row {
+            display: flex;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .report-content .info-row .label {
+            font-weight: 600;
+            color: #1B365D;
+            min-width: 110px;
+        }
+
+        .report-content .info-row .value {
+            color: #333;
+        }
+
+        .report-content .summary-stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 16px 24px;
+            background: white;
+            border-bottom: 2px solid #E0E0E0;
+        }
+
+        .report-content .stat {
+            text-align: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            min-width: 80px;
+        }
+
+        .report-content .stat-num {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .report-content .stat-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .report-content .stat-pass { background: #E8F5E9; color: #2E7D32; }
+        .report-content .stat-fail { background: #FFEBEE; color: #C62828; }
+        .report-content .stat-review { background: #FFF3E0; color: #EF6C00; }
+        .report-content .stat-na { background: #F5F5F5; color: #666; }
+
+        .report-content .checklist-section {
+            margin: 16px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .report-content .section-header {
+            background: #1B365D;
+            color: white;
+            padding: 10px 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .report-content .checklist-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .report-content .checklist-table th {
+            background: #F5F5F5;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1B365D;
+            border-bottom: 2px solid #E0E0E0;
+        }
+
+        .report-content .checklist-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #F0F0F0;
+            vertical-align: top;
+        }
+
+        .report-content .checklist-table tr:hover {
+            background: #FAFAFA;
+        }
+
+        .report-content .col-status { width: 70px; text-align: center; }
+        .report-content .col-id { width: 90px; }
+        .report-content .col-item { width: 40%; }
+        .report-content .col-notes { width: auto; }
+
+        .report-content .status-cell { text-align: center; }
+        .report-content .id-cell { font-family: monospace; font-size: 0.75rem; color: #666; }
+        .report-content .item-cell { color: #333; }
+        .report-content .notes-cell { color: #666; font-size: 0.8rem; font-style: italic; }
+
+        .report-content .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .report-content .status-pass { background: #E8F5E9; color: #2E7D32; }
+        .report-content .status-fail { background: #FFEBEE; color: #C62828; }
+        .report-content .status-review { background: #FFF3E0; color: #EF6C00; }
+        .report-content .status-na { background: #F5F5F5; color: #999; }
+
+        .report-content .findings-section {
+            margin: 24px 16px;
+            padding: 20px;
+            background: #F8F9FA;
+            border-radius: 8px;
+            border-left: 4px solid #1B365D;
+        }
+
+        .report-content .findings-section h2 {
+            color: #1B365D;
+            font-size: 1.1rem;
+            margin: 0 0 16px 0;
+            padding: 0;
+            border: none;
+        }
+
+        .report-content .findings-section h3 {
+            font-size: 0.9rem;
+            margin: 16px 0 8px 0;
+            color: #333;
+        }
+
+        .report-content .findings-critical h3 { color: #C62828; }
+        .report-content .findings-review h3 { color: #EF6C00; }
+
+        .report-content .findings-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .report-content .findings-section li {
+            margin: 6px 0;
+            font-size: 0.85rem;
+        }
+
+        .report-content .findings-notes p {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 8px 0 0 0;
+        }
+
+        .report-content .signature-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            margin: 24px 16px;
+            padding-top: 24px;
+            border-top: 2px solid #E0E0E0;
+        }
+
+        .report-content .sig-block {
+            flex: 1;
+            text-align: center;
+        }
+
+        .report-content .sig-line {
+            height: 1px;
+            background: #333;
+            margin-bottom: 8px;
+        }
+
+        .report-content .sig-block p {
+            font-size: 0.75rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .report-content .report-footer {
+            text-align: center;
+            padding: 16px;
+            background: #F5F5F5;
+            font-size: 0.75rem;
+            color: #999;
+            border-top: 1px solid #E0E0E0;
+        }
+
+        /* Legacy form styles for backwards compatibility */
         .report-content .form-header {
             background: #1B365D;
             color: white;
