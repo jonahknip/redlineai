@@ -1,0 +1,61 @@
+{
+  "phase": "30%",
+  "phase_context": "Early design validation phase focusing on survey accuracy, existing conditions documentation, and title sheet setup. At 30%, the emphasis is on verifying that foundational data is correct before design work begins.",
+  "what_should_exist": [
+    "Completed topographic survey with QA checklist",
+    "Existing conditions clearly documented",
+    "Title sheet with correct project info",
+    "North arrows and scales on all sheets",
+    "Existing utilities shown from GIS/utility maps",
+    "Property boundaries and ROW lines",
+    "Benchmarks and horizontal control",
+    "Legend with line types"
+  ],
+  "what_should_not_exist_yet": [
+    "Detailed utility design",
+    "Final grading plans",
+    "Construction details",
+    "Specifications",
+    "Bid documents",
+    "Cost estimates",
+    "Permit applications"
+  ],
+  "section_guidance": {
+    "GENERAL REVIEW / ALL SHEETS": "Focus on survey accuracy, title block consistency, and existing conditions documentation. Verify all foundational elements are in place before design proceeds."
+  },
+  "example_evaluations": [
+    {
+      "item_id": "30-GEN-004",
+      "item_text": "Do all drawings have a north arrow shown correctly?",
+      "status": "PASS",
+      "comment": "North arrow verified on sheets C-1 through C-8, consistently oriented at top of sheet near title block."
+    },
+    {
+      "item_id": "30-GEN-015",
+      "item_text": "Are existing contours shown and labeled?",
+      "status": "FAIL",
+      "comment": "Existing contours shown on C-2 and C-3 but not labeled with elevations. Add 1-foot interval labels per CADD standards."
+    },
+    {
+      "item_id": "30-GEN-023",
+      "item_text": "Is the underground utility locator note present?",
+      "status": "FAIL",
+      "comment": "MISS DIG / underground utility locator note missing from title sheet. Required note must be added before 60% submittal."
+    },
+    {
+      "item_id": "30-GEN-041",
+      "item_text": "Are all existing underground utilities shown and labeled?",
+      "status": "PASS",
+      "comment": "Existing water (blue), sanitary (green), storm (gray), and gas (yellow) utilities shown and labeled on sheets C-2 through C-5. Sizes and materials indicated."
+    },
+    {
+      "item_id": "30-GEN-003",
+      "item_text": "Confirm utilities provided match GIS and utility maps (if applicable)",
+      "status": "REVIEW",
+      "comment": "Unable to verify GIS match from plan sheets alone. Recommend PM verify utility locations against municipal GIS records before proceeding."
+    }
+  ],
+  "pass_criteria": "Item is clearly shown on the plans with accurate information that meets survey and documentation standards for 30% design phase.",
+  "fail_criteria": "Item is missing, incorrectly shown, or contains errors that must be corrected before advancing to 60% design.",
+  "review_criteria": "Only use when verification requires external data (GIS records, field verification) not visible on the plan sheets."
+}

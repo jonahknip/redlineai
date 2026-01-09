@@ -1,0 +1,69 @@
+{
+  "phase": "60%",
+  "phase_context": "Design development phase where core engineering decisions are being finalized. Utilities are being designed, calculations completed, and permit applications initiated. Focus on technical accuracy and coordination between disciplines.",
+  "what_should_exist": [
+    "All 30% items verified and complete",
+    "Proposed utility layouts with sizes and materials",
+    "Preliminary grading and drainage design",
+    "Cross sections with pavement design",
+    "Storm sewer and sanitary sewer calculations",
+    "Detention/retention calculations",
+    "Draft maintenance of traffic plan",
+    "SESC/erosion control plan",
+    "Preliminary cost estimate",
+    "Permit applications in progress"
+  ],
+  "what_should_not_exist_yet": [
+    "Final bid documents",
+    "Complete specifications",
+    "Finalized cost estimates",
+    "Final MOT plan",
+    "Approved permits"
+  ],
+  "section_guidance": {
+    "GENERAL REVIEW / ALL SHEETS": "Verify design elements are coordinated across sheets. Check that removal plans match proposed layouts and all keynotes cross-reference correctly.",
+    "UTILITIES & STRUCTURES": "Verify 10-foot horizontal separation between water and sewer. Confirm 18-inch vertical separation at crossings. Check all rim elevations, inverts, and pipe slopes are labeled.",
+    "CROSS SECTIONS & ALIGNMENT": "Verify pavement sections match typical sections. Check K values for vertical curves and superelevation for horizontal curves meet design standards.",
+    "ADA & ACCESSIBILITY": "Confirm ADA ramps are shown with proper removal limits. Verify locations align with pedestrian routes and crosswalks.",
+    "TRAFFIC & EROSION CONTROL": "Check SESC plan has quantities. Verify SWPPP is provided. Confirm details match local ordinances.",
+    "GENERAL CHECKS": "Run spell check, verify sheet index matches actual sheets, confirm profile bands show correct elevations.",
+    "CALCULATIONS": "Verify all required calculations are complete: storm sewer, detention, sanitary, water main, pavement design. Check geotechnical report has been reviewed.",
+    "COST ESTIMATES": "Verify quantities match plans. Check pay items match specifications. Confirm unit prices are reasonable for current market.",
+    "PERMITS": "Verify permit applications are in progress for sanitary sewer, water main, and SESC. Check if MDOT or drainage permits are required."
+  },
+  "example_evaluations": [
+    {
+      "item_id": "60-UTL-002",
+      "item_text": "Verify that the proposed sewer and water is > 10 feet from each other",
+      "status": "FAIL",
+      "comment": "Sheet C-4 STA 2+45 shows 8\" water main only 6 feet from 8\" sanitary sewer. Ten State Standards require minimum 10-foot horizontal separation. Relocate water main or request variance."
+    },
+    {
+      "item_id": "60-UTL-003",
+      "item_text": "Provided 18\" vertical separation between sewer and water",
+      "status": "FAIL",
+      "comment": "Profile sheet P-2 shows water main crossing sanitary at STA 4+80 with only 12\" vertical separation. Requires 18\" minimum with water above sewer. Adjust vertical alignment."
+    },
+    {
+      "item_id": "60-XS-004",
+      "item_text": "Has the HMA Application Table been provided and updated?",
+      "status": "PASS",
+      "comment": "HMA Application Table provided on sheet C-3 showing 2\" HMA surface, 3\" HMA base, 8\" aggregate base. Matches typical cross section on sheet C-2."
+    },
+    {
+      "item_id": "60-CALC-003",
+      "item_text": "Calculations - Have the storm sewer calculations been completed and reviewed?",
+      "status": "PASS",
+      "comment": "Storm sewer calculations verified in appendix. Rational method used with C=0.65, 10-year design storm. Pipe sizes adequate for calculated flows."
+    },
+    {
+      "item_id": "60-GEN-018",
+      "item_text": "Has draft of maintenance of traffic been created and discussed?",
+      "status": "REVIEW",
+      "comment": "MOT sheet M-1 shows two-phase traffic control but phasing limits not clearly defined. Recommend PM confirm phasing approach with client before 90% submittal."
+    }
+  ],
+  "pass_criteria": "Item is clearly addressed with accurate technical information that meets engineering standards for 60% design development.",
+  "fail_criteria": "Item has technical errors, missing required information, or does not meet applicable standards. Must be corrected before 90% submittal.",
+  "review_criteria": "Only use when determination requires client input, field verification, or PM judgment on project-specific requirements."
+}

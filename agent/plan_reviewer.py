@@ -726,10 +726,31 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
             few_shot_examples = ""
         
         if checklist_items_for_ai and OPENAI_AVAILABLE and api_key:
-            # Ask AI to evaluate each item and return JSON
-            items_text = "\n".join([f"- {item['id']}: {item['text']}" for item in checklist_items_for_ai])
-            
-            eval_prompt = f"""Evaluate each checklist item based on the plan analysis.
+            # Use phase-specific prompts for better accuracy
+            try:
+                from agent.prompts import build_evaluation_prompt, get_system_prompt
+                
+                # Get the phase from checklist
+                phase = checklist.get('phase', '30%') if checklist else '30%'
+                
+                # Build phase-specific evaluation prompt
+                eval_prompt = build_evaluation_prompt(
+                    phase=phase,
+                    checklist_items=checklist_items_for_ai,
+                    vision_results=vision_results[:6000] if vision_results else '',
+                    extracted_text=sample_text[:3000],
+                    training_examples=few_shot_examples
+                )
+                
+                # Get phase-specific system prompt
+                system_prompt = get_system_prompt(phase)
+                
+                print(f"[DEBUG] Using phase-specific prompts for {phase} review")
+            except Exception as e:
+                print(f"[DEBUG] Could not load phase-specific prompts: {e}, using default")
+                # Fallback to default prompt
+                items_text = "\n".join([f"- {item['id']}: {item['text']}" for item in checklist_items_for_ai])
+                eval_prompt = f"""Evaluate each checklist item based on the plan analysis.
 
 PLAN ANALYSIS:
 {vision_results[:6000] if vision_results else 'No vision analysis available'}
@@ -759,6 +780,7 @@ Status options: PASS, FAIL, REVIEW, N/A
 IMPORTANT: Be decisive. If you can see evidence in the plans, mark as PASS or FAIL with specific comments.
 Only mark REVIEW when you truly cannot determine the answer from the analysis provided.
 Provide specific, actionable comments referencing what you observed. Return ONLY the JSON array."""
+                system_prompt = "You are a civil engineering QA/QC reviewer. Evaluate checklist items and return JSON only."
 
             try:
                 client = OpenAI(api_key=api_key)
@@ -767,7 +789,7 @@ Provide specific, actionable comments referencing what you observed. Return ONLY
                 eval_response = client.chat.completions.create(
                     model="gpt-4o",
                     messages=[
-                        {"role": "system", "content": "You are a civil engineering QA/QC reviewer. Evaluate checklist items and return JSON only."},
+                        {"role": "system", "content": system_prompt},
                         {"role": "user", "content": eval_prompt}
                     ],
                     max_tokens=8000,

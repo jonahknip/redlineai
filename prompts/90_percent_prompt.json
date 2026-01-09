@@ -1,0 +1,71 @@
+{
+  "phase": "90%",
+  "phase_context": "Final QC phase before bid documents. All design work should be complete, specifications finalized, and documents ready for bidding. Focus on completeness, consistency, and bid-readiness.",
+  "what_should_exist": [
+    "All 60% items verified and complete",
+    "Final utility design with all details",
+    "Complete grading and drainage plans",
+    "Final cross sections and profiles",
+    "ADA compliance verified with slopes",
+    "Final maintenance of traffic plan",
+    "Complete SESC and SWPPP",
+    "All calculations finalized",
+    "Final cost estimate with quantities",
+    "All permits submitted or approved",
+    "Complete specifications",
+    "Bid documents ready"
+  ],
+  "what_should_not_exist_yet": [
+    "Construction submittals",
+    "As-built drawings",
+    "Final inspection reports"
+  ],
+  "section_guidance": {
+    "GENERAL REVIEW / ALL SHEETS": "Final QC check on all sheets. Verify technician initials, boring logs, sheet numbering, and that all notes match municipal requirements.",
+    "UTILITIES & STRUCTURES": "Final verification of all utility design. Confirm separations, inverts, rim elevations, and pipe slopes. All structures should have complete callouts.",
+    "CROSS SECTIONS & ALIGNMENT": "Verify final pavement sections, K values, and superelevation. HMA table should be complete and match typical sections.",
+    "ADA & ACCESSIBILITY": "Verify running slopes are less than 5%. Check handrail requirements if applicable. Confirm non-motorized paths meet AASHTO guidelines.",
+    "GRADING & MOT": "Final grading review including ADA routes, trip hazards, and drainage. MOT plan should be complete with owner-approved phasing.",
+    "TRAFFIC & EROSION CONTROL": "Final SESC plan with quantities. SWPPP complete. All details match local ordinances.",
+    "GENERAL CHECKS": "Final spell check, sheet index verification, and profile band elevations.",
+    "CALCULATIONS": "All calculations should be complete and reviewed. No outstanding concerns from geotechnical report.",
+    "COST ESTIMATES": "Final quantities verified against plans. Pay items match specifications. Unit prices current and reasonable.",
+    "PERMITS": "All required permits submitted. Verify copies included in bid documents.",
+    "SPECIFICATIONS": "Complete specification review. Verify all section numbers, client names, dates, and bid requirements are correct."
+  },
+  "example_evaluations": [
+    {
+      "item_id": "90-ADA-002",
+      "item_text": "Is running slope < 5%, and ramps identified with proper slopes/handrails (if applicable)?",
+      "status": "FAIL",
+      "comment": "ADA ramp at NE corner of Main St/Oak Ave intersection shows 5.2% running slope on detail D-4. Maximum allowed is 5.0%. Revise grading to achieve compliant slope."
+    },
+    {
+      "item_id": "90-UTL-001",
+      "item_text": "Check Rim elevations are correct and listed # of structures reviewed in comments",
+      "status": "PASS",
+      "comment": "All 24 manholes verified with rim elevations matching profiles. Inverts and pipe slopes labeled. Structures MH-1 through MH-24 reviewed."
+    },
+    {
+      "item_id": "90-SPEC-011",
+      "item_text": "Specifications: 00410.6.01 Revise Completion Dates",
+      "status": "FAIL",
+      "comment": "Specification 00410.6.01 shows substantial completion date of 11/15/2025 but plan cover sheet shows 10/31/2025. Dates must match across all documents."
+    },
+    {
+      "item_id": "90-SPEC-017",
+      "item_text": "Specifications: 00520.4.03 Adjust Liquidated Damages",
+      "status": "PASS",
+      "comment": "Liquidated damages set at $500/day in specification 00520.4.03. Amount is reasonable for project scope and matches contract requirements."
+    },
+    {
+      "item_id": "90-GRD-001",
+      "item_text": "Provide final Maintenance of Traffic plan. Has phasing been approved by owner?",
+      "status": "REVIEW",
+      "comment": "MOT plan complete on sheets M-1 through M-3 showing three-phase approach. Unable to verify owner approval from plan documents. PM should confirm phasing was approved in writing."
+    }
+  ],
+  "pass_criteria": "Item is complete, accurate, and ready for bid documents. Meets all applicable standards and specifications.",
+  "fail_criteria": "Item has errors, inconsistencies, or missing information that must be corrected before bid release.",
+  "review_criteria": "Only use when verification requires owner approval documentation or external confirmation not visible on plans."
+}
