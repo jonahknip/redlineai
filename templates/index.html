@@ -340,7 +340,214 @@
         .report-content {
             max-height: 500px;
             overflow-y: auto;
-            background: rgba(0,0,0,0.3);
+            background: rgba(10, 10, 30, 0.9);
+            padding: 20px;
+        }
+
+        /* Override report HTML styles to match space theme */
+        .report-content,
+        .report-content * {
+            color: rgba(255, 255, 255, 0.9) !important;
+            background-color: transparent !important;
+        }
+
+        .report-content h1,
+        .report-content h2,
+        .report-content h3,
+        .report-content h4 {
+            color: #fff !important;
+            border-bottom-color: rgba(255,255,255,0.2) !important;
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+
+        .report-content h2 {
+            font-size: 1.1rem;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .report-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        .report-content th,
+        .report-content td {
+            padding: 10px 12px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.15) !important;
+        }
+
+        .report-content th {
+            background: rgba(27, 54, 93, 0.6) !important;
+            font-weight: 600;
+        }
+
+        .report-content tr:nth-child(even) {
+            background: rgba(255,255,255,0.03) !important;
+        }
+
+        .report-content tr:hover {
+            background: rgba(255,255,255,0.08) !important;
+        }
+
+        /* Status badges in report */
+        .report-content .pass,
+        .report-content [style*="background-color: #4CAF50"],
+        .report-content [style*="background-color:#4CAF50"],
+        .report-content [style*="background: #4CAF50"],
+        .report-content [style*="green"] {
+            background: rgba(76, 175, 80, 0.3) !important;
+            color: #81C784 !important;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .report-content .fail,
+        .report-content [style*="background-color: #f44336"],
+        .report-content [style*="background-color:#f44336"],
+        .report-content [style*="background: #f44336"],
+        .report-content [style*="red"] {
+            background: rgba(244, 67, 54, 0.3) !important;
+            color: #E57373 !important;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .report-content .review,
+        .report-content [style*="background-color: #FF9800"],
+        .report-content [style*="background-color:#FF9800"],
+        .report-content [style*="background: #FF9800"],
+        .report-content [style*="orange"] {
+            background: rgba(255, 152, 0, 0.3) !important;
+            color: #FFB74D !important;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .report-content .na,
+        .report-content [style*="background-color: #9E9E9E"],
+        .report-content [style*="background-color:#9E9E9E"],
+        .report-content [style*="gray"] {
+            background: rgba(158, 158, 158, 0.3) !important;
+            color: #BDBDBD !important;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Summary section styling */
+        .report-content .summary,
+        .report-content [class*="summary"] {
+            background: rgba(27, 54, 93, 0.4) !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        /* Links in report */
+        .report-content a {
+            color: #64B5F6 !important;
+        }
+
+        .report-content a:hover {
+            color: #90CAF9 !important;
+        }
+
+        /* Code/pre blocks */
+        .report-content pre,
+        .report-content code {
+            background: rgba(0,0,0,0.4) !important;
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+
+        /* Override specific server-generated report styles */
+        .report-content body,
+        .report-content .report-body {
+            background: transparent !important;
+            color: rgba(255,255,255,0.9) !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .report-content .info-table td:first-child {
+            background: rgba(27, 54, 93, 0.4) !important;
+        }
+
+        .report-content .summary-box {
+            background: rgba(27, 54, 93, 0.3) !important;
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+
+        .report-content .summary-box.pass {
+            background: rgba(40, 167, 69, 0.2) !important;
+            border-color: #28a745 !important;
+        }
+
+        .report-content .summary-box.fail {
+            background: rgba(220, 53, 69, 0.2) !important;
+            border-color: #dc3545 !important;
+        }
+
+        .report-content .summary-box.review {
+            background: rgba(255, 193, 7, 0.2) !important;
+            border-color: #ffc107 !important;
+        }
+
+        .report-content .summary-box.na {
+            background: rgba(108, 117, 125, 0.2) !important;
+            border-color: #6c757d !important;
+        }
+
+        .report-content .section-title {
+            background: rgba(27, 54, 93, 0.8) !important;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .report-content .checklist th {
+            background: rgba(27, 54, 93, 0.5) !important;
+            border-color: rgba(255,255,255,0.15) !important;
+        }
+
+        .report-content .checklist td {
+            border-color: rgba(255,255,255,0.1) !important;
+        }
+
+        .report-content .checklist tr:nth-child(even) {
+            background: rgba(255,255,255,0.03) !important;
+        }
+
+        .report-content .badge-pass {
+            background: rgba(40, 167, 69, 0.8) !important;
+        }
+
+        .report-content .badge-fail {
+            background: rgba(220, 53, 69, 0.8) !important;
+        }
+
+        .report-content .badge-review {
+            background: rgba(255, 193, 7, 0.8) !important;
+            color: #000 !important;
+        }
+
+        .report-content .badge-na {
+            background: rgba(108, 117, 125, 0.8) !important;
+        }
+
+        .report-content .findings {
+            background: rgba(27, 54, 93, 0.3) !important;
+            border-left-color: #C8102E !important;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Project info header */
+        .report-content h1:first-of-type {
+            color: #C8102E !important;
+            font-size: 1.3rem;
         }
 
         /* Progress */
