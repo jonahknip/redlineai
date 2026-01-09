@@ -607,7 +607,8 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
             })
         
         try:
-            client = OpenAI(api_key=api_key)
+            import httpx
+            client = OpenAI(api_key=api_key, http_client=httpx.Client())
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=messages,
@@ -796,7 +797,8 @@ Provide specific, actionable comments referencing what you observed. Return ONLY
                 system_prompt = "You are a civil engineering QA/QC reviewer. Evaluate checklist items and return JSON only."
 
             try:
-                client = OpenAI(api_key=api_key)
+                import httpx
+                client = OpenAI(api_key=api_key, http_client=httpx.Client())
                 
                 print(f"[DEBUG] Sending evaluation request to GPT-4o...")
                 print(f"[DEBUG] Prompt length: {len(eval_prompt)} chars")
