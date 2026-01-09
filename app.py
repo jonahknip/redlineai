@@ -252,8 +252,8 @@ def review_planset():
         # Load checklist if specified
         checklist = None
         if checklist_id:
-            checklists = get_checklists().get_json().get('checklists', {})
-            checklist = checklists.get(checklist_id)
+            checklist = load_checklist_from_file(checklist_id)
+            logger.info(f"Loaded checklist: {checklist_id}, sections: {len(checklist.get('sections', [])) if checklist else 0}")
         
         # Analyze the planset
         result = analyze_planset(

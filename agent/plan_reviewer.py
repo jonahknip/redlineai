@@ -590,12 +590,8 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
 
     def generate_ai_report(self, use_vision: bool = True, checklist: dict = None, custom_instructions: str = "") -> str:
         """Generate a professional QA/QC review report optimized for Word/PDF export"""
-        if not OPENAI_AVAILABLE:
-            return self.generate_summary_report()
         
         api_key = os.environ.get('OPENAI_API_KEY')
-        if not api_key:
-            return self.generate_summary_report()
         
         if not self.analysis.total_sheets:
             self.perform_full_analysis()
@@ -603,12 +599,15 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         info = self.analysis.project_info
         review_date = datetime.now().strftime('%B %d, %Y')
         
-        # Get vision analysis if enabled
+        # Get vision analysis if enabled and OpenAI available
         vision_results = ""
-        if use_vision:
-            vision_data = self.analyze_with_vision(checklist)
-            if vision_data.get('success'):
-                vision_results = vision_data['analysis']
+        if use_vision and OPENAI_AVAILABLE and api_key:
+            try:
+                vision_data = self.analyze_with_vision(checklist)
+                if vision_data.get('success'):
+                    vision_results = vision_data['analysis']
+            except Exception as e:
+                print(f"Vision analysis error: {e}")
         
         # Extract text from plan set for context
         sample_text = ""
@@ -625,7 +624,7 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         total_sheets = self.analysis.total_sheets
         
         checklist_name = checklist.get('name', 'QA/QC Review') if checklist else 'General Review'
-        checklist_phase = checklist.get('phase', '') if checklist else ''
+        checklist_phase = checklist.get('phase', '') if checklist else 'General'
         
         # Build checklist items for AI evaluation
         checklist_items_for_ai = []
@@ -640,10 +639,14 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
                         'required': item.get('required', False)
                     })
         
-        # Ask AI to evaluate each item and return JSON
-        items_text = "\n".join([f"- {item['id']}: {item['text']}" for item in checklist_items_for_ai])
+        # If no checklist provided, we'll just do a general review with AI analysis
+        eval_dict = {}
         
-        eval_prompt = f"""Evaluate each checklist item based on the plan analysis.
+        if checklist_items_for_ai and OPENAI_AVAILABLE and api_key:
+            # Ask AI to evaluate each item and return JSON
+            items_text = "\n".join([f"- {item['id']}: {item['text']}" for item in checklist_items_for_ai])
+            
+            eval_prompt = f"""Evaluate each checklist item based on the plan analysis.
 
 PLAN ANALYSIS:
 {vision_results[:6000] if vision_results else 'No vision analysis available'}
@@ -670,36 +673,39 @@ Status options: PASS, FAIL, REVIEW, N/A
 
 Provide specific, actionable comments. Return ONLY the JSON array."""
 
-        try:
-            client = OpenAI(api_key=api_key)
-            
-            # Get AI evaluation
-            eval_response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a civil engineering QA/QC reviewer. Evaluate checklist items and return JSON only."},
-                    {"role": "user", "content": eval_prompt}
-                ],
-                max_tokens=8000,
-                temperature=0.1
-            )
-            
-            eval_text = eval_response.choices[0].message.content.strip()
-            # Clean markdown if present
-            if eval_text.startswith('```'):
-                eval_text = eval_text.split('\n', 1)[1] if '\n' in eval_text else eval_text[3:]
-            if eval_text.endswith('```'):
-                eval_text = eval_text[:-3]
-            eval_text = eval_text.strip()
-            if eval_text.startswith('json'):
-                eval_text = eval_text[4:].strip()
-            
-            evaluations = json.loads(eval_text)
-            eval_dict = {e['id']: e for e in evaluations}
-            
-        except Exception as e:
-            print(f"AI evaluation error: {e}")
-            # Default all to REVIEW if AI fails
+            try:
+                client = OpenAI(api_key=api_key)
+                
+                # Get AI evaluation
+                eval_response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are a civil engineering QA/QC reviewer. Evaluate checklist items and return JSON only."},
+                        {"role": "user", "content": eval_prompt}
+                    ],
+                    max_tokens=8000,
+                    temperature=0.1
+                )
+                
+                eval_text = eval_response.choices[0].message.content.strip()
+                # Clean markdown if present
+                if eval_text.startswith('```'):
+                    eval_text = eval_text.split('\n', 1)[1] if '\n' in eval_text else eval_text[3:]
+                if eval_text.endswith('```'):
+                    eval_text = eval_text[:-3]
+                eval_text = eval_text.strip()
+                if eval_text.startswith('json'):
+                    eval_text = eval_text[4:].strip()
+                
+                evaluations = json.loads(eval_text)
+                eval_dict = {e['id']: e for e in evaluations}
+                
+            except Exception as e:
+                print(f"AI evaluation error: {e}")
+                # Default all to REVIEW if AI fails
+                eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification'} for item in checklist_items_for_ai}
+        else:
+            # No checklist - mark all as review needed
             eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification'} for item in checklist_items_for_ai}
         
         # Count statuses
