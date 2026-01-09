@@ -143,12 +143,17 @@ def analyze_planset(pdf_path: str, use_vision: bool = True, checklist: dict = No
     Analyze a planset PDF and return results
     """
     try:
+        logger.info(f"[DEBUG] Starting analysis for: {pdf_path}")
+        logger.info(f"[DEBUG] use_vision: {use_vision}, checklist: {bool(checklist)}")
+        
         agent = CivilEngineeringPMAgent(pdf_path)
         
         # Get page count
         page_count = len(agent.doc)
+        logger.info(f"[DEBUG] Page count: {page_count}")
         
         # Generate AI-powered HTML report (falls back to basic if no API key)
+        logger.info(f"[DEBUG] Calling generate_ai_report...")
         report = agent.generate_ai_report(
             use_vision=use_vision,
             checklist=checklist,
@@ -157,6 +162,8 @@ def analyze_planset(pdf_path: str, use_vision: bool = True, checklist: dict = No
         
         # Check if report is HTML or plain text
         is_html = report.strip().startswith('<')
+        logger.info(f"[DEBUG] Report generated, length: {len(report)}, is_html: {is_html}")
+        logger.info(f"[DEBUG] Report starts with: {report[:100]}")
         
         # Get JSON data for structured display
         json_data = agent.export_json()
