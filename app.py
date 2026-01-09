@@ -198,6 +198,10 @@ def review_planset():
     """
     Review a planset from either file upload or URL
     """
+    logger.info(f"[API] /api/review called")
+    logger.info(f"[API] Form data keys: {list(request.form.keys())}")
+    logger.info(f"[API] Files: {list(request.files.keys())}")
+    
     temp_path = None
     
     try:
@@ -259,8 +263,12 @@ def review_planset():
         # Load checklist if specified
         checklist = None
         if checklist_id:
+            logger.info(f"[API] Loading checklist: {checklist_id}")
             checklist = load_checklist_from_file(checklist_id)
-            logger.info(f"Loaded checklist: {checklist_id}, sections: {len(checklist.get('sections', [])) if checklist else 0}")
+            if checklist:
+                logger.info(f"[API] Loaded checklist: {checklist_id}, sections: {len(checklist.get('sections', []))}, items: {len(checklist.get('items', []))}")
+            else:
+                logger.warning(f"[API] Failed to load checklist: {checklist_id}")
         
         # Analyze the planset
         result = analyze_planset(
@@ -732,6 +740,36 @@ def get_checklists():
         }
     
     return jsonify({'success': True, 'checklists': checklists})
+
+
+@app.errorhandler(404)
+def not_found(e):
+    """Handle 404 errors"""
+    logger.error(f"404 error: {request.url}")
+    return jsonify({'success': False, 'error': 'Page not found', 'url': request.url}), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    """Handle 500 errors"""
+    logger.error(f"500 error: {e}")
+    return jsonify({'success': False, 'error': 'Internal server error', 'details': str(e)}), 500
+
+
+@app.route('/api/debug', methods=['GET'])
+def debug_info():
+    """Debug endpoint to verify app configuration"""
+    checklist_dir = Path(__file__).parent / 'checklists'
+    checklist_files = list(checklist_dir.glob('*.json')) if checklist_dir.exists() else []
+    
+    return jsonify({
+        'success': True,
+        'status': 'running',
+        'checklist_dir_exists': checklist_dir.exists(),
+        'checklist_files': [f.name for f in checklist_files],
+        'openai_key_set': bool(os.environ.get('OPENAI_API_KEY')),
+        'routes': [str(rule) for rule in app.url_map.iter_rules()]
+    })
 
 
 if __name__ == '__main__':
