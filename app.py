@@ -704,6 +704,186 @@ def debug_info():
     })
 
 
+# ==================== TRAINING ENDPOINTS ====================
+
+@app.route('/train')
+def training_page():
+    """Training data upload page"""
+    return render_template('training.html')
+
+
+@app.route('/api/training/upload', methods=['POST'])
+def upload_training_data():
+    """
+    Upload completed review PDFs and their corresponding plansets for training.
+    Expects:
+    - review_pdf: The filled-out review checklist PDF
+    - planset_pdf: (optional) The corresponding planset PDF
+    - checklist_type: Which checklist was used (30_percent, 60_percent, etc.)
+    - project_type: Type of project (road, utility, site, etc.)
+    - project_name: Name of the project
+    """
+    try:
+        from agent.training import ReviewPDFParser, TrainingExample, get_training_store
+        
+        if 'review_pdf' not in request.files:
+            return jsonify({'success': False, 'error': 'No review PDF provided'}), 400
+        
+        review_file = request.files['review_pdf']
+        if not review_file.filename or not review_file.filename.lower().endswith('.pdf'):
+            return jsonify({'success': False, 'error': 'Invalid file type. Please upload a PDF.'}), 400
+        
+        # Get metadata
+        checklist_type = request.form.get('checklist_type', '')
+        project_type = request.form.get('project_type', '')
+        project_name = request.form.get('project_name', '')
+        
+        # Load the checklist definition if specified
+        checklist = None
+        if checklist_type:
+            checklist = load_checklist_from_file(checklist_type)
+        
+        # Save review PDF temporarily
+        temp_dir = tempfile.mkdtemp()
+        review_path = os.path.join(temp_dir, secure_filename(review_file.filename))
+        review_file.save(review_path)
+        
+        # Parse the review PDF
+        parser = ReviewPDFParser(review_path)
+        examples = parser.parse_checklist_responses(checklist)
+        
+        # Add metadata to examples
+        for example in examples:
+            example.project_type = project_type
+            example.project_name = project_name
+        
+        # Store examples
+        training_store = get_training_store()
+        added = training_store.add_examples(examples)
+        
+        # Clean up
+        os.remove(review_path)
+        os.rmdir(temp_dir)
+        
+        stats = training_store.get_statistics()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Added {added} new training examples',
+            'examples_parsed': len(examples),
+            'examples_added': added,
+            'total_examples': stats['total_examples'],
+            'stats': stats
+        })
+        
+    except Exception as e:
+        logger.error(f"Training upload error: {e}\n{traceback.format_exc()}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/training/manual', methods=['POST'])
+def add_manual_training():
+    """
+    Manually add a training example.
+    Useful for adding examples one at a time.
+    """
+    try:
+        from agent.training import TrainingExample, get_training_store
+        
+        data = request.get_json()
+        
+        example = TrainingExample(
+            checklist_item_id=data.get('checklist_item_id', ''),
+            checklist_item_text=data.get('checklist_item_text', ''),
+            status=data.get('status', 'REVIEW'),
+            comment=data.get('comment', ''),
+            project_type=data.get('project_type', ''),
+            project_name=data.get('project_name', ''),
+            sheet_context=data.get('sheet_context', ''),
+            source_file='manual_entry'
+        )
+        
+        training_store = get_training_store()
+        added = training_store.add_examples([example])
+        
+        return jsonify({
+            'success': True,
+            'added': added,
+            'example_id': example.id
+        })
+        
+    except Exception as e:
+        logger.error(f"Manual training error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/training/stats', methods=['GET'])
+def get_training_stats():
+    """Get training data statistics"""
+    try:
+        from agent.training import get_training_store
+        
+        training_store = get_training_store()
+        stats = training_store.get_statistics()
+        
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+        
+    except Exception as e:
+        logger.error(f"Training stats error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/training/export', methods=['GET'])
+def export_training_data():
+    """Export training data for OpenAI fine-tuning"""
+    try:
+        from agent.training import get_training_store
+        
+        training_store = get_training_store()
+        output_path = training_store.export_for_finetuning()
+        
+        return send_file(
+            output_path,
+            mimetype='application/jsonl',
+            as_attachment=True,
+            download_name='redlineai_finetuning_data.jsonl'
+        )
+        
+    except Exception as e:
+        logger.error(f"Training export error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/training/examples', methods=['GET'])
+def list_training_examples():
+    """List recent training examples"""
+    try:
+        from agent.training import get_training_store
+        
+        training_store = get_training_store()
+        
+        # Get pagination params
+        limit = int(request.args.get('limit', 50))
+        offset = int(request.args.get('offset', 0))
+        
+        examples = training_store.examples[offset:offset+limit]
+        
+        return jsonify({
+            'success': True,
+            'examples': [e.to_dict() for e in examples],
+            'total': len(training_store.examples),
+            'limit': limit,
+            'offset': offset
+        })
+        
+    except Exception as e:
+        logger.error(f"List examples error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('DEBUG', 'false').lower() == 'true'

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training | Redline.ai</title>
+    <meta name="theme-color" content="#C8102E">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23C8102E'/><text x='50' y='62' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='32'>R</text></svg>">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-icon { width: 48px; height: 48px; }
+        
+        h1 { color: #C8102E; font-size: 2rem; }
+        h1 span { color: #1B365D; }
+        
+        .subtitle { color: #555; font-size: 1rem; }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #1B365D;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .back-link:hover { text-decoration: underline; }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .card-header {
+            background: #1B365D;
+            color: white;
+            padding: 16px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-header svg { width: 20px; height: 20px; }
+        
+        .card-body { padding: 24px; }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1B365D;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-box.pass .stat-value { color: #28a745; }
+        .stat-box.fail .stat-value { color: #dc3545; }
+        .stat-box.review .stat-value { color: #ffc107; }
+        
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .form-group small {
+            display: block;
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+        
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #C8102E;
+        }
+        
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #FAFAFA;
+        }
+        
+        .upload-area:hover {
+            border-color: #C8102E;
+            background: #FFF5F5;
+        }
+        
+        .upload-area.has-file {
+            border-color: #28a745;
+            background: #e8f5e9;
+            border-style: solid;
+        }
+        
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            color: #999;
+        }
+        
+        .upload-area.has-file .upload-icon { color: #28a745; }
+        
+        .file-name {
+            margin-top: 8px;
+            font-weight: 600;
+            color: #1B365D;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #C8102E;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background: #A00D25;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #1B365D;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #152a4a;
+        }
+        
+        .btn svg { width: 18px; height: 18px; }
+        
+        /* Status */
+        .status {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+        
+        .status.loading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #e3f2fd;
+            color: #1565C0;
+        }
+        
+        .status.success {
+            display: block;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status.error {
+            display: block;
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #90CAF9;
+            border-top-color: #1565C0;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Examples table */
+        .examples-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .examples-table th,
+        .examples-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .examples-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1B365D;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-pass { background: #d4edda; color: #155724; }
+        .badge-fail { background: #f8d7da; color: #721c24; }
+        .badge-review { background: #fff3cd; color: #856404; }
+        .badge-na { background: #e9ecef; color: #495057; }
+        
+        /* Instructions */
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h4 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #856404;
+        }
+        
+        .instructions li { margin-bottom: 4px; }
+        
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#C8102E" stroke-width="4"/>
+                    <rect x="20" y="25" width="18" height="24" fill="#C8102E"/>
+                    <rect x="20" y="51" width="18" height="24" fill="#C8102E"/>
+                    <rect x="40" y="25" width="40" height="24" fill="#C8102E"/>
+                    <rect x="40" y="51" width="18" height="24" fill="#C8102E"/>
+                </svg>
+                <h1>redline<span>.ai</span></h1>
+            </div>
+            <p class="subtitle">Train the Review Agent</p>
+            <a href="/" class="back-link">&larr; Back to Reviews</a>
+        </header>
+
+        <!-- Stats Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10"/>
+                    <path d="M12 20V4"/>
+                    <path d="M6 20v-6"/>
+                </svg>
+                Training Data Statistics
+            </div>
+            <div class="card-body">
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total Examples</div>
+                    </div>
+                    <div class="stat-box pass">
+                        <div class="stat-value" id="statPass">0</div>
+                        <div class="stat-label">Pass</div>
+                    </div>
+                    <div class="stat-box fail">
+                        <div class="stat-value" id="statFail">0</div>
+                        <div class="stat-label">Fail</div>
+                    </div>
+                    <div class="stat-box review">
+                        <div class="stat-value" id="statReview">0</div>
+                        <div class="stat-label">Review</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="statItems">0</div>
+                        <div class="stat-label">Unique Items</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="statFiles">0</div>
+                        <div class="stat-label">Source Files</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-secondary" onclick="loadStats()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        Refresh Stats
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportData()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Export for Fine-tuning
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload Completed Review
+            </div>
+            <div class="card-body">
+                <div class="instructions">
+                    <h4>How to add training data:</h4>
+                    <ol>
+                        <li>Upload a <strong>filled-out review checklist PDF</strong> (with PASS/FAIL markings and comments)</li>
+                        <li>Select which checklist type was used</li>
+                        <li>Enter project details for context</li>
+                        <li>Click "Process & Add to Training"</li>
+                    </ol>
+                </div>
+                
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label>Completed Review PDF</label>
+                        <div class="upload-area" id="uploadArea">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            <p><strong>Click to upload</strong> filled-out review PDF</p>
+                            <p class="file-name" id="fileName"></p>
+                        </div>
+                        <input type="file" id="fileInput" name="review_pdf" accept=".pdf">
+                        <small>Upload a PDF with completed checklist markings (checkboxes filled, comments added)</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Checklist Type</label>
+                            <select name="checklist_type" id="checklistType">
+                                <option value="">-- Select --</option>
+                                <option value="30_percent">30% Review</option>
+                                <option value="60_percent">60% Review</option>
+                                <option value="90_percent">90% Review</option>
+                                <option value="cadd">CADD Review</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Project Type</label>
+                            <select name="project_type" id="projectType">
+                                <option value="">-- Select --</option>
+                                <option value="road">Road / Street</option>
+                                <option value="utility">Utility</option>
+                                <option value="site">Site Development</option>
+                                <option value="drainage">Drainage / Storm</option>
+                                <option value="bridge">Bridge / Structure</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" name="project_name" id="projectName" placeholder="e.g., Main Street Reconstruction">
+                        <small>Helps identify training examples by project</small>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submitBtn" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                            <path d="M12 16v-4"/>
+                            <path d="M12 8h.01"/>
+                        </svg>
+                        Process & Add to Training
+                    </button>
+                    
+                    <div class="status" id="status">
+                        <div class="spinner"></div>
+                        <span id="statusText">Processing...</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Recent Examples -->
+        <div class="card">
+            <div class="card-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                Recent Training Examples
+            </div>
+            <div class="card-body">
+                <table class="examples-table">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Status</th>
+                            <th>Comment</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody id="examplesBody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #666;">Loading examples...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const status = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
+        
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // File input change
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileName.textContent = this.files[0].name;
+                uploadArea.classList.add('has-file');
+                checkFormValid();
+            }
+        });
+        
+        // Form validation
+        function checkFormValid() {
+            const hasFile = fileInput.files.length > 0;
+            const hasChecklist = document.getElementById('checklistType').value !== '';
+            submitBtn.disabled = !(hasFile && hasChecklist);
+        }
+        
+        document.getElementById('checklistType').addEventListener('change', checkFormValid);
+        
+        // Form submit
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            showStatus('loading', 'Processing PDF and extracting training data...');
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/training/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('success', `Success! Added ${data.examples_added} new examples (${data.examples_parsed} parsed from PDF)`);
+                    loadStats();
+                    loadExamples();
+                    
+                    // Reset form
+                    uploadForm.reset();
+                    uploadArea.classList.remove('has-file');
+                    fileName.textContent = '';
+                } else {
+                    showStatus('error', 'Error: ' + data.error);
+                }
+            } catch (error) {
+                showStatus('error', 'Network error: ' + error.message);
+            }
+            
+            submitBtn.disabled = false;
+        });
+        
+        function showStatus(type, message) {
+            status.className = 'status ' + type;
+            statusText.textContent = message;
+        }
+        
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/training/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.stats;
+                    document.getElementById('statTotal').textContent = stats.total_examples;
+                    document.getElementById('statPass').textContent = stats.by_status.PASS || 0;
+                    document.getElementById('statFail').textContent = stats.by_status.FAIL || 0;
+                    document.getElementById('statReview').textContent = stats.by_status.REVIEW || 0;
+                    document.getElementById('statItems').textContent = stats.unique_checklist_items || 0;
+                    document.getElementById('statFiles').textContent = stats.source_files || 0;
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+        
+        // Load examples
+        async function loadExamples() {
+            try {
+                const response = await fetch('/api/training/examples?limit=20');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('examplesBody');
+                
+                if (data.success && data.examples.length > 0) {
+                    tbody.innerHTML = data.examples.map(ex => `
+                        <tr>
+                            <td><code>${ex.checklist_item_id}</code></td>
+                            <td><span class="badge badge-${ex.status.toLowerCase()}">${ex.status}</span></td>
+                            <td>${ex.comment.substring(0, 100)}${ex.comment.length > 100 ? '...' : ''}</td>
+                            <td>${ex.source_file || 'N/A'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">No training examples yet</td></tr>';
+                }
+            } catch (error) {
+                console.error('Failed to load examples:', error);
+            }
+        }
+        
+        // Export data
+        function exportData() {
+            window.location.href = '/api/training/export';
+        }
+        
+        // Load on page load
+        loadStats();
+        loadExamples();
+    </script>
+</body>
+</html>

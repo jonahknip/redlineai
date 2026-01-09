@@ -21,3 +21,6 @@ openpyxl==3.1.2
 python-dotenv==1.0.0
 requests==2.31.0
 beautifulsoup4==4.12.2
+
+# Vector Database for Training/RAG
+chromadb==0.4.22
