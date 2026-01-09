@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redline.ai | AI-Powered QA/QC for Civil Engineering</title>
+    <title>Redline.ai | AI-Powered Drawing Analysis</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23C8102E'/><text x='50' y='62' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='32'>R</text></svg>">
     <style>
         * {
@@ -57,15 +57,6 @@
             color: #555;
             font-size: 1rem;
             margin-top: 4px;
-        }
-
-        .brand {
-            color: #1B365D;
-            font-weight: 600;
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-            margin-top: 8px;
-            text-transform: uppercase;
         }
 
         /* Main Card */
@@ -166,7 +157,7 @@
             color: #999;
         }
 
-        /* Review Type Icons */
+        /* Review Type Selection */
         .section-title {
             font-size: 0.9rem;
             font-weight: 600;
@@ -410,498 +401,17 @@
             height: 14px;
         }
 
-        /* Report Content - Clean container for generated HTML */
+        /* Report Content */
         .report-content {
             background: #FFF;
             border: 1px solid #ddd;
             border-top: none;
             border-radius: 0 0 10px 10px;
-            padding: 20px;
+            padding: 0;
             max-height: 800px;
             overflow-y: auto;
             overflow-x: hidden;
         }
-        
-        /* Let the embedded styles in the report take over */
-        .report-content .report {
-            all: initial;
-            font-family: Calibri, Arial, sans-serif;
-            display: block;
-        }
-        
-        .report-content .report * {
-            box-sizing: border-box;
-        }
-
-        /* QA/QC Report Styling */
-        .report-content .qaqc-report {
-            font-family: 'Segoe UI', 'Calibri', Arial, sans-serif;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #333;
-        }
-
-        .report-content .report-header {
-            background: linear-gradient(135deg, #1B365D 0%, #2A4A7A 100%);
-            color: white;
-            padding: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 0;
-        }
-
-        .report-content .header-logo .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #C8102E;
-            background: white;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }
-
-        .report-content .header-logo .logo-tagline {
-            font-size: 0.65rem;
-            letter-spacing: 1px;
-            margin-top: 4px;
-            opacity: 0.9;
-        }
-
-        .report-content .header-title {
-            text-align: right;
-        }
-
-        .report-content .header-title h1 {
-            font-size: 1.3rem;
-            margin: 0 0 4px 0;
-            color: white;
-            border: none;
-            padding: 0;
-        }
-
-        .report-content .header-title .review-phase {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            margin: 0;
-        }
-
-        .report-content .project-info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px 24px;
-            padding: 20px 24px;
-            background: #F8F9FA;
-            border-bottom: 2px solid #E0E0E0;
-        }
-
-        .report-content .info-row {
-            display: flex;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-
-        .report-content .info-row .label {
-            font-weight: 600;
-            color: #1B365D;
-            min-width: 110px;
-        }
-
-        .report-content .info-row .value {
-            color: #333;
-        }
-
-        .report-content .summary-stats {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            padding: 16px 24px;
-            background: white;
-            border-bottom: 2px solid #E0E0E0;
-        }
-
-        .report-content .stat {
-            text-align: center;
-            padding: 12px 24px;
-            border-radius: 8px;
-            min-width: 80px;
-        }
-
-        .report-content .stat-num {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .report-content .stat-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .report-content .stat-pass { background: #E8F5E9; color: #2E7D32; }
-        .report-content .stat-fail { background: #FFEBEE; color: #C62828; }
-        .report-content .stat-review { background: #FFF3E0; color: #EF6C00; }
-        .report-content .stat-na { background: #F5F5F5; color: #666; }
-
-        .report-content .checklist-section {
-            margin: 16px;
-            border: 1px solid #E0E0E0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .report-content .section-header {
-            background: #1B365D;
-            color: white;
-            padding: 10px 16px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .report-content .checklist-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-        }
-
-        .report-content .checklist-table th {
-            background: #F5F5F5;
-            padding: 10px 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #1B365D;
-            border-bottom: 2px solid #E0E0E0;
-        }
-
-        .report-content .checklist-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #F0F0F0;
-            vertical-align: top;
-        }
-
-        .report-content .checklist-table tr:hover {
-            background: #FAFAFA;
-        }
-
-        .report-content .col-status { width: 70px; text-align: center; }
-        .report-content .col-id { width: 90px; }
-        .report-content .col-item { width: 40%; }
-        .report-content .col-notes { width: auto; }
-
-        .report-content .status-cell { text-align: center; }
-        .report-content .id-cell { font-family: monospace; font-size: 0.75rem; color: #666; }
-        .report-content .item-cell { color: #333; }
-        .report-content .notes-cell { color: #666; font-size: 0.8rem; font-style: italic; }
-
-        .report-content .status-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .report-content .status-pass { background: #E8F5E9; color: #2E7D32; }
-        .report-content .status-fail { background: #FFEBEE; color: #C62828; }
-        .report-content .status-review { background: #FFF3E0; color: #EF6C00; }
-        .report-content .status-na { background: #F5F5F5; color: #999; }
-
-        .report-content .findings-section {
-            margin: 24px 16px;
-            padding: 20px;
-            background: #F8F9FA;
-            border-radius: 8px;
-            border-left: 4px solid #1B365D;
-        }
-
-        .report-content .findings-section h2 {
-            color: #1B365D;
-            font-size: 1.1rem;
-            margin: 0 0 16px 0;
-            padding: 0;
-            border: none;
-        }
-
-        .report-content .findings-section h3 {
-            font-size: 0.9rem;
-            margin: 16px 0 8px 0;
-            color: #333;
-        }
-
-        .report-content .findings-critical h3 { color: #C62828; }
-        .report-content .findings-review h3 { color: #EF6C00; }
-
-        .report-content .findings-section ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .report-content .findings-section li {
-            margin: 6px 0;
-            font-size: 0.85rem;
-        }
-
-        .report-content .findings-notes p {
-            font-size: 0.85rem;
-            color: #666;
-            margin: 8px 0 0 0;
-        }
-
-        .report-content .signature-section {
-            display: flex;
-            justify-content: space-between;
-            gap: 24px;
-            margin: 24px 16px;
-            padding-top: 24px;
-            border-top: 2px solid #E0E0E0;
-        }
-
-        .report-content .sig-block {
-            flex: 1;
-            text-align: center;
-        }
-
-        .report-content .sig-line {
-            height: 1px;
-            background: #333;
-            margin-bottom: 8px;
-        }
-
-        .report-content .sig-block p {
-            font-size: 0.75rem;
-            color: #666;
-            margin: 0;
-        }
-
-        .report-content .report-footer {
-            text-align: center;
-            padding: 16px;
-            background: #F5F5F5;
-            font-size: 0.75rem;
-            color: #999;
-            border-top: 1px solid #E0E0E0;
-        }
-
-        /* Legacy form styles for backwards compatibility */
-        .report-content .form-header {
-            background: #1B365D;
-            color: white;
-            padding: 20px 24px;
-            text-align: center;
-        }
-
-        .report-content .form-header h1 {
-            color: white;
-            font-size: 1.3rem;
-            margin-bottom: 4px;
-        }
-
-        .report-content .form-header p {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-
-        .report-content .form-body {
-            padding: 24px;
-        }
-
-        .report-content .form-section {
-            margin-bottom: 24px;
-            border: 1px solid #E0E0E0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .report-content .section-header {
-            background: #F5F5F5;
-            padding: 12px 16px;
-            font-weight: 600;
-            color: #1B365D;
-            border-bottom: 1px solid #E0E0E0;
-            font-size: 0.9rem;
-        }
-
-        .report-content .section-body {
-            padding: 16px;
-        }
-
-        .report-content .checklist-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 10px 0;
-            border-bottom: 1px solid #F0F0F0;
-        }
-
-        .report-content .checklist-item:last-child {
-            border-bottom: none;
-        }
-
-        .report-content .checklist-checkbox {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #C8102E;
-            border-radius: 4px;
-            flex-shrink: 0;
-            margin-top: 2px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .report-content .checklist-checkbox.checked {
-            background: #C8102E;
-            color: white;
-        }
-
-        .report-content .checklist-checkbox svg {
-            width: 12px;
-            height: 12px;
-            display: none;
-        }
-
-        .report-content .checklist-checkbox.checked svg {
-            display: block;
-        }
-
-        .report-content .checklist-text {
-            flex: 1;
-            font-size: 0.9rem;
-            color: #333;
-            line-height: 1.4;
-        }
-
-        .report-content .checklist-id {
-            font-size: 0.75rem;
-            color: #999;
-            font-weight: 500;
-        }
-
-        .report-content .checklist-status {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 500;
-        }
-
-        .report-content .status-pass {
-            background: #E8F5E9;
-            color: #2E7D32;
-        }
-
-        .report-content .status-fail {
-            background: #FFEBEE;
-            color: #C62828;
-        }
-
-        .report-content .status-na {
-            background: #F5F5F5;
-            color: #666;
-        }
-
-        .report-content .status-review {
-            background: #FFF3E0;
-            color: #EF6C00;
-        }
-
-        .report-content .notes-field {
-            width: 100%;
-            min-height: 60px;
-            padding: 10px;
-            border: 1px solid #E0E0E0;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 0.85rem;
-            resize: vertical;
-            margin-top: 8px;
-        }
-
-        .report-content .summary-box {
-            background: #F8F9FA;
-            border: 1px solid #E0E0E0;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 16px;
-        }
-
-        .report-content .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            font-size: 0.9rem;
-        }
-
-        .report-content .summary-row strong {
-            color: #1B365D;
-        }
-
-        /* AI Generated Report Styling */
-        .report-content.ai-report {
-            padding: 30px;
-            font-family: 'Segoe UI', 'Calibri', Arial, sans-serif;
-            line-height: 1.6;
-        }
-
-        .report-content.ai-report h1 {
-            color: #1B365D;
-            font-size: 1.4rem;
-            border-bottom: 3px solid #C8102E;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        .report-content.ai-report h2 {
-            color: #1B365D;
-            font-size: 1.1rem;
-            border-bottom: 1px solid #E0E0E0;
-            padding-bottom: 8px;
-            margin: 24px 0 12px 0;
-        }
-
-        .report-content.ai-report h3 {
-            color: #333;
-            font-size: 1rem;
-            margin: 16px 0 8px 0;
-        }
-
-        .report-content.ai-report table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            font-size: 0.9rem;
-        }
-
-        .report-content.ai-report th,
-        .report-content.ai-report td {
-            border: 1px solid #E0E0E0;
-            padding: 10px 12px;
-            text-align: left;
-        }
-
-        .report-content.ai-report th {
-            background: #F5F5F5;
-            font-weight: 600;
-            color: #1B365D;
-        }
-
-        .report-content.ai-report ul,
-        .report-content.ai-report ol {
-            margin: 12px 0;
-            padding-left: 24px;
-        }
-
-        .report-content.ai-report li {
-            margin: 6px 0;
-        }
-
-        .report-content.ai-report .critical { color: #C8102E; font-weight: 600; }
-        .report-content.ai-report .warning { color: #EF6C00; font-weight: 600; }
-        .report-content.ai-report .success { color: #2E7D32; font-weight: 600; }
 
         /* Footer */
         footer {
@@ -916,68 +426,6 @@
             color: #C8102E;
             text-decoration: none;
             font-weight: 500;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-overlay.visible {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        }
-
-        .modal h3 {
-            color: #1B365D;
-            margin-bottom: 16px;
-            font-size: 1.1rem;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #E0E0E0;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            margin-bottom: 16px;
-        }
-
-        .modal input:focus {
-            outline: none;
-            border-color: #C8102E;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .modal .btn-cancel {
-            background: #F5F5F5;
-            color: #666;
-        }
-
-        .modal .btn-cancel:hover {
-            background: #E0E0E0;
         }
 
         /* Hide file input */
@@ -999,8 +447,7 @@
                 </svg>
                 <h1>redline<span>.ai</span></h1>
             </div>
-            <p class="subtitle">AI-Powered QA/QC for Civil Engineering Design</p>
-            <p class="brand">Abonmarche</p>
+            <p class="subtitle">The First Accurate Full Drawing Analyzer</p>
         </header>
 
         <div class="main-card">
@@ -1090,14 +537,13 @@
                             </button>
                         </div>
                     </div>
-                    <div class="report-content ai-report" id="reportContent"></div>
+                    <div class="report-content" id="reportContent"></div>
                 </div>
             </div>
         </div>
 
         <footer>
-            <p><a href="https://redline.ai" target="_blank">Redline.ai</a> &bull; AI-Powered QA/QC for Civil Engineering</p>
-            <p>Questions? <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" target="_blank">Contact Jonah Knip</a></p>
+            <p><a href="https://redline.ai" target="_blank">Redline.ai</a> &bull; The First Accurate Full Drawing Analyzer</p>
         </footer>
     </div>
 
@@ -1215,7 +661,7 @@
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('HTTP Error:', response.status, errorText);
-                    showStatus('error', `Server error (${response.status}): ${errorText.substring(0, 200)}`);
+                    showStatus('error', `Server error (${response.status}): Please check server logs`);
                     return;
                 }
 
@@ -1231,10 +677,8 @@
                     
                     if (data.is_html) {
                         reportContent.innerHTML = data.report;
-                        reportContent.classList.add('ai-report');
                     } else {
                         reportContent.textContent = data.report;
-                        reportContent.classList.remove('ai-report');
                     }
                     
                     reportSection.classList.add('visible');
@@ -1281,14 +725,6 @@
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .no-print { display: none !important; }
 }
-.print-header {
-    background: #1B365D;
-    color: white;
-    padding: 15px 20px;
-    text-align: center;
-    margin-bottom: 20px;
-}
-.print-header h2 { margin: 0; font-size: 18px; }
 .print-btn {
     position: fixed;
     top: 10px;

@@ -607,7 +607,7 @@ def load_checklist_from_file(checklist_id: str) -> dict:
 
 @app.route('/api/checklist', methods=['GET'])
 def get_checklists():
-    """Get available checklist templates - Abonmarche QA/QC checklists"""
+    """Get available checklist templates - QA/QC checklists"""
     checklists = {}
     
     # Load each checklist from JSON files
