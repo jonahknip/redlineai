@@ -704,6 +704,40 @@ def debug_info():
     })
 
 
+@app.route('/api/test-openai', methods=['GET'])
+def test_openai():
+    """Test OpenAI API connection"""
+    api_key = os.environ.get('OPENAI_API_KEY')
+    if not api_key:
+        return jsonify({'success': False, 'error': 'OPENAI_API_KEY not set'})
+    
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "user", "content": "Respond with exactly: API_WORKING"}
+            ],
+            max_tokens=20
+        )
+        
+        result = response.choices[0].message.content.strip()
+        return jsonify({
+            'success': True,
+            'response': result,
+            'model': 'gpt-4o',
+            'key_prefix': api_key[:8] + '...'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'key_prefix': api_key[:8] + '...' if api_key else 'none'
+        })
+
+
 # ==================== TRAINING ENDPOINTS ====================
 
 @app.route('/train')
