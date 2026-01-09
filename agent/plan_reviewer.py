@@ -616,26 +616,7 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
             sample_text += f"\n--- Page {i+1} ---\n"
             sample_text += page.get_text()[:2000]
         
-        # Build the checklist items for AI to evaluate
-        checklist_items_text = ""
-        total_items = 0
-        sections_list = []
-        if checklist and checklist.get('sections'):
-            for section in checklist.get('sections', []):
-                section_title = section.get('title', 'General')
-                sections_list.append(section_title)
-                checklist_items_text += f"\n\n=== {section_title} ===\n"
-                for item in section.get('items', []):
-                    total_items += 1
-                    item_id = item.get('id', '')
-                    item_text = item.get('text', '')
-                    required = "REQUIRED" if item.get('required') else "Optional"
-                    checklist_items_text += f"[{item_id}] ({required}) {item_text}\n"
-        
-        checklist_name = checklist.get('name', 'QA/QC Review') if checklist else 'General Review'
-        checklist_phase = checklist.get('phase', '') if checklist else ''
-        
-        # Pre-fill project info
+        # Project info
         project_name = info.project_name or 'Project Name Not Identified'
         project_number = info.project_number or 'N/A'
         location = info.location or 'Location Not Identified'
@@ -643,125 +624,256 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         engineer = info.engineer_of_record or 'Engineer Not Identified'
         total_sheets = self.analysis.total_sheets
         
-        prompt = f"""Generate a QA/QC checklist review report in HTML format.
-
-PROJECT DATA:
-- Project Name: {project_name}
-- Project Number: {project_number}
-- Location: {location}
-- Owner/Client: {owner}
-- Engineer: {engineer}
-- Total Sheets: {total_sheets}
-- Review Type: {checklist_name}
-- Review Phase: {checklist_phase}
-- Review Date: {review_date}
+        checklist_name = checklist.get('name', 'QA/QC Review') if checklist else 'General Review'
+        checklist_phase = checklist.get('phase', '') if checklist else ''
+        
+        # Build checklist items for AI evaluation
+        checklist_items_for_ai = []
+        if checklist and checklist.get('sections'):
+            for section in checklist.get('sections', []):
+                section_title = section.get('title', 'General')
+                for item in section.get('items', []):
+                    checklist_items_for_ai.append({
+                        'section': section_title,
+                        'id': item.get('id', ''),
+                        'text': item.get('text', ''),
+                        'required': item.get('required', False)
+                    })
+        
+        # Ask AI to evaluate each item and return JSON
+        items_text = "\n".join([f"- {item['id']}: {item['text']}" for item in checklist_items_for_ai])
+        
+        eval_prompt = f"""Evaluate each checklist item based on the plan analysis.
 
 PLAN ANALYSIS:
-{vision_results[:4000] if vision_results else 'Vision analysis not available'}
+{vision_results[:6000] if vision_results else 'No vision analysis available'}
 
-PLAN TEXT EXTRACTED:
-{sample_text[:2000]}
+EXTRACTED TEXT:
+{sample_text[:3000]}
 
-CHECKLIST ({total_items} items):
-{checklist_items_text}
+CHECKLIST ITEMS TO EVALUATE:
+{items_text}
 
-Generate HTML report. For each checklist item, assign:
-- PASS (green #27ae60) = Verified in plans
-- FAIL (red #e74c3c) = Not met/missing  
-- REVIEW (orange #f39c12) = Needs manual check
-- N/A (gray #95a5a6) = Not applicable
+Return a JSON array with your evaluation of each item. Format:
+[
+  {{"id": "30-GEN-001", "status": "PASS", "comment": "Verified - north arrow present on all sheets"}},
+  {{"id": "30-GEN-002", "status": "FAIL", "comment": "ADA ramps not identified in scope"}},
+  {{"id": "30-GEN-003", "status": "REVIEW", "comment": "Cannot verify utility locations from available sheets"}},
+  {{"id": "30-GEN-004", "status": "N/A", "comment": "Not applicable to this project type"}}
+]
 
-Output this exact HTML structure with all {total_items} items evaluated:
+Status options: PASS, FAIL, REVIEW, N/A
+- PASS = Clearly verified/met in the plans
+- FAIL = Not met, missing, or has issues
+- REVIEW = Cannot determine, needs manual verification
+- N/A = Does not apply to this project
 
-<div class="report">
+Provide specific, actionable comments. Return ONLY the JSON array."""
+
+        try:
+            client = OpenAI(api_key=api_key)
+            
+            # Get AI evaluation
+            eval_response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a civil engineering QA/QC reviewer. Evaluate checklist items and return JSON only."},
+                    {"role": "user", "content": eval_prompt}
+                ],
+                max_tokens=8000,
+                temperature=0.1
+            )
+            
+            eval_text = eval_response.choices[0].message.content.strip()
+            # Clean markdown if present
+            if eval_text.startswith('```'):
+                eval_text = eval_text.split('\n', 1)[1] if '\n' in eval_text else eval_text[3:]
+            if eval_text.endswith('```'):
+                eval_text = eval_text[:-3]
+            eval_text = eval_text.strip()
+            if eval_text.startswith('json'):
+                eval_text = eval_text[4:].strip()
+            
+            evaluations = json.loads(eval_text)
+            eval_dict = {e['id']: e for e in evaluations}
+            
+        except Exception as e:
+            print(f"AI evaluation error: {e}")
+            # Default all to REVIEW if AI fails
+            eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification'} for item in checklist_items_for_ai}
+        
+        # Count statuses
+        counts = {'PASS': 0, 'FAIL': 0, 'REVIEW': 0, 'N/A': 0}
+        for item in checklist_items_for_ai:
+            status = eval_dict.get(item['id'], {}).get('status', 'REVIEW')
+            if status in counts:
+                counts[status] += 1
+            else:
+                counts['REVIEW'] += 1
+        
+        # Build HTML report
+        html = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
 <style>
-.report {{ font-family: Calibri, Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; }}
-.header {{ text-align: center; border-bottom: 3px solid #c8102e; padding-bottom: 20px; margin-bottom: 25px; }}
-.header h1 {{ color: #1b365d; margin: 10px 0; font-size: 24px; }}
-.header p {{ margin: 5px 0; color: #666; }}
-.info-table {{ width: 100%; border-collapse: collapse; margin-bottom: 25px; }}
-.info-table td {{ padding: 8px 12px; border: 1px solid #ddd; }}
-.info-table td:first-child {{ background: #f5f5f5; font-weight: bold; width: 35%; }}
-.summary {{ display: table; width: 100%; margin-bottom: 25px; }}
-.summary-box {{ display: table-cell; text-align: center; padding: 15px; border: 1px solid #ddd; }}
-.summary-box.pass {{ background: #d4edda; }}
-.summary-box.fail {{ background: #f8d7da; }}
-.summary-box.review {{ background: #fff3cd; }}
-.summary-box.na {{ background: #e9ecef; }}
-.summary-box strong {{ display: block; font-size: 28px; }}
-.section {{ margin-bottom: 20px; }}
-.section-title {{ background: #1b365d; color: white; padding: 10px 15px; font-weight: bold; margin: 0; }}
+body {{ font-family: 'Segoe UI', Calibri, Arial, sans-serif; margin: 0; padding: 40px; color: #333; background: #fff; }}
+.report {{ max-width: 900px; margin: 0 auto; }}
+.header {{ text-align: center; border-bottom: 4px solid #C8102E; padding-bottom: 25px; margin-bottom: 30px; }}
+.header .company {{ font-size: 12px; letter-spacing: 3px; color: #666; margin-bottom: 15px; }}
+.header h1 {{ color: #1B365D; font-size: 28px; margin: 0 0 8px 0; }}
+.header .phase {{ color: #666; font-size: 16px; margin: 0; }}
+.header .date {{ color: #999; font-size: 14px; margin-top: 15px; }}
+.info-section {{ margin-bottom: 30px; }}
+.info-section h2 {{ font-size: 14px; color: #1B365D; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #1B365D; padding-bottom: 8px; margin-bottom: 15px; }}
+.info-table {{ width: 100%; border-collapse: collapse; }}
+.info-table td {{ padding: 10px 15px; border: 1px solid #ddd; font-size: 13px; }}
+.info-table td:first-child {{ background: #f5f5f5; font-weight: 600; width: 200px; }}
+.summary {{ display: flex; justify-content: center; gap: 20px; margin: 30px 0; }}
+.summary-box {{ text-align: center; padding: 20px 30px; border-radius: 8px; min-width: 100px; }}
+.summary-box.pass {{ background: #d4edda; border: 2px solid #28a745; }}
+.summary-box.fail {{ background: #f8d7da; border: 2px solid #dc3545; }}
+.summary-box.review {{ background: #fff3cd; border: 2px solid #ffc107; }}
+.summary-box.na {{ background: #e9ecef; border: 2px solid #6c757d; }}
+.summary-box .count {{ font-size: 36px; font-weight: 700; display: block; }}
+.summary-box.pass .count {{ color: #28a745; }}
+.summary-box.fail .count {{ color: #dc3545; }}
+.summary-box.review .count {{ color: #856404; }}
+.summary-box.na .count {{ color: #6c757d; }}
+.summary-box .label {{ font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }}
+.section {{ margin-bottom: 25px; page-break-inside: avoid; }}
+.section-title {{ background: #1B365D; color: white; padding: 12px 18px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0; }}
 .checklist {{ width: 100%; border-collapse: collapse; }}
-.checklist th {{ background: #f0f0f0; padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 12px; }}
-.checklist td {{ padding: 8px 10px; border: 1px solid #ddd; font-size: 12px; vertical-align: top; }}
-.checklist .status {{ text-align: center; width: 60px; }}
-.checklist .id {{ width: 80px; font-family: monospace; color: #666; }}
-.checklist .item {{ width: 40%; }}
-.checklist .notes {{ color: #555; }}
-.badge {{ display: inline-block; padding: 3px 8px; border-radius: 3px; color: white; font-size: 10px; font-weight: bold; }}
-.badge.pass {{ background: #27ae60; }}
-.badge.fail {{ background: #e74c3c; }}
-.badge.review {{ background: #f39c12; }}
-.badge.na {{ background: #95a5a6; }}
-.findings {{ background: #f8f9fa; padding: 20px; margin: 25px 0; border-left: 4px solid #c8102e; }}
-.findings h2 {{ color: #1b365d; margin-top: 0; font-size: 16px; }}
-.findings h3 {{ font-size: 14px; margin: 15px 0 8px; }}
-.findings ul {{ margin: 0 0 10px 0; padding-left: 20px; }}
-.findings li {{ margin: 5px 0; }}
-.signatures {{ display: table; width: 100%; margin-top: 40px; }}
-.sig-block {{ display: table-cell; text-align: center; padding: 0 15px; }}
-.sig-line {{ border-bottom: 1px solid #333; height: 40px; margin-bottom: 5px; }}
-.sig-label {{ font-size: 11px; color: #666; }}
-.footer {{ text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 10px; color: #999; }}
+.checklist th {{ background: #f0f0f0; padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 12px; font-weight: 600; }}
+.checklist td {{ padding: 10px 12px; border: 1px solid #ddd; font-size: 12px; vertical-align: top; }}
+.checklist tr:nth-child(even) {{ background: #fafafa; }}
+.status-col {{ width: 70px; text-align: center; }}
+.id-col {{ width: 100px; font-family: 'Consolas', monospace; color: #666; font-size: 11px; }}
+.item-col {{ width: 40%; }}
+.badge {{ display: inline-block; padding: 4px 10px; border-radius: 4px; color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; }}
+.badge-pass {{ background: #28a745; }}
+.badge-fail {{ background: #dc3545; }}
+.badge-review {{ background: #ffc107; color: #333; }}
+.badge-na {{ background: #6c757d; }}
+.findings {{ background: #f8f9fa; padding: 25px; margin: 30px 0; border-left: 5px solid #C8102E; }}
+.findings h2 {{ color: #1B365D; font-size: 18px; margin: 0 0 20px 0; }}
+.findings h3 {{ font-size: 14px; margin: 20px 0 10px 0; }}
+.findings h3.critical {{ color: #dc3545; }}
+.findings h3.review {{ color: #856404; }}
+.findings h3.general {{ color: #1B365D; }}
+.findings ul {{ margin: 0 0 15px 0; padding-left: 25px; }}
+.findings li {{ margin: 8px 0; font-size: 13px; }}
+.findings p {{ font-size: 13px; color: #555; line-height: 1.6; }}
+.signatures {{ display: flex; justify-content: space-between; margin-top: 50px; padding-top: 20px; }}
+.sig-block {{ text-align: center; flex: 1; padding: 0 20px; }}
+.sig-line {{ border-bottom: 2px solid #333; height: 50px; margin-bottom: 8px; }}
+.sig-label {{ font-size: 12px; color: #666; }}
+.footer {{ text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; font-size: 11px; color: #999; }}
 </style>
+</head>
+<body>
+<div class="report">
 
 <div class="header">
-<p style="letter-spacing: 2px; font-size: 11px;">ABONMARCHE</p>
+<div class="company">ABONMARCHE</div>
 <h1>{checklist_name}</h1>
-<p>{checklist_phase} Design Phase Review</p>
-<p style="margin-top: 15px;">Review Date: {review_date}</p>
+<p class="phase">{checklist_phase} Design Phase Review</p>
+<p class="date">Review Date: {review_date}</p>
 </div>
 
+<div class="info-section">
+<h2>Project Information</h2>
 <table class="info-table">
 <tr><td>Project Name</td><td>{project_name}</td></tr>
 <tr><td>Project Number</td><td>{project_number}</td></tr>
 <tr><td>Location</td><td>{location}</td></tr>
-<tr><td>Client/Owner</td><td>{owner}</td></tr>
+<tr><td>Client / Owner</td><td>{owner}</td></tr>
 <tr><td>Engineer of Record</td><td>{engineer}</td></tr>
 <tr><td>Total Sheets Reviewed</td><td>{total_sheets}</td></tr>
 <tr><td>Reviewed By</td><td>AI-Assisted Review (Redline.ai)</td></tr>
 </table>
+</div>
 
 <div class="summary">
-<div class="summary-box pass"><strong>[COUNT]</strong>PASS</div>
-<div class="summary-box fail"><strong>[COUNT]</strong>FAIL</div>
-<div class="summary-box review"><strong>[COUNT]</strong>REVIEW</div>
-<div class="summary-box na"><strong>[COUNT]</strong>N/A</div>
+<div class="summary-box pass"><span class="count">{counts['PASS']}</span><span class="label">Pass</span></div>
+<div class="summary-box fail"><span class="count">{counts['FAIL']}</span><span class="label">Fail</span></div>
+<div class="summary-box review"><span class="count">{counts['REVIEW']}</span><span class="label">Review</span></div>
+<div class="summary-box na"><span class="count">{counts['N/A']}</span><span class="label">N/A</span></div>
 </div>
-
-<!-- FOR EACH SECTION: -->
+'''
+        
+        # Group items by section and build tables
+        current_section = None
+        fail_items = []
+        review_items = []
+        
+        for item in checklist_items_for_ai:
+            eval_data = eval_dict.get(item['id'], {'status': 'REVIEW', 'comment': 'Requires manual verification'})
+            status = eval_data.get('status', 'REVIEW')
+            comment = eval_data.get('comment', '')
+            
+            # Track fails and reviews for findings
+            if status == 'FAIL':
+                fail_items.append(f"{item['id']}: {comment}")
+            elif status == 'REVIEW':
+                review_items.append(f"{item['id']}: {comment}")
+            
+            # Start new section if needed
+            if item['section'] != current_section:
+                if current_section is not None:
+                    html += '</table></div>\n'
+                current_section = item['section']
+                html += f'''
 <div class="section">
-<div class="section-title">[SECTION NAME]</div>
+<div class="section-title">{current_section}</div>
 <table class="checklist">
-<tr><th class="status">Status</th><th class="id">ID</th><th class="item">Checklist Item</th><th class="notes">Comments</th></tr>
-<!-- FOR EACH ITEM: -->
-<tr>
-<td class="status"><span class="badge [pass/fail/review/na]">[STATUS]</span></td>
-<td class="id">[ID]</td>
-<td class="item">[Item description]</td>
-<td class="notes">[Specific observation]</td>
+<tr><th class="status-col">Status</th><th class="id-col">ID</th><th class="item-col">Checklist Item</th><th>Comments</th></tr>
+'''
+            
+            # Badge class
+            badge_class = 'badge-' + status.lower().replace('/', '')
+            if status == 'N/A':
+                badge_class = 'badge-na'
+            
+            html += f'''<tr>
+<td class="status-col"><span class="badge {badge_class}">{status}</span></td>
+<td class="id-col">{item['id']}</td>
+<td class="item-col">{item['text']}</td>
+<td>{comment}</td>
 </tr>
-</table>
-</div>
-
+'''
+        
+        # Close last section
+        if current_section is not None:
+            html += '</table></div>\n'
+        
+        # Add findings section
+        html += '''
 <div class="findings">
 <h2>Key Findings & Recommendations</h2>
-<h3 style="color: #e74c3c;">Critical Issues (Action Required)</h3>
-<ul>[List FAIL items]</ul>
-<h3 style="color: #f39c12;">Items Requiring Manual Review</h3>
-<ul>[List REVIEW items]</ul>
-<h3 style="color: #1b365d;">General Observations</h3>
-<p>[Overall assessment]</p>
+'''
+        
+        if fail_items:
+            html += '<h3 class="critical">Critical Issues (Action Required)</h3>\n<ul>\n'
+            for item in fail_items[:10]:  # Limit to 10
+                html += f'<li>{item}</li>\n'
+            html += '</ul>\n'
+        else:
+            html += '<h3 class="critical">Critical Issues</h3>\n<p>No critical issues identified.</p>\n'
+        
+        if review_items:
+            html += '<h3 class="review">Items Requiring Manual Review</h3>\n<ul>\n'
+            for item in review_items[:10]:  # Limit to 10
+                html += f'<li>{item}</li>\n'
+            html += '</ul>\n'
+        else:
+            html += '<h3 class="review">Items Requiring Manual Review</h3>\n<p>No items flagged for manual review.</p>\n'
+        
+        html += f'''
+<h3 class="general">General Observations</h3>
+<p>This {checklist_phase} review evaluated {len(checklist_items_for_ai)} checklist items. 
+{counts['PASS']} items passed verification, {counts['FAIL']} items require attention, 
+{counts['REVIEW']} items need manual verification, and {counts['N/A']} items were not applicable to this project.</p>
 </div>
 
 <div class="signatures">
@@ -770,46 +882,15 @@ Output this exact HTML structure with all {total_items} items evaluated:
 <div class="sig-block"><div class="sig-line"></div><p class="sig-label">Project Manager</p></div>
 </div>
 
-<div class="footer">Generated by Redline.ai | Abonmarche QA/QC System | {review_date}</div>
+<div class="footer">
+Generated by Redline.ai | Abonmarche QA/QC Review System | {review_date}
 </div>
 
-REQUIREMENTS:
-1. Include ALL {total_items} checklist items - do not skip any
-2. Replace [COUNT] with actual counts
-3. Replace all [...] placeholders with real content
-4. Provide specific comments for each item based on plan analysis
-5. If uncertain about an item, mark as REVIEW not PASS
-6. Return ONLY the HTML, no explanations or markdown"""
-
-        try:
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You generate professional QA/QC review reports in HTML format. Output clean HTML only, no markdown. Include embedded CSS in a style tag. Evaluate every checklist item."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=16000,
-                temperature=0.1
-            )
-            
-            html_report = response.choices[0].message.content
-            
-            # Clean up any markdown code block markers
-            html_report = html_report.strip()
-            if html_report.startswith('```html'):
-                html_report = html_report[7:]
-            if html_report.startswith('```'):
-                html_report = html_report[3:]
-            if html_report.endswith('```'):
-                html_report = html_report[:-3]
-            
-            return html_report.strip()
-            
-        except Exception as e:
-            # Fall back to basic report on error
-            print(f"OpenAI error: {e}")
-            return self.generate_summary_report()
+</div>
+</body>
+</html>'''
+        
+        return html
 
 
 def main():
