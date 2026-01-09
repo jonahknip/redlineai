@@ -21,8 +21,16 @@ class ChecklistEngine:
     
     def __init__(self, api_key: Optional[str] = None):
         """Initialize the checklist engine."""
-        self.plan_reviewer = PlanReviewer(api_key=api_key)
+        self.api_key = api_key
+        self._plan_reviewer = None  # Lazy initialization
         self.checklists = self._load_checklists()
+    
+    @property
+    def plan_reviewer(self):
+        """Lazy load the plan reviewer only when needed."""
+        if self._plan_reviewer is None:
+            self._plan_reviewer = PlanReviewer(api_key=self.api_key)
+        return self._plan_reviewer
         
     def _load_checklists(self) -> Dict[str, Dict]:
         """Load all available checklists from JSON files."""
