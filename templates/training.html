@@ -394,7 +394,83 @@
             </div>
         </div>
 
-        <!-- Upload Card -->
+        <!-- BULK Upload Card -->
+        <div class="card">
+            <div class="card-header" style="background: #C8102E;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Bulk Upload (Recommended)
+            </div>
+            <div class="card-body">
+                <div class="instructions" style="background: #e8f5e9; border-color: #28a745;">
+                    <h4 style="color: #155724;">Quick Start - Upload 50+ files at once!</h4>
+                    <ol style="color: #155724;">
+                        <li>Select <strong>all your completed review PDFs</strong> (Ctrl+A or Cmd+A in file picker)</li>
+                        <li>Choose the checklist type they're based on</li>
+                        <li>Click "Upload All" - project names auto-extracted from filenames</li>
+                    </ol>
+                </div>
+                
+                <form id="bulkUploadForm">
+                    <div class="form-group">
+                        <label>Select Multiple PDFs</label>
+                        <div class="upload-area" id="bulkUploadArea" style="border-color: #C8102E;">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #C8102E;">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <p><strong style="color: #C8102E;">Click to select multiple PDFs</strong></p>
+                            <p class="file-name" id="bulkFileName" style="color: #C8102E;"></p>
+                        </div>
+                        <input type="file" id="bulkFileInput" name="files[]" accept=".pdf" multiple>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Checklist Type</label>
+                            <select name="checklist_type" id="bulkChecklistType" required>
+                                <option value="">-- Select --</option>
+                                <option value="30_percent">30% Review</option>
+                                <option value="60_percent">60% Review</option>
+                                <option value="90_percent">90% Review</option>
+                                <option value="cadd">CADD Review</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Project Type (Optional)</label>
+                            <select name="project_type" id="bulkProjectType">
+                                <option value="">-- Auto-detect --</option>
+                                <option value="road">Road / Street</option>
+                                <option value="utility">Utility</option>
+                                <option value="site">Site Development</option>
+                                <option value="drainage">Drainage / Storm</option>
+                                <option value="bridge">Bridge / Structure</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="bulkSubmitBtn" disabled style="background: #C8102E;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        Upload All Files
+                    </button>
+                    
+                    <div class="status" id="bulkStatus">
+                        <div class="spinner"></div>
+                        <span id="bulkStatusText">Processing...</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Single Upload Card -->
         <div class="card">
             <div class="card-header">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -512,7 +588,86 @@
     </div>
 
     <script>
-        // Elements
+        // ========== BULK UPLOAD ==========
+        const bulkUploadArea = document.getElementById('bulkUploadArea');
+        const bulkFileInput = document.getElementById('bulkFileInput');
+        const bulkFileName = document.getElementById('bulkFileName');
+        const bulkUploadForm = document.getElementById('bulkUploadForm');
+        const bulkSubmitBtn = document.getElementById('bulkSubmitBtn');
+        const bulkStatus = document.getElementById('bulkStatus');
+        const bulkStatusText = document.getElementById('bulkStatusText');
+        
+        bulkUploadArea.addEventListener('click', () => bulkFileInput.click());
+        
+        bulkFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                bulkFileName.textContent = `${this.files.length} files selected`;
+                bulkUploadArea.classList.add('has-file');
+                checkBulkFormValid();
+            }
+        });
+        
+        function checkBulkFormValid() {
+            const hasFiles = bulkFileInput.files.length > 0;
+            const hasChecklist = document.getElementById('bulkChecklistType').value !== '';
+            bulkSubmitBtn.disabled = !(hasFiles && hasChecklist);
+        }
+        
+        document.getElementById('bulkChecklistType').addEventListener('change', checkBulkFormValid);
+        
+        bulkUploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const files = bulkFileInput.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files[]', files[i]);
+            }
+            formData.append('checklist_type', document.getElementById('bulkChecklistType').value);
+            formData.append('project_type', document.getElementById('bulkProjectType').value);
+            
+            showBulkStatus('loading', `Processing ${files.length} files... This may take a minute.`);
+            bulkSubmitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/training/bulk-upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let msg = `Done! Processed ${data.processed}/${data.total_files} files. `;
+                    msg += `Added ${data.total_examples_added} examples (${data.total_examples_parsed} parsed).`;
+                    if (data.failed > 0) {
+                        msg += ` ${data.failed} files failed.`;
+                    }
+                    showBulkStatus('success', msg);
+                    loadStats();
+                    loadExamples();
+                    
+                    // Reset
+                    bulkUploadForm.reset();
+                    bulkUploadArea.classList.remove('has-file');
+                    bulkFileName.textContent = '';
+                } else {
+                    showBulkStatus('error', 'Error: ' + data.error);
+                }
+            } catch (error) {
+                showBulkStatus('error', 'Network error: ' + error.message);
+            }
+            
+            bulkSubmitBtn.disabled = false;
+        });
+        
+        function showBulkStatus(type, message) {
+            bulkStatus.className = 'status ' + type;
+            bulkStatusText.textContent = message;
+        }
+        
+        // ========== SINGLE UPLOAD ==========
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const fileName = document.getElementById('fileName');
@@ -521,10 +676,8 @@
         const status = document.getElementById('status');
         const statusText = document.getElementById('statusText');
         
-        // Upload area click
         uploadArea.addEventListener('click', () => fileInput.click());
         
-        // File input change
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
                 fileName.textContent = this.files[0].name;
@@ -533,7 +686,6 @@
             }
         });
         
-        // Form validation
         function checkFormValid() {
             const hasFile = fileInput.files.length > 0;
             const hasChecklist = document.getElementById('checklistType').value !== '';
@@ -542,7 +694,6 @@
         
         document.getElementById('checklistType').addEventListener('change', checkFormValid);
         
-        // Form submit
         uploadForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             

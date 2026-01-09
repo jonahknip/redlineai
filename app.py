@@ -781,6 +781,105 @@ def upload_training_data():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/api/training/bulk-upload', methods=['POST'])
+def bulk_upload_training():
+    """
+    Bulk upload multiple completed review PDFs at once.
+    Expects:
+    - files[]: Multiple PDF files
+    - checklist_type: Which checklist was used
+    - project_type: Type of projects (optional)
+    """
+    try:
+        from agent.training import ReviewPDFParser, get_training_store
+        
+        files = request.files.getlist('files[]')
+        if not files:
+            files = request.files.getlist('files')
+        
+        if not files or len(files) == 0:
+            return jsonify({'success': False, 'error': 'No files provided'}), 400
+        
+        checklist_type = request.form.get('checklist_type', '')
+        project_type = request.form.get('project_type', '')
+        
+        # Load checklist definition
+        checklist = None
+        if checklist_type:
+            checklist = load_checklist_from_file(checklist_type)
+        
+        training_store = get_training_store()
+        
+        results = {
+            'total_files': len(files),
+            'processed': 0,
+            'failed': 0,
+            'total_examples_parsed': 0,
+            'total_examples_added': 0,
+            'errors': []
+        }
+        
+        temp_dir = tempfile.mkdtemp()
+        
+        for file in files:
+            if not file.filename:
+                continue
+                
+            if not file.filename.lower().endswith('.pdf'):
+                results['errors'].append(f"{file.filename}: Not a PDF")
+                results['failed'] += 1
+                continue
+            
+            try:
+                # Save temporarily
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(temp_dir, filename)
+                file.save(filepath)
+                
+                # Parse PDF
+                parser = ReviewPDFParser(filepath)
+                examples = parser.parse_checklist_responses(checklist)
+                
+                # Extract project name from filename
+                project_name = filename.replace('.pdf', '').replace('_', ' ').replace('-', ' ')
+                
+                # Add metadata
+                for example in examples:
+                    example.project_type = project_type
+                    example.project_name = project_name
+                    example.source_file = filename
+                
+                # Store
+                added = training_store.add_examples(examples)
+                
+                results['processed'] += 1
+                results['total_examples_parsed'] += len(examples)
+                results['total_examples_added'] += added
+                
+                # Clean up file
+                os.remove(filepath)
+                
+            except Exception as e:
+                results['errors'].append(f"{file.filename}: {str(e)}")
+                results['failed'] += 1
+        
+        # Clean up temp dir
+        try:
+            os.rmdir(temp_dir)
+        except:
+            pass
+        
+        stats = training_store.get_statistics()
+        results['stats'] = stats
+        results['success'] = True
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        logger.error(f"Bulk upload error: {e}\n{traceback.format_exc()}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/training/manual', methods=['POST'])
 def add_manual_training():
     """
