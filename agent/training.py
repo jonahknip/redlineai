@@ -34,9 +34,9 @@ try:
     import chromadb
     from chromadb.config import Settings
     CHROMADB_AVAILABLE = True
-except ImportError:
+except (ImportError, Exception) as e:
     CHROMADB_AVAILABLE = False
-    logger.warning("ChromaDB not available - RAG features disabled")
+    logger.warning(f"ChromaDB not available - RAG features disabled: {e}")
 
 # Try to import OpenAI for embeddings
 try:
