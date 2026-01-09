@@ -24,3 +24,4 @@ beautifulsoup4==4.12.2
 
 # Vector Database for Training/RAG
 chromadb==0.4.22
+numpy<2.0
