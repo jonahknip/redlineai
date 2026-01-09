@@ -110,7 +110,17 @@ class CivilEngineeringPMAgent:
         if not self.pdf_path.exists():
             raise FileNotFoundError(f"Plan set not found: {pdf_path}")
 
-        self.doc = fitz.open(str(self.pdf_path))
+        try:
+            self.doc = fitz.open(str(self.pdf_path))
+            print(f"[DEBUG] Opened PDF: {pdf_path}, pages: {len(self.doc)}")
+            
+            if len(self.doc) == 0:
+                raise ValueError(f"PDF has no pages: {pdf_path}")
+                
+        except Exception as e:
+            print(f"[DEBUG] Error opening PDF: {e}")
+            raise ValueError(f"Could not open PDF file: {str(e)}")
+            
         self.analysis = PlanSetAnalysis()
         self.full_text = ""
 
@@ -131,13 +141,22 @@ class CivilEngineeringPMAgent:
         """Extract project identification information"""
         info = ProjectInfo()
 
+        # Check if document has pages
+        if not self.doc or len(self.doc) == 0:
+            print("[DEBUG] analyze_project_info: Document has no pages")
+            return info
+
         # Get metadata
-        metadata = self.doc.metadata
+        metadata = self.doc.metadata or {}
         info.creation_date = metadata.get('creationDate', '')
         info.revision_date = metadata.get('modDate', '')
 
         # Parse cover sheet (usually page 1)
-        cover_text = self.doc[0].get_text() if len(self.doc) > 0 else ""
+        try:
+            cover_text = self.doc[0].get_text() if len(self.doc) > 0 else ""
+        except Exception as e:
+            print(f"[DEBUG] Error reading cover page: {e}")
+            cover_text = ""
 
         # Extract project name - look for common patterns
         project_patterns = [
@@ -195,7 +214,13 @@ class CivilEngineeringPMAgent:
 
     def analyze_sheet_index(self) -> dict:
         """Parse the sheet index from cover sheet"""
-        cover_text = self.doc[0].get_text() if len(self.doc) > 0 else ""
+        if not self.doc or len(self.doc) == 0:
+            return {}
+        try:
+            cover_text = self.doc[0].get_text()
+        except Exception as e:
+            print(f"[DEBUG] Error reading cover for sheet index: {e}")
+            cover_text = ""
 
         sheet_index = {}
 
@@ -466,31 +491,44 @@ End of Report
         """Extract images from PDF pages for vision analysis"""
         import base64
         
+        # Check if document has any pages
+        if not self.doc or len(self.doc) == 0:
+            print("[DEBUG] extract_page_images: Document has no pages")
+            return []
+        
         if page_numbers is None:
             # Default to first few pages (cover, index, typical sections)
             page_numbers = list(range(min(max_pages, len(self.doc))))
         
+        print(f"[DEBUG] extract_page_images: Extracting {len(page_numbers)} pages from doc with {len(self.doc)} pages")
+        
         images = []
         for page_num in page_numbers:
-            if page_num >= len(self.doc):
+            if page_num < 0 or page_num >= len(self.doc):
+                print(f"[DEBUG] Skipping invalid page number: {page_num}")
                 continue
             
-            page = self.doc[page_num]
-            # Render page to image at reasonable resolution
-            mat = fitz.Matrix(1.5, 1.5)  # 1.5x zoom for readability
-            pix = page.get_pixmap(matrix=mat)
-            
-            # Convert to base64
-            img_bytes = pix.tobytes("png")
-            img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-            
-            images.append({
-                'page_num': page_num + 1,
-                'base64': img_base64,
-                'width': pix.width,
-                'height': pix.height
-            })
+            try:
+                page = self.doc[page_num]
+                # Render page to image at reasonable resolution
+                mat = fitz.Matrix(1.5, 1.5)  # 1.5x zoom for readability
+                pix = page.get_pixmap(matrix=mat)
+                
+                # Convert to base64
+                img_bytes = pix.tobytes("png")
+                img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+                
+                images.append({
+                    'page_num': page_num + 1,
+                    'base64': img_base64,
+                    'width': pix.width,
+                    'height': pix.height
+                })
+            except Exception as e:
+                print(f"[DEBUG] Error extracting page {page_num}: {e}")
+                continue
         
+        print(f"[DEBUG] extract_page_images: Successfully extracted {len(images)} images")
         return images
 
     def analyze_with_vision(self, checklist: dict = None) -> dict:
@@ -621,9 +659,16 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
         
         # Extract text from plan set for context
         sample_text = ""
-        for i, page in enumerate(self.doc[:5]):
-            sample_text += f"\n--- Page {i+1} ---\n"
-            sample_text += page.get_text()[:2000]
+        if self.doc and len(self.doc) > 0:
+            try:
+                max_pages = min(5, len(self.doc))
+                for i in range(max_pages):
+                    page = self.doc[i]
+                    sample_text += f"\n--- Page {i+1} ---\n"
+                    sample_text += page.get_text()[:2000]
+            except Exception as e:
+                print(f"[DEBUG] Error extracting sample text: {e}")
+                sample_text = "Could not extract text from document"
         
         # Project info
         project_name = info.project_name or 'Project Name Not Identified'
