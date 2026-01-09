@@ -43,6 +43,7 @@ uploads/
 temp/
 *.pdf
 !test_data/**/*.pdf
+!checklists/**/*.pdf
 
 # OS
 .DS_Store

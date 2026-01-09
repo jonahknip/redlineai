@@ -508,13 +508,30 @@ End of Report
         if not images:
             return {'success': False, 'error': 'Could not extract images'}
         
-        # Build checklist prompt if provided
+        # Build checklist prompt if provided - handle both flat and sectioned formats
         checklist_prompt = ""
         if checklist:
-            checklist_prompt = "\n\nAlso verify these checklist items:\n"
-            for item in checklist.get('items', []):
-                req = "REQUIRED" if item.get('required') else "Optional"
-                checklist_prompt += f"- [{req}] {item['text']}\n"
+            checklist_name = checklist.get('name', 'QA/QC Checklist')
+            checklist_phase = checklist.get('phase', '')
+            checklist_prompt = f"\n\n=== {checklist_name} ({checklist_phase}) ===\n"
+            checklist_prompt += f"Description: {checklist.get('description', '')}\n\n"
+            
+            # Check if we have sections (new format) or just items (old format)
+            if checklist.get('sections'):
+                for section in checklist.get('sections', []):
+                    section_title = section.get('title', 'General')
+                    checklist_prompt += f"\n## {section_title}\n"
+                    for item in section.get('items', []):
+                        req = "REQUIRED" if item.get('required') else "Optional"
+                        checklist_prompt += f"- [{req}] {item.get('id', '')}: {item.get('text', '')}\n"
+            else:
+                # Flat items format
+                checklist_prompt += "Verify these checklist items:\n"
+                for item in checklist.get('items', []):
+                    req = "REQUIRED" if item.get('required') else "Optional"
+                    section = item.get('section', '')
+                    section_prefix = f"[{section}] " if section else ""
+                    checklist_prompt += f"- [{req}] {section_prefix}{item.get('text', '')}\n"
         
         # Build messages with images
         messages = [
@@ -594,13 +611,33 @@ Be thorough and specific. Note anything that appears incomplete or requires foll
             if vision_data.get('success'):
                 vision_results = f"\n\nVISION ANALYSIS OF PLAN SHEETS:\n{vision_data['analysis']}"
         
-        # Build checklist section if provided
+        # Build checklist section if provided - handle sectioned format
         checklist_section = ""
         if checklist:
-            checklist_section = f"\n\nCHECKLIST TO VERIFY ({checklist.get('name', 'Custom')}):\n"
-            for item in checklist.get('items', []):
-                req = "REQUIRED" if item.get('required') else "Optional"
-                checklist_section += f"- [{req}] {item['text']}\n"
+            checklist_name = checklist.get('name', 'QA/QC Checklist')
+            checklist_phase = checklist.get('phase', '')
+            checklist_section = f"\n\n=== CHECKLIST: {checklist_name} ({checklist_phase}) ===\n"
+            checklist_section += f"Description: {checklist.get('description', '')}\n"
+            
+            # Check if we have sections (Abonmarche format) or just items
+            if checklist.get('sections'):
+                total_items = 0
+                required_items = 0
+                for section in checklist.get('sections', []):
+                    section_title = section.get('title', 'General')
+                    checklist_section += f"\n### {section_title}\n"
+                    for item in section.get('items', []):
+                        total_items += 1
+                        req = "REQUIRED" if item.get('required') else "Optional"
+                        if item.get('required'):
+                            required_items += 1
+                        checklist_section += f"- [{req}] {item.get('id', '')}: {item.get('text', '')}\n"
+                checklist_section += f"\nTotal items: {total_items} ({required_items} required)\n"
+            else:
+                # Flat items format (backward compatibility)
+                for item in checklist.get('items', []):
+                    req = "REQUIRED" if item.get('required') else "Optional"
+                    checklist_section += f"- [{req}] {item.get('text', '')}\n"
         
         # Build custom instructions section
         custom_instructions_section = ""

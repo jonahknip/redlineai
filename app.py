@@ -584,62 +584,121 @@ def send_email():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+def load_checklist_from_file(checklist_id: str) -> dict:
+    """Load a checklist from JSON file"""
+    checklist_dir = Path(__file__).parent / 'checklists'
+    
+    # Map checklist IDs to filenames
+    checklist_files = {
+        '30_percent': '30_percent.json',
+        '60_percent': '60_percent.json',
+        '90_percent': '90_percent.json',
+        'cadd': 'cadd_review.json'
+    }
+    
+    filename = checklist_files.get(checklist_id)
+    if not filename:
+        return None
+    
+    filepath = checklist_dir / filename
+    if not filepath.exists():
+        logger.warning(f"Checklist file not found: {filepath}")
+        return None
+    
+    try:
+        with open(filepath, 'r') as f:
+            checklist_data = json.load(f)
+        
+        # Flatten sections into items list for compatibility
+        all_items = []
+        for section in checklist_data.get('sections', []):
+            section_title = section.get('title', '')
+            for item in section.get('items', []):
+                all_items.append({
+                    'id': item.get('id'),
+                    'text': item.get('text'),
+                    'required': item.get('required', False),
+                    'section': section_title
+                })
+        
+        return {
+            'name': checklist_data.get('name'),
+            'phase': checklist_data.get('phase'),
+            'description': checklist_data.get('description'),
+            'sections': checklist_data.get('sections', []),
+            'items': all_items  # Flattened for compatibility
+        }
+    except Exception as e:
+        logger.error(f"Error loading checklist {checklist_id}: {e}")
+        return None
+
+
 @app.route('/api/checklist', methods=['GET'])
 def get_checklists():
-    """Get available checklist templates"""
-    checklists = {
-        'standard': {
-            'name': 'Standard Civil Review',
-            'items': [
-                {'id': 'cover', 'text': 'Cover sheet with project info', 'required': True},
-                {'id': 'index', 'text': 'Sheet index present', 'required': True},
-                {'id': 'pe_seal', 'text': 'PE seal and signature', 'required': True},
-                {'id': 'scale', 'text': 'Scale indicated on all sheets', 'required': True},
-                {'id': 'north', 'text': 'North arrow on plan sheets', 'required': True},
-                {'id': 'legend', 'text': 'Legend/symbols defined', 'required': False},
-                {'id': 'grading', 'text': 'Grading plan included', 'required': True},
-                {'id': 'drainage', 'text': 'Drainage plan included', 'required': True},
-                {'id': 'erosion', 'text': 'Erosion control plan', 'required': True},
-                {'id': 'utilities', 'text': 'Utility plan included', 'required': False},
-                {'id': 'details', 'text': 'Construction details', 'required': True},
-                {'id': 'specs', 'text': 'Reference to specifications', 'required': False},
-            ]
-        },
-        'mdot': {
-            'name': 'MDOT Project Review',
-            'items': [
-                {'id': 'cover', 'text': 'MDOT standard cover sheet', 'required': True},
-                {'id': 'index', 'text': 'Sheet index per MDOT format', 'required': True},
-                {'id': 'pe_seal', 'text': 'Michigan PE seal', 'required': True},
-                {'id': 'typical', 'text': 'Typical sections', 'required': True},
-                {'id': 'mot', 'text': 'Maintenance of Traffic plan', 'required': True},
-                {'id': 'signing', 'text': 'Signing and striping plan', 'required': True},
-                {'id': 'drainage', 'text': 'Drainage plan with calculations', 'required': True},
-                {'id': 'soil_boring', 'text': 'Soil boring locations', 'required': True},
-                {'id': 'row', 'text': 'ROW lines shown', 'required': True},
-                {'id': 'permits', 'text': 'Permit requirements noted', 'required': True},
-                {'id': 'quantities', 'text': 'Pay item quantities', 'required': True},
-                {'id': 'cross_sections', 'text': 'Cross sections provided', 'required': True},
-            ]
-        },
-        'municipal': {
-            'name': 'Municipal Infrastructure',
-            'items': [
-                {'id': 'cover', 'text': 'Cover sheet with municipal info', 'required': True},
-                {'id': 'survey', 'text': 'Survey/existing conditions', 'required': True},
-                {'id': 'layout', 'text': 'Site layout plan', 'required': True},
-                {'id': 'grading', 'text': 'Grading and drainage', 'required': True},
-                {'id': 'water', 'text': 'Water main plan', 'required': True},
-                {'id': 'sanitary', 'text': 'Sanitary sewer plan', 'required': True},
-                {'id': 'storm', 'text': 'Storm sewer plan', 'required': True},
-                {'id': 'paving', 'text': 'Paving plan', 'required': True},
-                {'id': 'landscape', 'text': 'Landscape plan', 'required': False},
-                {'id': 'lighting', 'text': 'Street lighting plan', 'required': False},
-                {'id': 'swppp', 'text': 'SWPPP/erosion control', 'required': True},
-                {'id': 'details', 'text': 'Standard details', 'required': True},
-            ]
+    """Get available checklist templates - Abonmarche QA/QC checklists"""
+    checklists = {}
+    
+    # Load each checklist from JSON files
+    checklist_ids = ['30_percent', '60_percent', '90_percent', 'cadd']
+    
+    for checklist_id in checklist_ids:
+        checklist = load_checklist_from_file(checklist_id)
+        if checklist:
+            checklists[checklist_id] = checklist
+    
+    # Fallback if no files found - provide basic structure
+    if not checklists:
+        checklists = {
+            '30_percent': {
+                'name': '30% Engineering QA/QC Review',
+                'phase': '30%',
+                'description': 'Early design validation',
+                'items': [
+                    {'id': '30-GEN-001', 'text': 'Survey completed with topographic QA', 'required': True},
+                    {'id': '30-GEN-002', 'text': 'Project scoped with ADA ramps identified', 'required': True},
+                    {'id': '30-GEN-003', 'text': 'North arrow shown correctly on all drawings', 'required': True},
+                    {'id': '30-GEN-004', 'text': 'Scale shown correctly on all drawings', 'required': True},
+                    {'id': '30-GEN-005', 'text': 'Title block consistent on each sheet', 'required': True},
+                ]
+            },
+            '60_percent': {
+                'name': '60% Engineering QA/QC Review',
+                'phase': '60%',
+                'description': 'Design development review',
+                'items': [
+                    {'id': '60-GEN-001', 'text': 'Utility locations and inverts verified', 'required': True},
+                    {'id': '60-GEN-002', 'text': 'Removal elements clearly identified', 'required': True},
+                    {'id': '60-GEN-003', 'text': 'Cross sections reviewed and labeled', 'required': True},
+                    {'id': '60-GEN-004', 'text': 'Storm sewer calculations completed', 'required': True},
+                    {'id': '60-GEN-005', 'text': 'Cost estimate quantities reviewed', 'required': True},
+                ]
+            },
+            '90_percent': {
+                'name': '90% Engineering QA/QC Review',
+                'phase': '90%',
+                'description': 'Final QC before bid',
+                'items': [
+                    {'id': '90-GEN-001', 'text': 'All technician initials correct', 'required': True},
+                    {'id': '90-GEN-002', 'text': 'Specifications sections reviewed', 'required': True},
+                    {'id': '90-GEN-003', 'text': 'Bid documents complete', 'required': True},
+                    {'id': '90-GEN-004', 'text': 'Permit applications reviewed', 'required': True},
+                    {'id': '90-GEN-005', 'text': 'Final MOT plan approved', 'required': True},
+                ]
+            },
+            'cadd': {
+                'name': 'CADD Drawing Review',
+                'phase': 'CADD',
+                'description': 'CADD standards and drawing quality',
+                'items': [
+                    {'id': 'CADD-001', 'text': 'Spell check completed on each sheet', 'required': True},
+                    {'id': 'CADD-002', 'text': 'North arrow, bar scale, title block scale match', 'required': True},
+                    {'id': 'CADD-003', 'text': 'No overlapping or misplaced text', 'required': True},
+                    {'id': 'CADD-004', 'text': 'Sheet index matches page numbers', 'required': True},
+                    {'id': 'CADD-005', 'text': 'Legend line types displaying correctly', 'required': True},
+                ]
+            }
         }
-    }
+    
     return jsonify({'success': True, 'checklists': checklists})
 
 
