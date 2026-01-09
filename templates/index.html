@@ -15,8 +15,8 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/static/manifest.json">
     
-    <!-- Icons -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,10 90,85 10,85' fill='%231B365D'/><polygon points='50,25 75,75 25,75' fill='%23C8102E'/></svg>">
+    <!-- Icons - Plan sheets with magnifying glass -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='none' stroke='%231B365D' stroke-width='4'/><rect x='20' y='15' width='35' height='42' rx='2' fill='%23C8102E'/><line x1='28' y1='36' x2='47' y2='36' stroke='white' stroke-width='2'/><line x1='37' y1='20' x2='37' y2='52' stroke='white' stroke-width='2'/><rect x='45' y='43' width='25' height='30' rx='2' fill='%23C8102E'/><line x1='50' y1='58' x2='65' y2='58' stroke='white' stroke-width='1.5'/><line x1='57' y1='47' x2='57' y2='69' stroke='white' stroke-width='1.5'/><circle cx='55' cy='55' r='18' fill='none' stroke='%231B365D' stroke-width='5'/><line x1='42' y1='68' x2='30' y2='82' stroke='%231B365D' stroke-width='6' stroke-linecap='round'/></svg>">
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     
     <!-- Three.js -->
@@ -756,7 +756,7 @@
         });
 
         // ============================================
-        // 3D SPINNING LOGO
+        // 3D SPINNING LOGO - Plan sheets with magnifying glass
         // ============================================
         const logoContainer = document.getElementById('logo-container');
         const logoRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -766,86 +766,121 @@
 
         const logoScene = new THREE.Scene();
         const logoCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        logoCamera.position.z = 3;
+        logoCamera.position.z = 4;
 
-        // Create "A" shape for Abonmarche
         const logoGroup = new THREE.Group();
 
-        // Outer triangle (navy)
-        const outerShape = new THREE.Shape();
-        outerShape.moveTo(0, 1.2);
-        outerShape.lineTo(-1, -0.8);
-        outerShape.lineTo(1, -0.8);
-        outerShape.closePath();
-
-        const outerGeometry = new THREE.ExtrudeGeometry(outerShape, {
-            depth: 0.3,
-            bevelEnabled: true,
-            bevelThickness: 0.05,
-            bevelSize: 0.05,
-            bevelSegments: 3
+        // Materials
+        const redMaterial = new THREE.MeshPhongMaterial({
+            color: 0xC8102E,
+            shininess: 80,
+            specular: 0x444444
         });
 
         const navyMaterial = new THREE.MeshPhongMaterial({
             color: 0x1B365D,
             shininess: 100,
-            specular: 0x444444
+            specular: 0x666666
         });
 
-        const outerMesh = new THREE.Mesh(outerGeometry, navyMaterial);
-        outerMesh.position.z = -0.15;
-        logoGroup.add(outerMesh);
+        // Large document (back-left) - red with 4 quadrants look
+        const doc1Group = new THREE.Group();
+        
+        // Main document body
+        const doc1Geo = new THREE.BoxGeometry(1.0, 1.2, 0.08);
+        const doc1 = new THREE.Mesh(doc1Geo, redMaterial);
+        doc1Group.add(doc1);
+        
+        // Quadrant lines (white/light indents)
+        const lineGeo = new THREE.BoxGeometry(0.02, 1.1, 0.09);
+        const lineMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 50 });
+        const vLine = new THREE.Mesh(lineGeo, lineMat);
+        vLine.position.x = 0.15;
+        doc1Group.add(vLine);
+        
+        const hLineGeo = new THREE.BoxGeometry(0.9, 0.02, 0.09);
+        const hLine = new THREE.Mesh(hLineGeo, lineMat);
+        hLine.position.y = 0.1;
+        doc1Group.add(hLine);
+        
+        doc1Group.position.set(-0.3, 0.4, -0.2);
+        logoGroup.add(doc1Group);
 
-        // Inner triangle (red)
-        const innerShape = new THREE.Shape();
-        innerShape.moveTo(0, 0.7);
-        innerShape.lineTo(-0.55, -0.4);
-        innerShape.lineTo(0.55, -0.4);
-        innerShape.closePath();
+        // Small document (front-right) - red with quadrants
+        const doc2Group = new THREE.Group();
+        
+        const doc2Geo = new THREE.BoxGeometry(0.7, 0.8, 0.08);
+        const doc2 = new THREE.Mesh(doc2Geo, redMaterial);
+        doc2Group.add(doc2);
+        
+        // Small doc quadrant lines
+        const vLine2 = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.7, 0.09), lineMat);
+        vLine2.position.x = 0.1;
+        doc2Group.add(vLine2);
+        
+        const hLine2 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.02, 0.09), lineMat);
+        hLine2.position.y = 0.05;
+        doc2Group.add(hLine2);
+        
+        doc2Group.position.set(0.5, -0.3, 0.1);
+        logoGroup.add(doc2Group);
 
-        const innerGeometry = new THREE.ExtrudeGeometry(innerShape, {
-            depth: 0.35,
-            bevelEnabled: true,
-            bevelThickness: 0.03,
-            bevelSize: 0.03,
-            bevelSegments: 2
-        });
-
-        const redMaterial = new THREE.MeshPhongMaterial({
-            color: 0xC8102E,
+        // Magnifying glass
+        const magGroup = new THREE.Group();
+        
+        // Glass ring (torus)
+        const ringGeo = new THREE.TorusGeometry(0.45, 0.08, 16, 32);
+        const ring = new THREE.Mesh(ringGeo, navyMaterial);
+        magGroup.add(ring);
+        
+        // Glass lens (transparent-ish circle)
+        const lensGeo = new THREE.CircleGeometry(0.42, 32);
+        const lensMat = new THREE.MeshPhongMaterial({
+            color: 0x8899aa,
+            transparent: true,
+            opacity: 0.3,
             shininess: 100,
-            specular: 0x444444
+            side: THREE.DoubleSide
         });
+        const lens = new THREE.Mesh(lensGeo, lensMat);
+        lens.position.z = 0.02;
+        magGroup.add(lens);
+        
+        // Handle
+        const handleGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.8, 16);
+        const handle = new THREE.Mesh(handleGeo, navyMaterial);
+        handle.rotation.z = Math.PI / 4;
+        handle.position.set(-0.55, -0.55, 0);
+        magGroup.add(handle);
+        
+        magGroup.position.set(0.15, -0.15, 0.3);
+        magGroup.rotation.z = -0.1;
+        logoGroup.add(magGroup);
 
-        const innerMesh = new THREE.Mesh(innerGeometry, redMaterial);
-        innerMesh.position.z = 0;
-        logoGroup.add(innerMesh);
-
-        // Crossbar for "A"
-        const barGeometry = new THREE.BoxGeometry(0.8, 0.15, 0.4);
-        const barMesh = new THREE.Mesh(barGeometry, navyMaterial);
-        barMesh.position.y = -0.1;
-        barMesh.position.z = 0.1;
-        logoGroup.add(barMesh);
+        // Outer circle ring (navy outline like in logo)
+        const outerRingGeo = new THREE.TorusGeometry(1.6, 0.06, 16, 64);
+        const outerRing = new THREE.Mesh(outerRingGeo, navyMaterial);
+        outerRing.position.z = -0.3;
+        logoGroup.add(outerRing);
 
         logoScene.add(logoGroup);
 
         // Lighting for logo
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         logoScene.add(ambientLight);
 
         const pointLight = new THREE.PointLight(0xffffff, 1);
-        pointLight.position.set(2, 2, 3);
+        pointLight.position.set(3, 3, 4);
         logoScene.add(pointLight);
 
-        const pointLight2 = new THREE.PointLight(0xC8102E, 0.5);
-        pointLight2.position.set(-2, -1, 2);
+        const pointLight2 = new THREE.PointLight(0xC8102E, 0.4);
+        pointLight2.position.set(-2, -1, 3);
         logoScene.add(pointLight2);
 
         // Animate logo
         function animateLogo() {
             requestAnimationFrame(animateLogo);
-            logoGroup.rotation.y += 0.01;
+            logoGroup.rotation.y += 0.008;
             logoRenderer.render(logoScene, logoCamera);
         }
         animateLogo();
