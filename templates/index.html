@@ -1081,7 +1081,7 @@
             // Upload file and start review
             const formData = new FormData();
             formData.append('planset', uploadedFile);
-            formData.append('checklist_id', selectedReviewType);
+            formData.append('checklist', selectedReviewType);
             
             try {
                 const response = await fetch('/api/review', {

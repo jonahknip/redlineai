@@ -232,9 +232,9 @@ def review_planset():
                     'error': f'Failed to download file: {str(e)}'
                 }), 400
         
-        elif 'file' in request.files:
-            # Handle file upload
-            file = request.files['file']
+        elif 'file' in request.files or 'planset' in request.files:
+            # Handle file upload (accept both 'file' and 'planset' field names)
+            file = request.files.get('file') or request.files.get('planset')
             
             if file.filename == '':
                 return jsonify({
