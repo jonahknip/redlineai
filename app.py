@@ -16,6 +16,7 @@ from io import BytesIO
 
 from flask import Flask, render_template, request, jsonify, send_file, session
 from werkzeug.utils import secure_filename
+import fitz  # PyMuPDF - import at top level to catch any import issues early
 
 from agent.plan_reviewer import CivilEngineeringPMAgent
 
@@ -438,8 +439,6 @@ def export_pdf_with_plan_pages():
     Export report as a true PDF with relevant plan set pages attached.
     Failed checklist items will have their corresponding plan pages appended.
     """
-    import fitz  # PyMuPDF
-    
     try:
         data = request.get_json()
         report_html = data.get('report', '')
