@@ -1073,6 +1073,7 @@
                     <div class="summary-box pass"><span class="summary-count" id="passCount">0</span><span class="summary-label">Pass</span></div>
                     <div class="summary-box fail"><span class="summary-count" id="failCount">0</span><span class="summary-label">Fail</span></div>
                     <div class="summary-box review"><span class="summary-count" id="reviewCount">0</span><span class="summary-label">Review</span></div>
+                    <div class="summary-box skipped" id="skippedBox" style="display: none;"><span class="summary-count" id="skippedCount">0</span><span class="summary-label">Skipped</span></div>
                     <div class="summary-box na"><span class="summary-count" id="naCount">0</span><span class="summary-label">N/A</span></div>
                 </div>
                 <div id="sectionsContainer"></div>
@@ -1130,6 +1131,20 @@
             if (!currentEvalData) return 0;
             return Object.values(currentEvalData).filter(item => item.status === status).length;
         }
+        
+        function updateSummaryCounts() {
+            document.getElementById('passCount').textContent = countStatus('PASS');
+            document.getElementById('failCount').textContent = countStatus('FAIL');
+            document.getElementById('reviewCount').textContent = countStatus('REVIEW');
+            document.getElementById('naCount').textContent = countStatus('N/A');
+            
+            const skippedCount = countStatus('SKIPPED');
+            const skippedBox = document.getElementById('skippedBox');
+            if (skippedBox) {
+                document.getElementById('skippedCount').textContent = skippedCount;
+                skippedBox.style.display = skippedCount > 0 ? 'block' : 'none';
+            }
+        }
 
         // ============================================
         // RENDER REPORT
@@ -1140,10 +1155,12 @@
             
             // Show and update summary
             summarySection.style.display = 'flex';
-            document.getElementById('passCount').textContent = countStatus('PASS');
-            document.getElementById('failCount').textContent = countStatus('FAIL');
-            document.getElementById('reviewCount').textContent = countStatus('REVIEW');
-            document.getElementById('naCount').textContent = countStatus('N/A');
+            updateSummaryCounts();
+            
+            // Count items with questions
+            const reviewItemsWithQuestions = Object.values(currentEvalData).filter(
+                item => item.status === 'REVIEW' && item.questions && item.questions.length > 0
+            ).length;
             
             // Group items by section
             const sections = {};
@@ -1182,6 +1199,23 @@
                 `;
                 sectionsContainer.innerHTML += sectionHtml;
             });
+            
+            // Add submit answers button if there are review items with questions
+            if (reviewItemsWithQuestions > 0) {
+                const existingBtn = document.getElementById('submitAnswersBtn');
+                if (!existingBtn) {
+                    const btnHtml = `
+                        <button class="submit-answers-btn" id="submitAnswersBtn" onclick="submitMeasurementAnswers()">
+                            Submit Measurements (${reviewItemsWithQuestions} items need verification)
+                        </button>
+                    `;
+                    sectionsContainer.insertAdjacentHTML('beforeend', btnHtml);
+                }
+            } else {
+                // Remove the button if no more review items
+                const existingBtn = document.getElementById('submitAnswersBtn');
+                if (existingBtn) existingBtn.remove();
+            }
         }
 
         function renderChecklistRow(item) {
@@ -1190,12 +1224,34 @@
                 ? item.page_refs.map(p => `<span class="page-ref">${p}</span>`).join('') 
                 : '-';
             
+            // Check if item has measurement questions (for REVIEW items)
+            let questionHtml = '';
+            if (item.status === 'REVIEW' && item.questions && item.questions.length > 0) {
+                const q = item.questions[0];
+                questionHtml = `
+                    <div class="measurement-question" data-item-id="${item.id}">
+                        <label>${q.question_text}</label>
+                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <input type="text" class="measurement-input" 
+                                   data-item-id="${item.id}" 
+                                   data-question-index="0"
+                                   placeholder="${q.expected_unit || 'Enter value'}">
+                            <label class="skip-checkbox">
+                                <input type="checkbox" class="skip-question" data-item-id="${item.id}">
+                                Skip
+                            </label>
+                        </div>
+                        ${q.threshold_display ? `<div class="threshold-hint">${q.threshold_display}</div>` : ''}
+                    </div>
+                `;
+            }
+            
             return `
                 <tr>
                     <td><span class="badge ${statusClass}">${item.status}</span></td>
                     <td>${pageRefs}</td>
                     <td style="font-family: monospace; font-size: 0.8rem; color: rgba(255,255,255,0.6);">${item.id}</td>
-                    <td>${item.text || ''}</td>
+                    <td>${item.text || ''}${questionHtml}</td>
                     <td>${item.comment || ''}</td>
                 </tr>
             `;
@@ -1284,6 +1340,85 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // ============================================
+        // MEASUREMENT ANSWERS
+        // ============================================
+        async function submitMeasurementAnswers() {
+            if (!currentReviewId) {
+                addChatMessage('ai', 'Please wait for the review to complete first.');
+                return;
+            }
+            
+            // Collect all answers from measurement inputs
+            const answers = {};
+            const inputs = document.querySelectorAll('.measurement-input');
+            
+            inputs.forEach(input => {
+                const itemId = input.dataset.itemId;
+                const questionIndex = parseInt(input.dataset.questionIndex || '0');
+                const value = input.value.trim();
+                const skipCheckbox = document.querySelector(`.skip-question[data-item-id="${itemId}"]`);
+                const skip = skipCheckbox ? skipCheckbox.checked : false;
+                
+                if (value || skip) {
+                    if (!answers[itemId]) answers[itemId] = [];
+                    answers[itemId].push({
+                        question_index: questionIndex,
+                        answer: value,
+                        skip: skip
+                    });
+                }
+            });
+            
+            // Check if we have any answers
+            if (Object.keys(answers).length === 0) {
+                addChatMessage('ai', 'Please provide measurements or mark items to skip before submitting.');
+                return;
+            }
+            
+            // Disable button during submission
+            const submitBtn = document.getElementById('submitAnswersBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner">⏳</span> Processing...';
+            }
+            
+            try {
+                const response = await fetch(`/api/review/${currentReviewId}/answer-questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answers })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update eval data with new statuses
+                    currentEvalData = data.updated_items;
+                    
+                    // Re-render the report
+                    renderReport({ eval_data: currentEvalData });
+                    
+                    // Get new counts
+                    const counts = data.new_counts || {};
+                    
+                    // Show success message in chat
+                    const updatedCount = Object.keys(answers).length;
+                    addChatMessage('ai', `Updated ${updatedCount} checklist items based on your measurements. ${counts.PASS || 0} now passing, ${counts.FAIL || 0} failing, ${counts.REVIEW || 0} still need review.`);
+                } else {
+                    addChatMessage('ai', `Error updating items: ${data.error}`);
+                }
+            } catch (error) {
+                addChatMessage('ai', `Network error: ${error.message}`);
+            } finally {
+                // Re-enable button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Submit Measurements';
+                }
+            }
         }
 
         // ============================================

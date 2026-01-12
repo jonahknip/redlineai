@@ -21,6 +21,7 @@ import fitz  # PyMuPDF - import at top level to catch any import issues early
 from agent.plan_reviewer import CivilEngineeringPMAgent
 from models.database import Review, ConversationTurn, ConversationTraining
 from agent.followup import generate_followup_response, analyze_query_intent, classify_query_for_training
+from agent.measurement_questions import add_questions_to_eval_data
 
 # Configure logging
 logging.basicConfig(
@@ -286,6 +287,12 @@ def review_planset():
         )
         
         if result['success']:
+            # Add measurement questions to REVIEW items
+            eval_data = result.get('eval_data', {})
+            if eval_data:
+                eval_data = add_questions_to_eval_data(eval_data)
+                result['eval_data'] = eval_data
+            
             # Save review to database
             try:
                 session_id = session.get('session_id')
