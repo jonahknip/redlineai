@@ -19,6 +19,8 @@ from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF - import at top level to catch any import issues early
 
 from agent.plan_reviewer import CivilEngineeringPMAgent
+from models.database import Review, ConversationTurn, ConversationTraining
+from agent.followup import generate_followup_response, analyze_query_intent, classify_query_for_training
 
 # Configure logging
 logging.basicConfig(
@@ -284,6 +286,29 @@ def review_planset():
         )
         
         if result['success']:
+            # Save review to database
+            try:
+                session_id = session.get('session_id')
+                if not session_id:
+                    session_id = str(uuid.uuid4())
+                    session['session_id'] = session_id
+                
+                review_id = Review.create(
+                    session_id=session_id,
+                    project_name=result.get('project_name', 'Unknown'),
+                    project_number=result.get('data', {}).get('project_info', {}).get('project_number'),
+                    planset_filename=filename if 'filename' in dir() else None,
+                    review_type=checklist_id or 'general',
+                    initial_report=result.get('report', ''),
+                    eval_data=result.get('eval_data', {}),
+                    page_count=result.get('page_count', 0)
+                )
+                result['review_id'] = review_id
+                logger.info(f"Saved review {review_id} to database")
+            except Exception as db_error:
+                logger.error(f"Failed to save review to database: {db_error}")
+                # Continue without review_id - don't fail the request
+            
             return jsonify(result)
         else:
             return jsonify(result), 500
@@ -836,6 +861,175 @@ def get_review(review_id):
             return jsonify({'success': True, 'review': review})
     
     return jsonify({'success': False, 'error': 'Review not found'}), 404
+
+
+# ==================== CONVERSATION FOLLOWUP ENDPOINTS ====================
+
+@app.route('/api/review/<review_id>', methods=['GET'])
+def get_review_by_id(review_id):
+    """Get a review by ID with conversation history."""
+    try:
+        review = Review.get(review_id)
+        if not review:
+            return jsonify({'success': False, 'error': 'Review not found'}), 404
+        
+        # Get conversation turns
+        turns = ConversationTurn.get_for_review(review_id)
+        
+        # Calculate turns remaining (max 5 user turns)
+        user_turns = len([t for t in turns if t['role'] == 'user'])
+        turns_remaining = max(0, 5 - user_turns)
+        
+        return jsonify({
+            'success': True,
+            'review': review,
+            'conversation': turns,
+            'turns_remaining': turns_remaining
+        })
+        
+    except Exception as e:
+        logger.error(f"Get review error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/review/<review_id>/followup', methods=['POST'])
+def followup_review(review_id):
+    """
+    Handle follow-up questions for a review.
+    Limited to 5 follow-up turns per review.
+    """
+    try:
+        # Get the review
+        review = Review.get(review_id)
+        if not review:
+            return jsonify({'success': False, 'error': 'Review not found'}), 404
+        
+        # Check turn limit
+        current_turns = Review.get_turn_count(review_id)
+        if current_turns >= 5:
+            return jsonify({
+                'success': False,
+                'error': 'Follow-up limit reached (5 turns max). Please fix the identified issues and start a new review.',
+                'turns_remaining': 0
+            }), 400
+        
+        # Get user query
+        data = request.get_json()
+        user_query = data.get('query', '').strip()
+        
+        if not user_query:
+            return jsonify({'success': False, 'error': 'No query provided'}), 400
+        
+        # Get conversation history
+        conversation_history = ConversationTurn.get_for_review(review_id)
+        
+        # Build review context
+        review_context = {
+            'project_name': review.get('project_name', 'Unknown'),
+            'review_type': review.get('review_type', 'Unknown'),
+            'page_count': review.get('page_count', 0),
+            'eval_data': review.get('eval_data', {})
+        }
+        
+        # Get planset images if provided (for vision analysis)
+        planset_images = None
+        if 'planset_images' in data:
+            planset_images = data['planset_images']  # List of base64 images
+        
+        # Generate response
+        result = generate_followup_response(
+            review_context=review_context,
+            conversation_history=conversation_history,
+            user_query=user_query,
+            planset_images=planset_images
+        )
+        
+        # Calculate new turn number
+        turn_number = current_turns + 1
+        
+        # Save user turn
+        user_turn_id = ConversationTurn.create(
+            review_id=review_id,
+            turn_number=turn_number,
+            role='user',
+            content=user_query,
+            pages_analyzed=result.get('pages_analyzed', []),
+            items_referenced=result.get('items_referenced', [])
+        )
+        
+        # Save assistant turn
+        assistant_turn_id = ConversationTurn.create(
+            review_id=review_id,
+            turn_number=turn_number,
+            role='assistant',
+            content=result['response'],
+            eval_updates=result.get('eval_updates', {}),
+            used_vision=result.get('used_vision', False)
+        )
+        
+        # Save training example
+        try:
+            ConversationTraining.create(
+                review_id=review_id,
+                turn_id=assistant_turn_id,
+                example_type=result.get('query_type', 'general'),
+                user_query=user_query,
+                ai_response=result['response'],
+                context_summary=f"Project: {review_context['project_name']}, Type: {review_context['review_type']}",
+                items_involved=list(result.get('eval_updates', {}).keys()) if result.get('eval_updates') else None,
+                pages_involved=result.get('pages_analyzed'),
+                outcome='updated' if result.get('eval_updates') else 'answered'
+            )
+        except Exception as training_error:
+            logger.warning(f"Failed to save training example: {training_error}")
+        
+        # Update eval_data if there are updates
+        if result.get('eval_updates'):
+            current_eval = review.get('eval_data', {})
+            current_eval.update(result['eval_updates'])
+            Review.update(review_id, eval_data=current_eval)
+        
+        return jsonify({
+            'success': True,
+            'response': result['response'],
+            'eval_updates': result.get('eval_updates', {}),
+            'used_vision': result.get('used_vision', False),
+            'query_type': result.get('query_type', 'general'),
+            'turns_remaining': max(0, 5 - turn_number)
+        })
+        
+    except Exception as e:
+        logger.error(f"Followup error: {e}\n{traceback.format_exc()}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/training', methods=['GET'])
+def get_admin_training():
+    """
+    Admin endpoint to view conversation training data.
+    Protected with PIN code.
+    """
+    pin = request.args.get('pin', '')
+    if pin != '0469':
+        return jsonify({'success': False, 'error': 'Invalid PIN'}), 403
+    
+    try:
+        # Get training statistics
+        stats = ConversationTraining.get_statistics()
+        
+        # Get recent examples
+        limit = int(request.args.get('limit', 50))
+        examples = ConversationTraining.get_all_for_export(limit=limit)
+        
+        return jsonify({
+            'success': True,
+            'stats': stats,
+            'examples': examples
+        })
+        
+    except Exception as e:
+        logger.error(f"Admin training error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/email', methods=['POST'])

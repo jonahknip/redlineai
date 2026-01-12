@@ -568,6 +568,114 @@ Comment: {example.comment}
     return "\n".join(prompt_parts)
 
 
+def save_conversation_training(
+    review_id: str,
+    turn_id: str,
+    user_query: str,
+    ai_response: str,
+    example_type: str = 'general',
+    context_summary: str = None,
+    items_involved: list = None,
+    pages_involved: list = None,
+    outcome: str = None
+) -> Optional[str]:
+    """
+    Save a conversation exchange as a training example.
+    
+    This integrates with the ConversationTraining table in the database
+    to capture follow-up conversation data for future fine-tuning.
+    
+    Args:
+        review_id: The review this conversation belongs to
+        turn_id: The specific conversation turn ID
+        user_query: The user's question
+        ai_response: The AI's response
+        example_type: Category (recheck, page_analysis, clarification, prioritize, general)
+        context_summary: Brief context about the review
+        items_involved: List of checklist item IDs involved
+        pages_involved: List of page numbers discussed
+        outcome: Result of the interaction (answered, updated, etc.)
+    
+    Returns:
+        The training example ID, or None if save failed
+    """
+    try:
+        # Import here to avoid circular imports
+        from models.database import ConversationTraining
+        
+        example_id = ConversationTraining.create(
+            review_id=review_id,
+            turn_id=turn_id,
+            example_type=example_type,
+            user_query=user_query,
+            ai_response=ai_response,
+            context_summary=context_summary,
+            items_involved=items_involved,
+            pages_involved=pages_involved,
+            outcome=outcome
+        )
+        
+        logger.info(f"Saved conversation training example {example_id}")
+        return example_id
+        
+    except Exception as e:
+        logger.error(f"Failed to save conversation training: {e}")
+        return None
+
+
+def export_conversation_training_for_finetuning(output_path: str = None) -> str:
+    """
+    Export conversation training data in OpenAI fine-tuning format (JSONL).
+    
+    This exports the conversation follow-up exchanges that have been
+    captured through the chat continuation feature.
+    
+    Returns:
+        Path to the exported JSONL file
+    """
+    try:
+        from models.database import ConversationTraining
+        
+        if output_path is None:
+            output_path = str(TRAINING_DIR / 'conversation_finetuning_data.jsonl')
+        
+        examples = ConversationTraining.get_all_for_export(limit=5000)
+        
+        with open(output_path, 'w') as f:
+            for example in examples:
+                # Create fine-tuning example
+                system_msg = """You are an expert civil engineering QA/QC reviewer assistant. 
+You help users with follow-up questions about planset reviews. You can:
+- Re-examine checklist items with more detail
+- Analyze specific pages when asked
+- Explain findings and their importance
+- Prioritize issues by severity
+- Update evaluations if new information warrants changes."""
+
+                user_msg = f"""Context: {example.get('context_summary', 'Review follow-up')}
+
+User Question: {example['user_query']}"""
+
+                assistant_msg = example['ai_response']
+                
+                fine_tune_example = {
+                    "messages": [
+                        {"role": "system", "content": system_msg},
+                        {"role": "user", "content": user_msg},
+                        {"role": "assistant", "content": assistant_msg}
+                    ]
+                }
+                
+                f.write(json.dumps(fine_tune_example) + '\n')
+        
+        logger.info(f"Exported {len(examples)} conversation examples to {output_path}")
+        return output_path
+        
+    except Exception as e:
+        logger.error(f"Failed to export conversation training: {e}")
+        raise
+
+
 # Singleton instance
 _training_store = None
 
