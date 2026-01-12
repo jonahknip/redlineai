@@ -63,3 +63,4 @@ htmlcov/
 *.pem
 *.key
 credentials.json
+# Trigger rebuild Mon Jan 12 08:37:05 EST 2026
