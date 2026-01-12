@@ -779,10 +779,10 @@ CHECKLIST ITEMS TO EVALUATE:
 
 Return a JSON array with your evaluation of each item. Format:
 [
-  {{"id": "30-GEN-001", "status": "PASS", "comment": "Verified - north arrow present on all sheets"}},
-  {{"id": "30-GEN-002", "status": "FAIL", "comment": "ADA ramps not identified in scope"}},
-  {{"id": "30-GEN-003", "status": "REVIEW", "comment": "Cannot verify utility locations from available sheets"}},
-  {{"id": "30-GEN-004", "status": "N/A", "comment": "Not applicable to this project type"}}
+  {{"id": "30-GEN-001", "status": "PASS", "comment": "Verified - north arrow present on all sheets", "page_refs": [1, 2]}},
+  {{"id": "30-GEN-002", "status": "FAIL", "comment": "ADA ramps not identified in scope", "page_refs": [1]}},
+  {{"id": "30-GEN-003", "status": "REVIEW", "comment": "Cannot verify utility locations from available sheets", "page_refs": []}},
+  {{"id": "30-GEN-004", "status": "N/A", "comment": "Not applicable to this project type", "page_refs": []}}
 ]
 
 Status options: PASS, FAIL, REVIEW, N/A
@@ -791,9 +791,13 @@ Status options: PASS, FAIL, REVIEW, N/A
 - REVIEW = Only use when you genuinely cannot determine from the provided information
 - N/A = Does not apply to this project type
 
-IMPORTANT: Be decisive. If you can see evidence in the plans, mark as PASS or FAIL with specific comments.
-Only mark REVIEW when you truly cannot determine the answer from the analysis provided.
-Provide specific, actionable comments referencing what you observed. Return ONLY the JSON array."""
+IMPORTANT: 
+1. Be decisive. If you can see evidence in the plans, mark as PASS or FAIL with specific comments.
+2. Only mark REVIEW when you truly cannot determine the answer from the analysis provided.
+3. For FAIL and REVIEW items, include "page_refs" array with 1-indexed page numbers where the issue is visible or should be addressed.
+4. Provide specific, actionable comments referencing what you observed.
+
+Return ONLY the JSON array."""
                 system_prompt = "You are a civil engineering QA/QC reviewer. Evaluate checklist items and return JSON only."
 
             try:

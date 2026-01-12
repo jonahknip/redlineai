@@ -432,6 +432,252 @@ th {{ background: #f5f5f5; color: #1B365D; }}
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/api/export/pdf-with-pages', methods=['POST'])
+def export_pdf_with_plan_pages():
+    """
+    Export report as a true PDF with relevant plan set pages attached.
+    Failed checklist items will have their corresponding plan pages appended.
+    """
+    import fitz  # PyMuPDF
+    
+    try:
+        data = request.get_json()
+        report_html = data.get('report', '')
+        project_name = data.get('project_name', 'Planset Review')
+        review_type = data.get('review_type', 'review')
+        failed_items = data.get('failed_items', [])  # List of {id, comment, page_refs}
+        planset_path = data.get('planset_path', '')  # Path to the original planset PDF
+        
+        # Create output PDF
+        output_doc = fitz.open()
+        
+        # Convert HTML report to PDF pages
+        # First, create a simple text-based report if HTML conversion isn't available
+        report_text = report_html
+        
+        # Try to extract text from HTML for the report
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(report_html, 'html.parser')
+            report_text = soup.get_text(separator='\n')
+        except:
+            pass
+        
+        # Create report pages
+        # A4 size in points: 595 x 842
+        page_width = 595
+        page_height = 842
+        margin = 50
+        
+        # Add cover page
+        cover_page = output_doc.new_page(width=page_width, height=page_height)
+        cover_text = f"""
+
+
+REDLINE.AI
+QA/QC REVIEW REPORT
+
+
+Project: {project_name}
+Review Type: {review_type}
+Generated: {datetime.now().strftime('%B %d, %Y')}
+
+
+This report contains the QA/QC review results followed by
+relevant plan set pages for items that failed or require attention.
+
+
+"""
+        cover_page.insert_text(
+            (margin, 150),
+            cover_text,
+            fontsize=14,
+            fontname="helv"
+        )
+        
+        # Add report content pages
+        lines = report_text.split('\n')
+        current_y = margin
+        current_page = output_doc.new_page(width=page_width, height=page_height)
+        
+        # Add header to first content page
+        current_page.insert_text(
+            (margin, 30),
+            "REVIEW FINDINGS",
+            fontsize=16,
+            fontname="helv",
+            color=(0.106, 0.212, 0.365)  # Navy
+        )
+        current_y = 60
+        
+        for line in lines:
+            if not line.strip():
+                current_y += 12
+                continue
+            
+            # Check if we need a new page
+            if current_y > page_height - margin:
+                current_page = output_doc.new_page(width=page_width, height=page_height)
+                current_y = margin
+            
+            # Truncate very long lines
+            if len(line) > 100:
+                line = line[:97] + "..."
+            
+            # Determine font size and style based on content
+            fontsize = 10
+            color = (0, 0, 0)  # Black
+            
+            if line.startswith('FAIL') or 'FAIL' in line.upper():
+                color = (0.863, 0.063, 0.271)  # Red
+            elif line.startswith('PASS') or 'PASS' in line.upper():
+                color = (0.157, 0.655, 0.271)  # Green
+            elif line.startswith('#') or line.isupper():
+                fontsize = 12
+                color = (0.106, 0.212, 0.365)  # Navy for headers
+            
+            try:
+                current_page.insert_text(
+                    (margin, current_y),
+                    line[:80],  # Limit line length
+                    fontsize=fontsize,
+                    fontname="helv",
+                    color=color
+                )
+            except:
+                pass
+            
+            current_y += fontsize + 4
+        
+        # Add a separator page before plan sheets
+        if failed_items and planset_path and os.path.exists(planset_path):
+            separator_page = output_doc.new_page(width=page_width, height=page_height)
+            separator_page.insert_text(
+                (margin, page_height // 2 - 50),
+                "REFERENCED PLAN SHEETS",
+                fontsize=20,
+                fontname="helv",
+                color=(0.106, 0.212, 0.365)
+            )
+            separator_page.insert_text(
+                (margin, page_height // 2),
+                "The following pages from the plan set are referenced by",
+                fontsize=12,
+                fontname="helv"
+            )
+            separator_page.insert_text(
+                (margin, page_height // 2 + 20),
+                "checklist items that failed or require attention.",
+                fontsize=12,
+                fontname="helv"
+            )
+            
+            # Open the source planset
+            try:
+                source_doc = fitz.open(planset_path)
+                
+                # Collect unique page numbers from failed items
+                pages_to_include = set()
+                for item in failed_items:
+                    page_refs = item.get('page_refs', [])
+                    if isinstance(page_refs, list):
+                        for ref in page_refs:
+                            if isinstance(ref, int) and 0 <= ref < len(source_doc):
+                                pages_to_include.add(ref)
+                    elif isinstance(page_refs, int):
+                        if 0 <= page_refs < len(source_doc):
+                            pages_to_include.add(page_refs)
+                
+                # If no specific pages referenced, include first 5 pages
+                if not pages_to_include:
+                    pages_to_include = set(range(min(5, len(source_doc))))
+                
+                # Sort pages
+                sorted_pages = sorted(pages_to_include)
+                
+                # Add each referenced page with a label
+                for page_num in sorted_pages:
+                    # Add a label page
+                    label_page = output_doc.new_page(width=page_width, height=page_height)
+                    label_page.insert_text(
+                        (margin, 50),
+                        f"Plan Sheet {page_num + 1}",
+                        fontsize=16,
+                        fontname="helv",
+                        color=(0.106, 0.212, 0.365)
+                    )
+                    
+                    # Find items that reference this page
+                    referencing_items = []
+                    for item in failed_items:
+                        page_refs = item.get('page_refs', [])
+                        if isinstance(page_refs, int):
+                            page_refs = [page_refs]
+                        if page_num in page_refs:
+                            referencing_items.append(item)
+                    
+                    if referencing_items:
+                        label_page.insert_text(
+                            (margin, 80),
+                            "Referenced by:",
+                            fontsize=10,
+                            fontname="helv"
+                        )
+                        y_pos = 100
+                        for item in referencing_items[:5]:  # Limit to 5 items
+                            item_text = f"- {item.get('id', 'N/A')}: {item.get('comment', '')[:50]}"
+                            label_page.insert_text(
+                                (margin + 10, y_pos),
+                                item_text,
+                                fontsize=9,
+                                fontname="helv",
+                                color=(0.863, 0.063, 0.271)
+                            )
+                            y_pos += 15
+                    
+                    # Copy the actual plan page
+                    output_doc.insert_pdf(
+                        source_doc,
+                        from_page=page_num,
+                        to_page=page_num
+                    )
+                
+                source_doc.close()
+                
+            except Exception as e:
+                logger.error(f"Error adding plan pages: {e}")
+                # Add error notice
+                error_page = output_doc.new_page(width=page_width, height=page_height)
+                error_page.insert_text(
+                    (margin, page_height // 2),
+                    f"Could not attach plan pages: {str(e)[:50]}",
+                    fontsize=12,
+                    fontname="helv",
+                    color=(0.863, 0.063, 0.271)
+                )
+        
+        # Save to buffer
+        pdf_buffer = BytesIO()
+        output_doc.save(pdf_buffer)
+        output_doc.close()
+        pdf_buffer.seek(0)
+        
+        # Clean filename
+        safe_name = ''.join(c if c.isalnum() or c in ' -_' else '_' for c in project_name)
+        filename = f"{safe_name}_{review_type}_Review_with_Plans_{datetime.now().strftime('%Y%m%d')}.pdf"
+        
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        logger.error(f"PDF with pages export error: {e}\n{traceback.format_exc()}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/history', methods=['GET'])
 def get_history():
     """Get review history for current session"""

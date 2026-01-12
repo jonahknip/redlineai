@@ -44,20 +44,23 @@
     {
       "name": "Start 30% Review",
       "short_name": "30% Review",
-      "description": "Start a 30% engineering review",
-      "url": "/?review=30_percent"
+      "description": "Start a 30% engineering QA/QC review - early design validation",
+      "url": "/?review=30_percent",
+      "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Start 60% Review",
       "short_name": "60% Review", 
-      "description": "Start a 60% engineering review",
-      "url": "/?review=60_percent"
+      "description": "Start a 60% engineering QA/QC review - design development",
+      "url": "/?review=60_percent",
+      "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Start 90% Review",
       "short_name": "90% Review",
-      "description": "Start a 90% engineering review",
-      "url": "/?review=90_percent"
+      "description": "Start a 90% engineering QA/QC review - final QC before bid",
+      "url": "/?review=90_percent",
+      "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

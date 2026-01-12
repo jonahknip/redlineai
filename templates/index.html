@@ -1376,6 +1376,19 @@
             // Add user message
             addMessage('user', `Uploaded: ${file.name}`);
 
+            // Check if a review type was preselected via URL shortcut
+            if (window.preselectedReviewType) {
+                const preselected = window.preselectedReviewType;
+                window.preselectedReviewType = null; // Clear it
+                
+                // Auto-start the preselected review
+                setTimeout(() => {
+                    addMessage('ai', `<p>Got it! Starting <strong>${reviewLabels[preselected]}</strong> automatically...</p>`, true);
+                    setTimeout(() => startReview(preselected), 500);
+                }, 500);
+                return;
+            }
+
             // Add AI response with review options
             setTimeout(() => {
                 const optionsHtml = `
@@ -1552,6 +1565,35 @@ ${currentReport}
             printWindow.document.write(printHtml);
             printWindow.document.close();
         };
+
+        // Handle URL parameters for quick shortcuts (PWA right-click menu)
+        function handleUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reviewType = urlParams.get('review');
+            
+            if (reviewType && ['30_percent', '60_percent', '90_percent'].includes(reviewType)) {
+                // Show a message indicating which review was selected via shortcut
+                const reviewLabelsLocal = {
+                    '30_percent': '30% Engineering QA/QC Review',
+                    '60_percent': '60% Engineering QA/QC Review',
+                    '90_percent': '90% Engineering QA/QC Review'
+                };
+                
+                // Add message indicating quick access was used
+                setTimeout(() => {
+                    addMessage('ai', `
+                        <p><strong>Quick Access:</strong> ${reviewLabelsLocal[reviewType]} selected.</p>
+                        <p>Please upload a planset PDF to begin the review, or try the demo.</p>
+                    `, true);
+                }, 800);
+                
+                // Store the selected review type to auto-start after file upload
+                window.preselectedReviewType = reviewType;
+            }
+        }
+        
+        // Call on page load
+        handleUrlParams();
 
         // Save to history
         async function saveToHistory(data, reviewType) {
