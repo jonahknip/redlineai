@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redline.AI | QA/QC Plan Review</title>
+    <title>Redline - Abonmarche Review Agent</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1B365D">
-    <meta name="description" content="AI-Powered QA/QC Plan Review Agent for Civil Engineering">
+    <meta name="description" content="Redline - Abonmarche Review Agent | AI-Powered QA/QC Plan Review">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Redline.AI">
+    <meta name="apple-mobile-web-app-title" content="Redline - Abonmarche">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/static/manifest.json">
@@ -762,6 +762,306 @@
             display: none;
         }
 
+        /* Loading steps */
+        .loading-steps {
+            margin-top: 20px;
+        }
+
+        .loading-step {
+            padding: 10px 16px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .loading-step.active {
+            border-left-color: #ffc107;
+            color: #ffc107;
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        .loading-step.complete {
+            border-left-color: #28a745;
+            color: #28a745;
+        }
+
+        .loading-step.complete::before {
+            content: '✓ ';
+        }
+
+        /* Backend report container */
+        .backend-report-container {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .backend-report-container iframe {
+            display: block;
+        }
+
+        /* Measurement questions section */
+        .measurement-questions-container {
+            background: rgba(255, 193, 7, 0.05);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header-styled {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            color: #fff;
+            margin: 0 0 8px 0;
+        }
+
+        .section-header-styled .icon {
+            font-size: 1.3rem;
+        }
+
+        .helper-text {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            margin: 0 0 20px 0;
+        }
+
+        .measurement-items {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .measurement-item-card {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 16px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .measurement-item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .item-id {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .page-refs {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            margin-left: auto;
+        }
+
+        .measurement-item-text {
+            font-size: 0.9rem;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .measurement-item-comment {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .measurement-input-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Plan pages section */
+        .plan-pages-container {
+            background: rgba(27, 54, 93, 0.2);
+            border: 1px solid rgba(27, 54, 93, 0.4);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .plan-pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .plan-page-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .plan-page-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .plan-page-header {
+            padding: 10px 12px;
+            background: rgba(27, 54, 93, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-number {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .page-badges {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mini-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .mini-badge.fail { background: #dc3545; color: #fff; }
+        .mini-badge.review { background: #ffc107; color: #000; }
+
+        .plan-page-preview {
+            aspect-ratio: 11/8.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        .plan-page-preview canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .loading-placeholder, .error-placeholder {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .plan-page-items {
+            padding: 10px 12px;
+            font-size: 0.75rem;
+        }
+
+        .ref-item {
+            padding: 4px 0;
+            color: rgba(255,255,255,0.7);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .ref-item:last-child {
+            border-bottom: none;
+        }
+
+        .ref-item.fail { color: #ff6b6b; }
+        .ref-item.review { color: #ffd43b; }
+
+        .more-items {
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+            padding-top: 6px;
+        }
+
+        /* Page modal */
+        .page-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+        }
+
+        .page-modal-content {
+            position: relative;
+            background: #1a1a2e;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .page-modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .page-modal-body {
+            overflow: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-modal-body canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Error message */
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #ff6b6b;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
         /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
@@ -811,7 +1111,7 @@
         <!-- Header -->
         <header class="app-header">
             <div class="logo">
-                REDLINE<span>.AI</span>
+                REDLINE<span> - Abonmarche</span>
             </div>
             <div class="header-actions">
                 <span class="project-info" id="projectInfo"></span>
@@ -927,6 +1227,9 @@
         let currentReviewId = null;
         let currentProjectName = '';
         let currentEvalData = null;
+        let currentReportHtml = null;  // Store backend-generated HTML report
+        let currentPageCount = 0;
+        let pdfDocument = null;  // Store PDF.js document for page rendering
         let reviewInProgress = false;
         let eventSource = null;
 
@@ -1056,28 +1359,37 @@
             splitView.classList.add('active');
             
             // Add initial AI message
-            addChatMessage('ai', `Working on your ${reviewLabels[selectedReviewType]}. Is there anything specific we should check for today?`);
+            addChatMessage('ai', `Starting your ${reviewLabels[selectedReviewType]}. I'm analyzing your planset now...`);
             
             // Initialize report with loading state
             reportContent.innerHTML = `
-                <div class="progress-section">
+                <div class="progress-section" id="progressSection">
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="progressBar"></div>
                     </div>
                     <div class="progress-text">
-                        <span id="progressLabel">Analyzing planset...</span>
+                        <span id="progressLabel">Extracting text and images from PDF...</span>
                         <span id="progressPercent">0%</span>
                     </div>
                 </div>
-                <div class="summary-section" id="summarySection" style="display: none;">
-                    <div class="summary-box pass"><span class="summary-count" id="passCount">0</span><span class="summary-label">Pass</span></div>
-                    <div class="summary-box fail"><span class="summary-count" id="failCount">0</span><span class="summary-label">Fail</span></div>
-                    <div class="summary-box review"><span class="summary-count" id="reviewCount">0</span><span class="summary-label">Review</span></div>
-                    <div class="summary-box skipped" id="skippedBox" style="display: none;"><span class="summary-count" id="skippedCount">0</span><span class="summary-label">Skipped</span></div>
-                    <div class="summary-box na"><span class="summary-count" id="naCount">0</span><span class="summary-label">N/A</span></div>
+                <div class="loading-steps" id="loadingSteps">
+                    <div class="loading-step active" id="step1">Extracting PDF content...</div>
+                    <div class="loading-step" id="step2">Analyzing with GPT-4 Vision...</div>
+                    <div class="loading-step" id="step3">Evaluating checklist items...</div>
+                    <div class="loading-step" id="step4">Generating report...</div>
                 </div>
-                <div id="sectionsContainer"></div>
             `;
+            
+            // Simulate progress steps
+            simulateProgress();
+            
+            // Load PDF document for page previews
+            try {
+                const arrayBuffer = await uploadedFile.arrayBuffer();
+                pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            } catch (e) {
+                console.error('Failed to load PDF for previews:', e);
+            }
             
             // Upload file and start review
             const formData = new FormData();
@@ -1096,13 +1408,10 @@
                     currentReviewId = data.review_id;
                     currentProjectName = data.project_name || 'Plan Review';
                     currentEvalData = data.eval_data || {};
+                    currentReportHtml = data.report || '';
+                    currentPageCount = data.page_count || 0;
                     
                     projectInfo.textContent = currentProjectName;
-                    
-                    // Update progress to 100%
-                    document.getElementById('progressBar').style.width = '100%';
-                    document.getElementById('progressPercent').textContent = '100%';
-                    document.getElementById('progressLabel').textContent = 'Review complete!';
                     
                     // Mark as complete
                     statusIndicator.classList.add('complete');
@@ -1112,19 +1421,92 @@
                     // Enable export
                     exportBtn.disabled = false;
                     
-                    // Render full report
+                    // Render the full report
                     renderReport(data);
                     
-                    // Add completion message
-                    addChatMessage('ai', `Review complete! I analyzed ${data.page_count} pages and found ${countStatus('FAIL')} issues and ${countStatus('REVIEW')} items needing verification. You can ask me questions about the findings or export the report.`);
+                    // Add detailed completion message with suggestions
+                    const failCount = countStatus('FAIL');
+                    const reviewCount = countStatus('REVIEW');
+                    const passCount = countStatus('PASS');
+                    
+                    let completionMessage = `**Review Complete!**\n\nI analyzed ${currentPageCount} pages and evaluated ${Object.keys(currentEvalData).length} checklist items.\n\n`;
+                    completionMessage += `**Summary:**\n`;
+                    completionMessage += `• ${passCount} items passed\n`;
+                    completionMessage += `• ${failCount} issues found\n`;
+                    completionMessage += `• ${reviewCount} items need manual verification\n\n`;
+                    
+                    if (reviewCount > 0) {
+                        completionMessage += `**Next Steps:**\n`;
+                        completionMessage += `Some items need your input. Look for the yellow "REVIEW" items in the report - they have measurement questions you can answer to verify compliance.\n\n`;
+                    }
+                    
+                    completionMessage += `**You can:**\n`;
+                    completionMessage += `• Ask me questions about specific findings\n`;
+                    completionMessage += `• Request clarification on any checklist item\n`;
+                    completionMessage += `• Export the report as PDF when ready\n`;
+                    completionMessage += `• Scroll down to see referenced plan pages`;
+                    
+                    addChatMessage('ai', completionMessage.replace(/\n/g, '<br>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'));
                 } else {
                     addChatMessage('ai', `Sorry, there was an error: ${data.error}`);
                     statusText.textContent = 'Error';
+                    reportContent.innerHTML = `<div class="error-message">Error: ${data.error}</div>`;
                 }
             } catch (error) {
                 addChatMessage('ai', `Network error: ${error.message}`);
                 statusText.textContent = 'Error';
+                reportContent.innerHTML = `<div class="error-message">Network error: ${error.message}</div>`;
             }
+        }
+        
+        function simulateProgress() {
+            const steps = ['step1', 'step2', 'step3', 'step4'];
+            const labels = [
+                'Extracting PDF content...',
+                'Analyzing with GPT-4 Vision...',
+                'Evaluating checklist items...',
+                'Generating report...'
+            ];
+            let currentStep = 0;
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress > 95) progress = 95;
+                
+                const progressBar = document.getElementById('progressBar');
+                const progressPercent = document.getElementById('progressPercent');
+                const progressLabel = document.getElementById('progressLabel');
+                
+                if (progressBar) progressBar.style.width = progress + '%';
+                if (progressPercent) progressPercent.textContent = Math.round(progress) + '%';
+                
+                // Update steps
+                if (progress > 25 && currentStep < 1) {
+                    document.getElementById('step1')?.classList.remove('active');
+                    document.getElementById('step1')?.classList.add('complete');
+                    document.getElementById('step2')?.classList.add('active');
+                    if (progressLabel) progressLabel.textContent = labels[1];
+                    currentStep = 1;
+                } else if (progress > 50 && currentStep < 2) {
+                    document.getElementById('step2')?.classList.remove('active');
+                    document.getElementById('step2')?.classList.add('complete');
+                    document.getElementById('step3')?.classList.add('active');
+                    if (progressLabel) progressLabel.textContent = labels[2];
+                    currentStep = 2;
+                } else if (progress > 75 && currentStep < 3) {
+                    document.getElementById('step3')?.classList.remove('active');
+                    document.getElementById('step3')?.classList.add('complete');
+                    document.getElementById('step4')?.classList.add('active');
+                    if (progressLabel) progressLabel.textContent = labels[3];
+                    currentStep = 3;
+                }
+                
+                // Stop when review is complete
+                if (!reviewInProgress) {
+                    clearInterval(interval);
+                }
+            }, 500);
         }
 
         function countStatus(status) {
@@ -1150,17 +1532,65 @@
         // RENDER REPORT
         // ============================================
         function renderReport(data) {
-            const sectionsContainer = document.getElementById('sectionsContainer');
-            const summarySection = document.getElementById('summarySection');
+            // Use the backend-generated HTML report if available
+            if (currentReportHtml && data.is_html !== false) {
+                // Create container for report + extras
+                reportContent.innerHTML = `
+                    <div id="backendReport" class="backend-report-container"></div>
+                    <div id="measurementSection" class="measurement-section"></div>
+                    <div id="planPagesSection" class="plan-pages-section"></div>
+                `;
+                
+                // Insert the backend HTML report into an iframe or shadow DOM for style isolation
+                const reportContainer = document.getElementById('backendReport');
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = 'width: 100%; border: none; min-height: 600px;';
+                iframe.id = 'reportIframe';
+                reportContainer.appendChild(iframe);
+                
+                // Write the report HTML to the iframe
+                iframe.onload = function() {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    iframeDoc.open();
+                    iframeDoc.write(currentReportHtml);
+                    iframeDoc.close();
+                    
+                    // Adjust iframe height to content
+                    setTimeout(() => {
+                        iframe.style.height = iframeDoc.body.scrollHeight + 50 + 'px';
+                    }, 100);
+                };
+                iframe.src = 'about:blank';
+                
+                // Add measurement questions section if needed
+                renderMeasurementQuestions();
+                
+                // Add plan page previews
+                renderPlanPagePreviews();
+            } else {
+                // Fallback: render from eval_data if no HTML report
+                renderReportFromEvalData();
+            }
+        }
+        
+        function renderReportFromEvalData() {
+            // Fallback rendering from eval_data
+            reportContent.innerHTML = `
+                <div class="summary-section" id="summarySection">
+                    <div class="summary-box pass"><span class="summary-count" id="passCount">0</span><span class="summary-label">Pass</span></div>
+                    <div class="summary-box fail"><span class="summary-count" id="failCount">0</span><span class="summary-label">Fail</span></div>
+                    <div class="summary-box review"><span class="summary-count" id="reviewCount">0</span><span class="summary-label">Review</span></div>
+                    <div class="summary-box skipped" id="skippedBox" style="display: none;"><span class="summary-count" id="skippedCount">0</span><span class="summary-label">Skipped</span></div>
+                    <div class="summary-box na"><span class="summary-count" id="naCount">0</span><span class="summary-label">N/A</span></div>
+                </div>
+                <div id="sectionsContainer"></div>
+                <div id="measurementSection" class="measurement-section"></div>
+                <div id="planPagesSection" class="plan-pages-section"></div>
+            `;
             
-            // Show and update summary
-            summarySection.style.display = 'flex';
             updateSummaryCounts();
             
-            // Count items with questions
-            const reviewItemsWithQuestions = Object.values(currentEvalData).filter(
-                item => item.status === 'REVIEW' && item.questions && item.questions.length > 0
-            ).length;
+            const sectionsContainer = document.getElementById('sectionsContainer');
             
             // Group items by section
             const sections = {};
@@ -1171,7 +1601,6 @@
             });
             
             // Render sections
-            sectionsContainer.innerHTML = '';
             Object.entries(sections).forEach(([sectionName, items]) => {
                 const sectionHtml = `
                     <div class="section-card expanded">
@@ -1200,21 +1629,229 @@
                 sectionsContainer.innerHTML += sectionHtml;
             });
             
-            // Add submit answers button if there are review items with questions
-            if (reviewItemsWithQuestions > 0) {
-                const existingBtn = document.getElementById('submitAnswersBtn');
-                if (!existingBtn) {
-                    const btnHtml = `
-                        <button class="submit-answers-btn" id="submitAnswersBtn" onclick="submitMeasurementAnswers()">
-                            Submit Measurements (${reviewItemsWithQuestions} items need verification)
-                        </button>
-                    `;
-                    sectionsContainer.insertAdjacentHTML('beforeend', btnHtml);
+            // Add measurement questions and plan pages
+            renderMeasurementQuestions();
+            renderPlanPagePreviews();
+        }
+        
+        function renderMeasurementQuestions() {
+            const measurementSection = document.getElementById('measurementSection');
+            if (!measurementSection) return;
+            
+            // Find items with measurement questions
+            const reviewItems = Object.entries(currentEvalData).filter(
+                ([id, item]) => item.status === 'REVIEW' && item.questions && item.questions.length > 0
+            );
+            
+            if (reviewItems.length === 0) {
+                measurementSection.innerHTML = '';
+                return;
+            }
+            
+            let html = `
+                <div class="measurement-questions-container">
+                    <h3 class="section-header-styled">
+                        <span class="icon">📏</span>
+                        Items Requiring Measurement Verification (${reviewItems.length})
+                    </h3>
+                    <p class="helper-text">These items need your input to verify compliance. Enter measurements or skip if not applicable.</p>
+                    <div class="measurement-items">
+            `;
+            
+            reviewItems.forEach(([itemId, item]) => {
+                const q = item.questions[0];
+                const pageRefs = item.page_refs && item.page_refs.length > 0 
+                    ? `Page${item.page_refs.length > 1 ? 's' : ''}: ${item.page_refs.join(', ')}`
+                    : '';
+                
+                html += `
+                    <div class="measurement-item-card">
+                        <div class="measurement-item-header">
+                            <span class="item-id">${itemId}</span>
+                            <span class="badge badge-review">REVIEW</span>
+                            ${pageRefs ? `<span class="page-refs">${pageRefs}</span>` : ''}
+                        </div>
+                        <div class="measurement-item-text">${item.text || ''}</div>
+                        <div class="measurement-item-comment">${item.comment || ''}</div>
+                        <div class="measurement-question">
+                            <label>${q.question_text}</label>
+                            <div class="measurement-input-row">
+                                <input type="text" class="measurement-input" 
+                                       data-item-id="${itemId}" 
+                                       data-question-index="0"
+                                       placeholder="${q.expected_unit || 'Enter value'}">
+                                <label class="skip-checkbox">
+                                    <input type="checkbox" class="skip-question" data-item-id="${itemId}">
+                                    Skip this item
+                                </label>
+                            </div>
+                            ${q.threshold_display ? `<div class="threshold-hint">${q.threshold_display}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    <button class="submit-answers-btn" id="submitAnswersBtn" onclick="submitMeasurementAnswers()">
+                        Submit Measurements
+                    </button>
+                </div>
+            `;
+            
+            measurementSection.innerHTML = html;
+        }
+        
+        async function renderPlanPagePreviews() {
+            const planPagesSection = document.getElementById('planPagesSection');
+            if (!planPagesSection || !pdfDocument) return;
+            
+            // Collect all unique page references from failed/review items
+            const pageRefs = new Set();
+            Object.values(currentEvalData).forEach(item => {
+                if ((item.status === 'FAIL' || item.status === 'REVIEW') && item.page_refs) {
+                    item.page_refs.forEach(p => pageRefs.add(p));
                 }
-            } else {
-                // Remove the button if no more review items
-                const existingBtn = document.getElementById('submitAnswersBtn');
-                if (existingBtn) existingBtn.remove();
+            });
+            
+            if (pageRefs.size === 0) {
+                planPagesSection.innerHTML = '';
+                return;
+            }
+            
+            const sortedPages = Array.from(pageRefs).sort((a, b) => a - b);
+            
+            let html = `
+                <div class="plan-pages-container">
+                    <h3 class="section-header-styled">
+                        <span class="icon">📄</span>
+                        Referenced Plan Pages (${sortedPages.length})
+                    </h3>
+                    <p class="helper-text">Pages referenced by items that failed or need review. Click to enlarge.</p>
+                    <div class="plan-pages-grid" id="planPagesGrid">
+            `;
+            
+            sortedPages.forEach(pageNum => {
+                // Find items that reference this page
+                const referencingItems = Object.entries(currentEvalData)
+                    .filter(([id, item]) => item.page_refs && item.page_refs.includes(pageNum))
+                    .map(([id, item]) => ({ id, status: item.status, comment: item.comment }));
+                
+                const failCount = referencingItems.filter(i => i.status === 'FAIL').length;
+                const reviewCount = referencingItems.filter(i => i.status === 'REVIEW').length;
+                
+                html += `
+                    <div class="plan-page-card" data-page="${pageNum}">
+                        <div class="plan-page-header">
+                            <span class="page-number">Page ${pageNum}</span>
+                            <div class="page-badges">
+                                ${failCount > 0 ? `<span class="mini-badge fail">${failCount} FAIL</span>` : ''}
+                                ${reviewCount > 0 ? `<span class="mini-badge review">${reviewCount} REVIEW</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="plan-page-preview" id="pagePreview${pageNum}">
+                            <div class="loading-placeholder">Loading...</div>
+                        </div>
+                        <div class="plan-page-items">
+                            ${referencingItems.slice(0, 3).map(i => 
+                                `<div class="ref-item ${i.status.toLowerCase()}">${i.id}: ${(i.comment || '').substring(0, 50)}${i.comment && i.comment.length > 50 ? '...' : ''}</div>`
+                            ).join('')}
+                            ${referencingItems.length > 3 ? `<div class="more-items">+${referencingItems.length - 3} more</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            planPagesSection.innerHTML = html;
+            
+            // Render page thumbnails
+            for (const pageNum of sortedPages) {
+                await renderPageThumbnail(pageNum);
+            }
+        }
+        
+        async function renderPageThumbnail(pageNum) {
+            if (!pdfDocument) return;
+            
+            const container = document.getElementById(`pagePreview${pageNum}`);
+            if (!container) return;
+            
+            try {
+                const page = await pdfDocument.getPage(pageNum);
+                const scale = 0.3; // Thumbnail scale
+                const viewport = page.getViewport({ scale });
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                canvas.style.cursor = 'pointer';
+                canvas.onclick = () => showPageModal(pageNum);
+                
+                const context = canvas.getContext('2d');
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                container.innerHTML = '';
+                container.appendChild(canvas);
+            } catch (e) {
+                container.innerHTML = `<div class="error-placeholder">Failed to load</div>`;
+            }
+        }
+        
+        function showPageModal(pageNum) {
+            // Create modal for full-size page view
+            const modal = document.createElement('div');
+            modal.className = 'page-modal';
+            modal.innerHTML = `
+                <div class="page-modal-backdrop" onclick="this.parentElement.remove()"></div>
+                <div class="page-modal-content">
+                    <div class="page-modal-header">
+                        <h3>Page ${pageNum}</h3>
+                        <button class="modal-close" onclick="this.closest('.page-modal').remove()">×</button>
+                    </div>
+                    <div class="page-modal-body" id="modalPageCanvas">
+                        <div class="loading-placeholder">Loading full page...</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Render full-size page
+            renderFullPage(pageNum, 'modalPageCanvas');
+        }
+        
+        async function renderFullPage(pageNum, containerId) {
+            if (!pdfDocument) return;
+            
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            try {
+                const page = await pdfDocument.getPage(pageNum);
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                const context = canvas.getContext('2d');
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                container.innerHTML = '';
+                container.appendChild(canvas);
+            } catch (e) {
+                container.innerHTML = `<div class="error-placeholder">Failed to load page</div>`;
             }
         }
 
@@ -1224,34 +1861,16 @@
                 ? item.page_refs.map(p => `<span class="page-ref">${p}</span>`).join('') 
                 : '-';
             
-            // Check if item has measurement questions (for REVIEW items)
-            let questionHtml = '';
-            if (item.status === 'REVIEW' && item.questions && item.questions.length > 0) {
-                const q = item.questions[0];
-                questionHtml = `
-                    <div class="measurement-question" data-item-id="${item.id}">
-                        <label>${q.question_text}</label>
-                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <input type="text" class="measurement-input" 
-                                   data-item-id="${item.id}" 
-                                   data-question-index="0"
-                                   placeholder="${q.expected_unit || 'Enter value'}">
-                            <label class="skip-checkbox">
-                                <input type="checkbox" class="skip-question" data-item-id="${item.id}">
-                                Skip
-                            </label>
-                        </div>
-                        ${q.threshold_display ? `<div class="threshold-hint">${q.threshold_display}</div>` : ''}
-                    </div>
-                `;
-            }
+            // Note: Measurement questions are now rendered in a separate section
+            const hasQuestion = item.status === 'REVIEW' && item.questions && item.questions.length > 0;
+            const questionIndicator = hasQuestion ? ' <span class="question-indicator" title="Measurement question available">📏</span>' : '';
             
             return `
                 <tr>
                     <td><span class="badge ${statusClass}">${item.status}</span></td>
                     <td>${pageRefs}</td>
                     <td style="font-family: monospace; font-size: 0.8rem; color: rgba(255,255,255,0.6);">${item.id}</td>
-                    <td>${item.text || ''}${questionHtml}</td>
+                    <td>${item.text || ''}${questionIndicator}</td>
                     <td>${item.comment || ''}</td>
                 </tr>
             `;
@@ -1424,6 +2043,56 @@
         // ============================================
         // EXPORT
         // ============================================
+        function generateReportHtml() {
+            // Use the backend-generated HTML if available
+            if (currentReportHtml) {
+                return currentReportHtml;
+            }
+            
+            // Fallback: generate from eval_data
+            if (!currentEvalData) return '<p>No review data available</p>';
+            
+            let html = `<h1>QA/QC Review Report</h1>
+                <h2>Project: ${escapeHtml(currentProjectName)}</h2>
+                <p>Review Type: ${escapeHtml(reviewLabels[selectedReviewType] || selectedReviewType)}</p>
+                <h3>Summary</h3>
+                <ul>
+                    <li>Pass: ${countStatus('PASS')}</li>
+                    <li>Fail: ${countStatus('FAIL')}</li>
+                    <li>Review: ${countStatus('REVIEW')}</li>
+                    <li>Skipped: ${countStatus('SKIPPED')}</li>
+                    <li>N/A: ${countStatus('N/A')}</li>
+                </ul>`;
+            
+            // Group items by section
+            const sections = {};
+            Object.entries(currentEvalData).forEach(([id, item]) => {
+                const section = item.section || 'General';
+                if (!sections[section]) sections[section] = [];
+                sections[section].push({ id, ...item });
+            });
+            
+            // Generate sections
+            Object.entries(sections).forEach(([sectionName, items]) => {
+                html += `<h3>${escapeHtml(sectionName)}</h3>`;
+                html += '<table border="1" cellpadding="5" style="border-collapse: collapse; width: 100%;">';
+                html += '<tr><th>Status</th><th>ID</th><th>Item</th><th>Comments</th></tr>';
+                
+                items.forEach(item => {
+                    html += `<tr>
+                        <td><strong>${item.status}</strong></td>
+                        <td>${item.id}</td>
+                        <td>${escapeHtml(item.text || '')}</td>
+                        <td>${escapeHtml(item.comment || '')}</td>
+                    </tr>`;
+                });
+                
+                html += '</table>';
+            });
+            
+            return html;
+        }
+        
         exportBtn.addEventListener('click', exportPdf);
 
         async function exportPdf() {
@@ -1433,9 +2102,30 @@
             exportBtn.innerHTML = '<span class="spinner">⏳</span> Generating...';
             
             try {
+                // Collect failed items with page references
+                const failedItems = [];
+                if (currentEvalData) {
+                    Object.entries(currentEvalData).forEach(([id, item]) => {
+                        if (item.status === 'FAIL' || item.status === 'REVIEW') {
+                            failedItems.push({
+                                id: id,
+                                comment: item.comment || '',
+                                page_refs: item.page_refs || []
+                            });
+                        }
+                    });
+                }
+                
+                // Generate report HTML from current data
+                const reportHtml = generateReportHtml();
+                
                 const formData = new FormData();
                 formData.append('planset', uploadedFile);
                 formData.append('review_id', currentReviewId);
+                formData.append('project_name', currentProjectName);
+                formData.append('review_type', selectedReviewType || 'review');
+                formData.append('report', reportHtml);
+                formData.append('failed_items', JSON.stringify(failedItems));
                 
                 const response = await fetch('/api/export/pdf-with-pages', {
                     method: 'POST',
