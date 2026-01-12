@@ -566,6 +566,15 @@
             height: 18px;
         }
 
+        .export-btn-secondary {
+            background: linear-gradient(135deg, #1b365d 0%, #0f2442 100%);
+            box-shadow: 0 4px 15px rgba(27, 54, 93, 0.3);
+        }
+
+        .export-btn-secondary:hover {
+            box-shadow: 0 6px 25px rgba(27, 54, 93, 0.5);
+        }
+
         .report-content {
             max-height: 70vh;
             overflow-y: auto;
@@ -1295,6 +1304,8 @@
         let uploadedFile = null;
         let currentReport = null;
         let currentProjectName = '';
+        let currentReviewType = '';
+        let currentEvalData = null;  // Stores checklist evaluation data with page_refs
 
         const reviewLabels = {
             '30_percent': '30% Engineering QA/QC Review',
@@ -1464,6 +1475,8 @@
                 if (data.success) {
                     currentReport = data.report;
                     currentProjectName = data.project_name || 'Planset Review';
+                    currentReviewType = reviewType;
+                    currentEvalData = data.eval_data || null;  // Store evaluation data if returned
 
                     // Strip HTML wrapper from report
                     let cleanReport = data.report;
@@ -1490,6 +1503,14 @@
                                         <polyline points="9 15 12 12 15 15"/>
                                     </svg>
                                     Export PDF
+                                </button>
+                                <button class="export-btn export-btn-secondary" onclick="exportPdfWithPlans()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="3" y1="9" x2="21" y2="9"/>
+                                        <line x1="9" y1="21" x2="9" y2="9"/>
+                                    </svg>
+                                    PDF + Plan Pages
                                 </button>
                             </div>
                             <div class="report-content">${cleanReport}</div>
@@ -1564,6 +1585,80 @@ ${currentReport}
 </html>`;
             printWindow.document.write(printHtml);
             printWindow.document.close();
+        };
+
+        // Export PDF with Plan Pages function
+        window.exportPdfWithPlans = async function() {
+            if (!currentReport || !uploadedFile) {
+                alert('Please complete a review first before exporting with plan pages.');
+                return;
+            }
+
+            // Show loading state
+            const exportBtns = document.querySelectorAll('.export-btn-secondary');
+            exportBtns.forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '<span>Generating...</span>';
+            });
+
+            try {
+                // Create form data with planset file and report data
+                const formData = new FormData();
+                formData.append('planset', uploadedFile);
+                formData.append('report', currentReport);
+                formData.append('project_name', currentProjectName);
+                formData.append('review_type', currentReviewType);
+                
+                // Include evaluation data with page references if available
+                if (currentEvalData) {
+                    // Extract failed items with page_refs
+                    const failedItems = Object.values(currentEvalData)
+                        .filter(item => item.status === 'FAIL' || item.status === 'REVIEW')
+                        .map(item => ({
+                            id: item.id,
+                            comment: item.comment || '',
+                            page_refs: item.page_refs || []
+                        }));
+                    formData.append('failed_items', JSON.stringify(failedItems));
+                }
+
+                const response = await fetch('/api/export/pdf-with-pages', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Export failed: ${response.status}`);
+                }
+
+                // Download the PDF
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${currentProjectName.replace(/[^a-zA-Z0-9\s-_]/g, '_')}_${currentReviewType}_with_plans.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`Export failed: ${error.message}`);
+            } finally {
+                // Restore button state
+                exportBtns.forEach(btn => {
+                    btn.disabled = false;
+                    btn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="9" y1="21" x2="9" y2="9"/>
+                        </svg>
+                        PDF + Plan Pages
+                    `;
+                });
+            }
         };
 
         // Handle URL parameters for quick shortcuts (PWA right-click menu)

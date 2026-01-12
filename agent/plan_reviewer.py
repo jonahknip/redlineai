@@ -123,6 +123,7 @@ class CivilEngineeringPMAgent:
             
         self.analysis = PlanSetAnalysis()
         self.full_text = ""
+        self.eval_data = {}  # Stores checklist evaluation results with page_refs
 
     def __del__(self):
         """Clean up PDF document"""
@@ -843,6 +844,9 @@ Return ONLY the JSON array."""
         else:
             # No checklist - mark all as review needed
             eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification'} for item in checklist_items_for_ai}
+        
+        # Store eval_dict as instance variable for later retrieval
+        self.eval_data = eval_dict
         
         # Count statuses
         counts = {'PASS': 0, 'FAIL': 0, 'REVIEW': 0, 'N/A': 0}

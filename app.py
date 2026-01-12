@@ -172,13 +172,17 @@ def analyze_planset(pdf_path: str, use_vision: bool = True, checklist: dict = No
         # Extract project name for history
         project_name = json_data.get('project_info', {}).get('project_name', 'Unknown Project')
         
+        # Get evaluation data (includes page_refs for failed items)
+        eval_data = getattr(agent, 'eval_data', {})
+        
         return {
             'success': True,
             'page_count': page_count,
             'report': report,
             'is_html': is_html,
             'data': json_data,
-            'project_name': project_name
+            'project_name': project_name,
+            'eval_data': eval_data  # Include evaluation data with page_refs
         }
     except Exception as e:
         logger.error(f"Analysis error: {e}\n{traceback.format_exc()}")
@@ -438,14 +442,41 @@ def export_pdf_with_plan_pages():
     """
     Export report as a true PDF with relevant plan set pages attached.
     Failed checklist items will have their corresponding plan pages appended.
+    Accepts either FormData (with planset file) or JSON (with planset_path).
     """
+    temp_planset_path = None
+    
     try:
-        data = request.get_json()
-        report_html = data.get('report', '')
-        project_name = data.get('project_name', 'Planset Review')
-        review_type = data.get('review_type', 'review')
-        failed_items = data.get('failed_items', [])  # List of {id, comment, page_refs}
-        planset_path = data.get('planset_path', '')  # Path to the original planset PDF
+        # Handle both FormData and JSON requests
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            # FormData request with file upload
+            report_html = request.form.get('report', '')
+            project_name = request.form.get('project_name', 'Planset Review')
+            review_type = request.form.get('review_type', 'review')
+            failed_items_str = request.form.get('failed_items', '[]')
+            try:
+                failed_items = json.loads(failed_items_str)
+            except:
+                failed_items = []
+            
+            # Save uploaded planset file temporarily
+            planset_path = ''
+            if 'planset' in request.files:
+                planset_file = request.files['planset']
+                if planset_file and planset_file.filename:
+                    temp_dir = tempfile.mkdtemp()
+                    temp_planset_path = os.path.join(temp_dir, secure_filename(planset_file.filename))
+                    planset_file.save(temp_planset_path)
+                    planset_path = temp_planset_path
+                    logger.info(f"Saved planset for export: {temp_planset_path}")
+        else:
+            # JSON request
+            data = request.get_json()
+            report_html = data.get('report', '')
+            project_name = data.get('project_name', 'Planset Review')
+            review_type = data.get('review_type', 'review')
+            failed_items = data.get('failed_items', [])  # List of {id, comment, page_refs}
+            planset_path = data.get('planset_path', '')  # Path to the original planset PDF
         
         # Create output PDF
         output_doc = fitz.open()
@@ -675,6 +706,15 @@ relevant plan set pages for items that failed or require attention.
     except Exception as e:
         logger.error(f"PDF with pages export error: {e}\n{traceback.format_exc()}")
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+    finally:
+        # Clean up temp planset file
+        if temp_planset_path and os.path.exists(temp_planset_path):
+            try:
+                os.remove(temp_planset_path)
+                os.rmdir(os.path.dirname(temp_planset_path))
+            except Exception:
+                pass
 
 
 @app.route('/api/history', methods=['GET'])
