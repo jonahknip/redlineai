@@ -942,8 +942,10 @@ body {{ font-family: 'Segoe UI', Calibri, Arial, sans-serif; margin: 0; padding:
 .checklist td {{ padding: 10px 12px; border: 1px solid #ddd; font-size: 12px; vertical-align: top; }}
 .checklist tr:nth-child(even) {{ background: #fafafa; }}
 .status-col {{ width: 70px; text-align: center; }}
+.page-col {{ width: 60px; text-align: center; font-family: 'Consolas', monospace; color: #666; font-size: 11px; }}
 .id-col {{ width: 100px; font-family: 'Consolas', monospace; color: #666; font-size: 11px; }}
-.item-col {{ width: 40%; }}
+.item-col {{ width: 35%; }}
+.page-badge {{ display: inline-block; padding: 2px 6px; background: #e9ecef; border-radius: 3px; font-size: 10px; margin: 1px; }}
 .badge {{ display: inline-block; padding: 4px 10px; border-radius: 4px; color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; }}
 .badge-pass {{ background: #28a745; }}
 .badge-fail {{ background: #dc3545; }}
@@ -1006,11 +1008,13 @@ body {{ font-family: 'Segoe UI', Calibri, Arial, sans-serif; margin: 0; padding:
             status = eval_data.get('status', 'REVIEW')
             comment = eval_data.get('comment', '')
             
-            # Track fails and reviews for findings
+            # Track fails and reviews for findings (with page refs)
+            page_refs = eval_data.get('page_refs', [])
+            page_note = f" (Page{'s' if len(page_refs) > 1 else ''}: {', '.join(map(str, page_refs))})" if page_refs else ""
             if status == 'FAIL':
-                fail_items.append(f"{item['id']}: {comment}")
+                fail_items.append(f"{item['id']}{page_note}: {comment}")
             elif status == 'REVIEW':
-                review_items.append(f"{item['id']}: {comment}")
+                review_items.append(f"{item['id']}{page_note}: {comment}")
             
             # Start new section if needed
             if item['section'] != current_section:
@@ -1021,7 +1025,7 @@ body {{ font-family: 'Segoe UI', Calibri, Arial, sans-serif; margin: 0; padding:
 <div class="section">
 <div class="section-title">{current_section}</div>
 <table class="checklist">
-<tr><th class="status-col">Status</th><th class="id-col">ID</th><th class="item-col">Checklist Item</th><th>Comments</th></tr>
+<tr><th class="status-col">Status</th><th class="page-col">Page(s)</th><th class="id-col">ID</th><th class="item-col">Checklist Item</th><th>Comments</th></tr>
 '''
             
             # Badge class
@@ -1029,8 +1033,18 @@ body {{ font-family: 'Segoe UI', Calibri, Arial, sans-serif; margin: 0; padding:
             if status == 'N/A':
                 badge_class = 'badge-na'
             
+            # Get page references
+            page_refs = eval_data.get('page_refs', [])
+            if page_refs:
+                page_display = ', '.join([f'<span class="page-badge">{p}</span>' for p in page_refs[:3]])
+                if len(page_refs) > 3:
+                    page_display += f' +{len(page_refs) - 3}'
+            else:
+                page_display = '-'
+            
             html += f'''<tr>
 <td class="status-col"><span class="badge {badge_class}">{status}</span></td>
+<td class="page-col">{page_display}</td>
 <td class="id-col">{item['id']}</td>
 <td class="item-col">{item['text']}</td>
 <td>{comment}</td>
