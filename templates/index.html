@@ -22,6 +22,12 @@
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
+    <!-- PDF.js for preview -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    
     <!-- Google Fonts for premium feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -337,6 +343,37 @@
 
         .upload-zone.has-file .upload-icon {
             color: #4CAF50;
+        }
+
+        /* PDF Preview Styles */
+        .pdf-preview-container {
+            margin-top: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            max-height: 200px;
+            display: none;
+        }
+
+        .pdf-preview-container.visible {
+            display: block;
+        }
+
+        .pdf-preview-canvas {
+            width: 100%;
+            height: auto;
+            max-height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .upload-zone.has-file .upload-icon,
+        .upload-zone.has-file .upload-text {
+            display: none;
+        }
+
+        .upload-zone.has-file {
+            padding: 20px;
         }
 
         .upload-text {
@@ -956,6 +993,165 @@
             text-shadow: 0 0 20px rgba(200, 16, 46, 0.5);
         }
 
+        /* Chat Input Container */
+        .chat-input-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .chat-input-container.visible {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chat-input-title {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .turns-counter {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(200, 16, 46, 0.2);
+            color: #C8102E;
+            font-weight: 600;
+        }
+
+        .turns-counter.exhausted {
+            background: rgba(108, 117, 125, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .review-id-display {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: monospace;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .quick-action-btn {
+            background: rgba(27, 54, 93, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(200, 16, 46, 0.3);
+            border-color: rgba(200, 16, 46, 0.5);
+            color: #fff;
+        }
+
+        .quick-action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #C8102E;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(135deg, #C8102E 0%, #a00d25 100%);
+            border: none;
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(200, 16, 46, 0.4);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chat-send-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .limit-message {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            padding: 12px;
+            background: rgba(108, 117, 125, 0.2);
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
         /* Hidden Elements */
         #fileInput {
             display: none;
@@ -1068,6 +1264,9 @@
                                 </svg>
                                 <p class="upload-text"><strong>Click to upload</strong> or drag & drop</p>
                                 <p class="file-name" id="fileName"></p>
+                                <div class="pdf-preview-container" id="pdfPreviewContainer">
+                                    <canvas class="pdf-preview-canvas" id="pdfPreviewCanvas"></canvas>
+                                </div>
                             </div>
                             <div class="demo-divider">
                                 <span>or try a demo</span>
@@ -1080,6 +1279,33 @@
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Chat Input for Follow-up Questions -->
+            <div class="chat-input-container" id="chatInputContainer">
+                <div class="chat-input-header">
+                    <span class="chat-input-title">Continue the conversation</span>
+                    <span class="turns-counter" id="turnsCounter">5 turns remaining</span>
+                </div>
+                <div class="review-id-display" id="reviewIdDisplay"></div>
+                <div class="quick-actions" id="quickActions">
+                    <button class="quick-action-btn" data-action="recheck">Re-check failed items</button>
+                    <button class="quick-action-btn" data-action="priority">List by importance</button>
+                    <button class="quick-action-btn" data-action="page">Analyze specific page</button>
+                    <button class="quick-action-btn" data-action="explain">Explain a finding</button>
+                </div>
+                <div class="chat-input-wrapper">
+                    <textarea class="chat-input" id="chatInput" placeholder="Ask a follow-up question about the review..." rows="1"></textarea>
+                    <button class="chat-send-btn" id="chatSendBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="limit-message" id="limitMessage" style="display: none;">
+                    Follow-up limit reached. Please fix the identified issues and start a new review for further analysis.
                 </div>
             </div>
         </div>
@@ -1320,6 +1546,8 @@
         let currentProjectName = '';
         let currentReviewType = '';
         let currentEvalData = null;  // Stores checklist evaluation data with page_refs
+        let currentReviewId = null;  // Database review ID for follow-up conversations
+        let turnsRemaining = 5;      // Max 5 follow-up turns per review
 
         const reviewLabels = {
             '30_percent': '30% Engineering QA/QC Review',
@@ -1409,6 +1637,9 @@
                 currentProjectName = '';
                 currentReviewType = '';
                 currentEvalData = null;
+                currentReviewId = null;
+                turnsRemaining = 5;
+                hideChatInput();
                 
                 // Add separator message for new review
                 addMessage('ai', `<hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;"><p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">New planset uploaded - starting fresh review</p>`, true);
@@ -1417,6 +1648,9 @@
             uploadedFile = file;
             fileNameDisplay.textContent = file.name;
             uploadZone.classList.add('has-file');
+            
+            // Render PDF preview
+            renderPdfPreview(file);
 
             // Add user message
             addMessage('user', `Uploaded: ${file.name}`);
@@ -1515,6 +1749,8 @@
                     currentProjectName = data.project_name || 'Planset Review';
                     currentReviewType = reviewType;
                     currentEvalData = data.eval_data || null;  // Store evaluation data if returned
+                    currentReviewId = data.review_id || null;  // Store review ID for follow-ups
+                    turnsRemaining = 5;  // Reset turns for new review
 
                     // Strip HTML wrapper from report
                     let cleanReport = data.report;
@@ -1555,6 +1791,11 @@
 
                     // Save to history
                     saveToHistory(data, reviewType);
+                    
+                    // Show chat input for follow-up questions
+                    if (currentReviewId) {
+                        showChatInput();
+                    }
                 } else {
                     addMessage('ai', `Something went wrong: ${data.error}. Please try again or contact support.`);
                 }
@@ -1742,6 +1983,223 @@ ${currentReport}
                 });
             } catch (err) {
                 console.error('Failed to save to history:', err);
+            }
+        }
+
+        // ============================================
+        // PDF PREVIEW FUNCTIONALITY
+        // ============================================
+        async function renderPdfPreview(file) {
+            const previewContainer = document.getElementById('pdfPreviewContainer');
+            const canvas = document.getElementById('pdfPreviewCanvas');
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const page = await pdf.getPage(1);
+                
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+                
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                const context = canvas.getContext('2d');
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                previewContainer.classList.add('visible');
+            } catch (error) {
+                console.error('Error rendering PDF preview:', error);
+                // If preview fails, just don't show it - not critical
+            }
+        }
+
+        // ============================================
+        // CHAT CONTINUATION FUNCTIONALITY
+        // ============================================
+        const chatInputContainer = document.getElementById('chatInputContainer');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+        const turnsCounter = document.getElementById('turnsCounter');
+        const reviewIdDisplay = document.getElementById('reviewIdDisplay');
+        const limitMessage = document.getElementById('limitMessage');
+        const quickActions = document.getElementById('quickActions');
+
+        function showChatInput() {
+            if (!currentReviewId) return;
+            
+            chatInputContainer.classList.add('visible');
+            updateTurnsDisplay();
+            reviewIdDisplay.textContent = `Review ID: ${currentReviewId.substring(0, 8)}...`;
+            
+            // Enable/disable based on turns remaining
+            const exhausted = turnsRemaining <= 0;
+            chatInput.disabled = exhausted;
+            chatSendBtn.disabled = exhausted;
+            quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = exhausted);
+            limitMessage.style.display = exhausted ? 'block' : 'none';
+        }
+
+        function hideChatInput() {
+            chatInputContainer.classList.remove('visible');
+        }
+
+        function updateTurnsDisplay() {
+            turnsCounter.textContent = `${turnsRemaining} turn${turnsRemaining !== 1 ? 's' : ''} remaining`;
+            if (turnsRemaining <= 0) {
+                turnsCounter.classList.add('exhausted');
+            } else {
+                turnsCounter.classList.remove('exhausted');
+            }
+        }
+
+        // Quick action handlers
+        quickActions.addEventListener('click', (e) => {
+            if (e.target.classList.contains('quick-action-btn') && !e.target.disabled) {
+                const action = e.target.dataset.action;
+                handleQuickAction(action);
+            }
+        });
+
+        function handleQuickAction(action) {
+            let query = '';
+            switch (action) {
+                case 'recheck':
+                    query = 'Please re-check the failed items with more detail and confirm if they are correct.';
+                    break;
+                case 'priority':
+                    query = 'List all failed and review items in order of importance/criticality, with the most urgent issues first.';
+                    break;
+                case 'page':
+                    const pageNum = prompt('Which page number would you like me to analyze more closely?');
+                    if (pageNum) {
+                        query = `Please analyze page ${pageNum} more closely and tell me if there are any issues I should be aware of.`;
+                    }
+                    break;
+                case 'explain':
+                    const itemId = prompt('Enter the item ID (e.g., 90-GEN-001) or describe the finding you want explained:');
+                    if (itemId) {
+                        query = `Please explain the finding for ${itemId} in more detail. Why did it fail or need review?`;
+                    }
+                    break;
+            }
+            
+            if (query) {
+                chatInput.value = query;
+                sendFollowup();
+            }
+        }
+
+        // Send button click handler
+        chatSendBtn.addEventListener('click', sendFollowup);
+
+        // Enter key to send (Shift+Enter for new line)
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendFollowup();
+            }
+        });
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+        });
+
+        async function sendFollowup() {
+            const query = chatInput.value.trim();
+            if (!query || !currentReviewId || turnsRemaining <= 0) return;
+            
+            // Disable input while sending
+            chatInput.disabled = true;
+            chatSendBtn.disabled = true;
+            quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = true);
+            
+            // Clear input
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            
+            // Add user message
+            addMessage('user', query);
+            
+            // Add typing indicator
+            const typingMsg = addMessage('ai', `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg class="spinner" viewBox="0 0 24 24" width="16" height="16">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30 70" />
+                    </svg>
+                    <span>Analyzing...</span>
+                </div>
+            `, true);
+            
+            try {
+                const response = await fetch(`/api/review/${currentReviewId}/followup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                typingMsg.remove();
+                
+                if (data.success) {
+                    // Update turns remaining
+                    turnsRemaining = data.turns_remaining;
+                    updateTurnsDisplay();
+                    
+                    // Format response
+                    let responseHtml = `<p>${escapeHtml(data.response).replace(/\n/g, '<br>')}</p>`;
+                    
+                    // Show evaluation updates if any
+                    if (data.eval_updates && Object.keys(data.eval_updates).length > 0) {
+                        responseHtml += `<div style="margin-top: 12px; padding: 10px; background: rgba(200, 16, 46, 0.1); border-radius: 8px; border-left: 3px solid #C8102E;">`;
+                        responseHtml += `<strong style="color: #C8102E;">Evaluation Updates:</strong><ul style="margin: 8px 0 0 20px;">`;
+                        for (const [itemId, update] of Object.entries(data.eval_updates)) {
+                            responseHtml += `<li>${itemId}: Now marked as <strong>${update.status}</strong></li>`;
+                            // Update local eval data
+                            if (currentEvalData && currentEvalData[itemId]) {
+                                currentEvalData[itemId] = update;
+                            }
+                        }
+                        responseHtml += `</ul></div>`;
+                    }
+                    
+                    // Show if vision was used
+                    if (data.used_vision) {
+                        responseHtml += `<p style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px;">📄 Analyzed plan pages for this response</p>`;
+                    }
+                    
+                    addMessage('ai', responseHtml, true);
+                    
+                    // Check if limit reached
+                    if (turnsRemaining <= 0) {
+                        chatInput.disabled = true;
+                        chatSendBtn.disabled = true;
+                        quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = true);
+                        limitMessage.style.display = 'block';
+                    } else {
+                        chatInput.disabled = false;
+                        chatSendBtn.disabled = false;
+                        quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = false);
+                    }
+                } else {
+                    addMessage('ai', `Sorry, there was an error: ${data.error}`);
+                    chatInput.disabled = false;
+                    chatSendBtn.disabled = false;
+                    quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = false);
+                }
+            } catch (error) {
+                typingMsg.remove();
+                addMessage('ai', `Network error: ${error.message}. Please try again.`);
+                chatInput.disabled = false;
+                chatSendBtn.disabled = false;
+                quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = false);
             }
         }
 
