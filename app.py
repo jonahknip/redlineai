@@ -904,14 +904,8 @@ def followup_review(review_id):
         if not review:
             return jsonify({'success': False, 'error': 'Review not found'}), 404
         
-        # Check turn limit
+        # Get current turn count (no limit)
         current_turns = Review.get_turn_count(review_id)
-        if current_turns >= 5:
-            return jsonify({
-                'success': False,
-                'error': 'Follow-up limit reached (5 turns max). Please fix the identified issues and start a new review.',
-                'turns_remaining': 0
-            }), 400
         
         # Get user query
         data = request.get_json()
@@ -994,8 +988,7 @@ def followup_review(review_id):
             'response': result['response'],
             'eval_updates': result.get('eval_updates', {}),
             'used_vision': result.get('used_vision', False),
-            'query_type': result.get('query_type', 'general'),
-            'turns_remaining': max(0, 5 - turn_number)
+            'query_type': result.get('query_type', 'general')
         })
         
     except Exception as e:
@@ -1029,6 +1022,59 @@ def get_admin_training():
         
     except Exception as e:
         logger.error(f"Admin training error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/review/<review_id>/answer-questions', methods=['POST'])
+def answer_measurement_questions(review_id):
+    """
+    Re-evaluate REVIEW items based on user-provided measurements.
+    
+    Request body:
+    {
+        "answers": {
+            "90-UTL-002": [{"question_index": 0, "answer": "12.5", "skip": false}],
+            ...
+        }
+    }
+    """
+    try:
+        from agent.measurement_questions import re_evaluate_items, count_statuses, add_questions_to_eval_data
+        
+        # Get the review
+        review = Review.get(review_id)
+        if not review:
+            return jsonify({'success': False, 'error': 'Review not found'}), 404
+        
+        # Get answers from request
+        data = request.get_json()
+        answers = data.get('answers', {})
+        
+        if not answers:
+            return jsonify({'success': False, 'error': 'No answers provided'}), 400
+        
+        # Get current eval_data
+        eval_data = review.get('eval_data', {})
+        
+        # Re-evaluate items with answers
+        updated_eval = re_evaluate_items(eval_data, answers)
+        
+        # Update review in database
+        Review.update(review_id, eval_data=updated_eval)
+        
+        # Count new statuses
+        counts = count_statuses(updated_eval)
+        
+        return jsonify({
+            'success': True,
+            'updated_items': updated_eval,
+            'new_counts': counts
+        })
+        
+    except Exception as e:
+        logger.error(f"Answer questions error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

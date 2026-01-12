@@ -879,15 +879,21 @@ Return ONLY the JSON array."""
                 evaluations = json.loads(eval_text)
                 eval_dict = {e['id']: e for e in evaluations}
                 
+                # Enrich eval_dict with section and text info from checklist
+                for item in checklist_items_for_ai:
+                    if item['id'] in eval_dict:
+                        eval_dict[item['id']]['section'] = item.get('section', 'General')
+                        eval_dict[item['id']]['text'] = item.get('text', '')
+                
             except Exception as e:
                 print(f"AI evaluation error: {e}")
                 import traceback
                 traceback.print_exc()
                 # Default all to REVIEW if AI fails
-                eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification'} for item in checklist_items_for_ai}
+                eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification', 'section': item.get('section', 'General'), 'text': item.get('text', '')} for item in checklist_items_for_ai}
         else:
             # No checklist - mark all as review needed
-            eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification'} for item in checklist_items_for_ai}
+            eval_dict = {item['id']: {'id': item['id'], 'status': 'REVIEW', 'comment': 'Requires manual verification', 'section': item.get('section', 'General'), 'text': item.get('text', '')} for item in checklist_items_for_ai}
         
         # Store eval_dict as instance variable for later retrieval
         self.eval_data = eval_dict

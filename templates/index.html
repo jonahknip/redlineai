@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plan Set Review Agent | Abonmarche</title>
+    <title>Redline.AI | QA/QC Plan Review</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1B365D">
     <meta name="description" content="AI-Powered QA/QC Plan Review Agent for Civil Engineering">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Plan Review">
+    <meta name="apple-mobile-web-app-title" content="Redline.AI">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/static/manifest.json">
@@ -19,16 +19,13 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='none' stroke='%231B365D' stroke-width='4'/><rect x='22' y='25' width='22' height='22' fill='%23C8102E'/><rect x='22' y='50' width='22' height='22' fill='%23C8102E'/><rect x='47' y='25' width='30' height='22' fill='%23C8102E'/><rect x='47' y='50' width='16' height='22' fill='%23C8102E'/></svg>">
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
     <!-- PDF.js for preview -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
     
-    <!-- Google Fonts for premium feel -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -44,1097 +41,416 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #030014;
             color: #fff;
-            min-height: 100vh;
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* Three.js Canvas */
-        #space-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
-        /* Animated gradient overlay */
-        .gradient-overlay {
+        /* Background */
+        .bg-gradient {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(ellipse at 20% 20%, rgba(200, 16, 46, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(27, 54, 93, 0.2) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(100, 50, 150, 0.1) 0%, transparent 70%);
-            z-index: 1;
+                radial-gradient(ellipse at 20% 20%, rgba(200, 16, 46, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(27, 54, 93, 0.15) 0%, transparent 50%);
+            z-index: 0;
             pointer-events: none;
-            animation: gradientShift 15s ease-in-out infinite;
         }
 
-        @keyframes gradientShift {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.1); }
-        }
-
-        /* Floating particles overlay */
-        .particles-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation: float 20s infinite;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
-        }
-
-        /* Main Container */
+        /* App Container */
         .app-container {
             position: relative;
             z-index: 10;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* Header with 3D Logo */
-        header {
-            text-align: center;
-            padding: 40px 20px 30px;
-            position: relative;
+        /* Header */
+        .app-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: rgba(27, 54, 93, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
         }
 
-        /* Glowing ring behind logo */
-        .logo-glow {
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 160px;
-            height: 160px;
-            background: radial-gradient(circle, rgba(200, 16, 46, 0.3) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(20px);
-            animation: pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.5; }
-            50% { transform: translateX(-50%) scale(1.2); opacity: 0.8; }
-        }
-
-        #logo-container {
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 20px;
-            position: relative;
-            z-index: 2;
-        }
-
-        h1 {
+        .logo {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.4rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            letter-spacing: 2px;
-            background: linear-gradient(135deg, #fff 0%, #C8102E 50%, #fff 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: shimmer 3s linear infinite;
-            text-shadow: 0 0 40px rgba(200, 16, 46, 0.5);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        @keyframes shimmer {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
-
-        h1 .highlight {
+        .logo span {
             color: #C8102E;
         }
 
-        .subtitle {
-            color: rgba(255,255,255,0.5);
-            font-size: 0.95rem;
-            margin-top: 8px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-weight: 300;
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* Chat Container */
-        .chat-container {
+        .project-info {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .install-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .install-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .install-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
             flex: 1;
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 20px;
             display: flex;
-            flex-direction: column;
-        }
-
-        /* Glass card effect */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        /* Messages Area */
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .message {
-            display: flex;
-            animation: messageIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes messageIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message.ai {
-            justify-content: flex-start;
-        }
-
-        .message-content {
-            max-width: 85%;
-            padding: 18px 24px;
-            border-radius: 20px;
-            line-height: 1.6;
-            font-size: 0.95rem;
-            position: relative;
             overflow: hidden;
         }
 
-        .message.ai .message-content {
-            background: linear-gradient(135deg, rgba(27, 54, 93, 0.9) 0%, rgba(27, 54, 93, 0.7) 100%);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px 20px 20px 4px;
-            backdrop-filter: blur(10px);
-            box-shadow: 
-                0 4px 20px rgba(27, 54, 93, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .message.ai .message-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        }
-
-        .message.user .message-content {
-            background: linear-gradient(135deg, #C8102E 0%, #a00d25 100%);
-            border-radius: 20px 20px 4px 20px;
-            box-shadow: 
-                0 4px 20px rgba(200, 16, 46, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        /* Upload Area */
-        .upload-prompt {
+        /* Upload View */
+        .upload-view {
+            flex: 1;
             display: flex;
-            flex-direction: column;
-            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .upload-view.hidden {
+            display: none;
+        }
+
+        .upload-container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .upload-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .upload-subtitle {
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 40px;
         }
 
         .upload-zone {
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
+            background: rgba(255,255,255,0.03);
+            border: 2px dashed rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 60px 40px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            background: rgba(255,255,255,0.02);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-zone::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(200, 16, 46, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .upload-zone:hover::before {
-            left: 100%;
+            transition: all 0.3s;
+            margin-bottom: 24px;
         }
 
         .upload-zone:hover {
             border-color: #C8102E;
-            background: rgba(200, 16, 46, 0.1);
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(200, 16, 46, 0.2);
+            background: rgba(200, 16, 46, 0.05);
+        }
+
+        .upload-zone.has-file {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
         }
 
         .upload-zone.dragover {
             border-color: #C8102E;
-            background: rgba(200, 16, 46, 0.15);
-            transform: scale(1.03);
-            box-shadow: 0 0 40px rgba(200, 16, 46, 0.3);
-        }
-
-        .upload-zone.has-file {
-            border-color: #4CAF50;
-            border-style: solid;
-            background: rgba(76, 175, 80, 0.1);
-            box-shadow: 0 0 30px rgba(76, 175, 80, 0.2);
+            background: rgba(200, 16, 46, 0.1);
+            transform: scale(1.02);
         }
 
         .upload-icon {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 16px;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
             color: rgba(255,255,255,0.4);
-            transition: all 0.3s;
-        }
-
-        .upload-zone:hover .upload-icon {
-            color: #C8102E;
-            transform: translateY(-5px);
         }
 
         .upload-zone.has-file .upload-icon {
-            color: #4CAF50;
-        }
-
-        /* PDF Preview Styles */
-        .pdf-preview-container {
-            margin-top: 12px;
-            border-radius: 12px;
-            overflow: hidden;
-            background: rgba(0, 0, 0, 0.3);
-            max-height: 200px;
-            display: none;
-        }
-
-        .pdf-preview-container.visible {
-            display: block;
-        }
-
-        .pdf-preview-canvas {
-            width: 100%;
-            height: auto;
-            max-height: 180px;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-
-        .upload-zone.has-file .upload-icon,
-        .upload-zone.has-file .upload-text {
-            display: none;
-        }
-
-        .upload-zone.has-file {
-            padding: 20px;
+            color: #28a745;
         }
 
         .upload-text {
-            color: rgba(255,255,255,0.6);
-            font-size: 1rem;
-        }
-
-        .upload-text strong {
-            color: #C8102E;
-            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            font-size: 1.1rem;
         }
 
         .file-name {
+            color: #28a745;
+            font-weight: 600;
             margin-top: 12px;
-            font-size: 0.9rem;
-            color: #4CAF50;
-            font-weight: 600;
+            font-size: 0.95rem;
         }
 
-        /* Demo Section */
-        .demo-divider {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-            color: rgba(255,255,255,0.4);
-            font-size: 0.85rem;
-        }
-
-        .demo-divider::before,
-        .demo-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        }
-
-        .demo-divider span {
-            padding: 0 16px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.75rem;
-        }
-
-        .demo-btn {
-            width: 100%;
-            background: linear-gradient(135deg, rgba(27, 54, 93, 0.8) 0%, rgba(27, 54, 93, 0.6) 100%);
-            border: 2px solid rgba(27, 54, 93, 0.8);
-            color: #fff;
-            padding: 16px 24px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .demo-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(200, 16, 46, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .demo-btn:hover::before {
-            left: 100%;
-        }
-
-        .demo-btn:hover {
-            border-color: #C8102E;
-            background: linear-gradient(135deg, rgba(200, 16, 46, 0.3) 0%, rgba(27, 54, 93, 0.6) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(200, 16, 46, 0.3);
-        }
-
-        .demo-btn svg {
-            flex-shrink: 0;
-            color: #C8102E;
-        }
-
-        .demo-btn svg.spinner {
-            animation: spin 1s linear infinite;
-            color: #fff;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Review Options */
-        .review-options {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
+        .pdf-preview {
             margin-top: 16px;
-        }
-
-        .review-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: #fff;
-            padding: 16px 24px;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            min-width: 110px;
-            position: relative;
+            max-height: 150px;
+            border-radius: 8px;
             overflow: hidden;
         }
 
-        .review-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(200, 16, 46, 0.3) 0%, rgba(27, 54, 93, 0.3) 100%);
-            opacity: 0;
-            transition: opacity 0.3s;
+        .pdf-preview canvas {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 8px;
         }
 
-        .review-btn:hover::before {
-            opacity: 1;
+        /* Review Type Selector */
+        .review-selector {
+            display: none;
+            margin-top: 24px;
         }
 
-        .review-btn:hover {
+        .review-selector.visible {
+            display: block;
+        }
+
+        .review-selector h3 {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 16px;
+        }
+
+        .review-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .review-option {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .review-option:hover {
+            border-color: rgba(200, 16, 46, 0.5);
+            background: rgba(200, 16, 46, 0.05);
+        }
+
+        .review-option.selected {
             border-color: #C8102E;
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 
-                0 10px 30px rgba(200, 16, 46, 0.3),
-                0 0 0 1px rgba(200, 16, 46, 0.5);
+            background: rgba(200, 16, 46, 0.1);
         }
 
-        .review-btn .percent {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #C8102E, #ff4466);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-            z-index: 1;
+        .review-option-title {
+            font-weight: 600;
+            margin-bottom: 4px;
         }
 
-        .review-btn .items {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.4);
-            position: relative;
-            z-index: 1;
+        .review-option-desc {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
         }
 
-        .review-btn-full {
-            background: linear-gradient(135deg, #1b365d 0%, #C8102E 100%);
-            border: 2px solid rgba(200, 16, 46, 0.5);
+        .start-review-btn {
+            background: linear-gradient(135deg, #C8102E 0%, #a00d25 100%);
+            border: none;
+            color: #fff;
+            padding: 16px 48px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.5;
+            pointer-events: none;
         }
 
-        .review-btn-full::before {
-            background: linear-gradient(135deg, #C8102E 0%, #1b365d 100%);
+        .start-review-btn.enabled {
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        .review-btn-full:hover {
-            border-color: rgba(200, 16, 46, 0.8);
+        .start-review-btn.enabled:hover {
+            transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(200, 16, 46, 0.4);
         }
 
-        /* Report Wrapper - Full width */
-        .report-wrapper {
-            background: rgba(10, 10, 30, 0.9);
-            border-radius: 20px;
+        /* Split View */
+        .split-view {
+            flex: 1;
+            display: none;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.15);
-            margin-top: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            width: 100%;
         }
 
-        /* Make message with report full width */
-        .message.ai .message-content:has(.report-wrapper) {
-            max-width: 100%;
-            width: 100%;
+        .split-view.active {
+            display: flex;
         }
 
-        .report-header {
-            background: linear-gradient(135deg, rgba(27, 54, 93, 0.95) 0%, rgba(27, 54, 93, 0.8) 100%);
-            padding: 20px 28px;
+        /* Chat Panel */
+        .chat-panel {
+            width: 380px;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.2);
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            flex-shrink: 0;
         }
 
-        .report-header h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
+        .panel-header h2 {
+            font-size: 1rem;
             font-weight: 600;
         }
 
-        .export-btn {
-            background: linear-gradient(135deg, #C8102E 0%, #a00d25 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
+        .status-indicator {
+            font-size: 0.8rem;
+            color: #ffc107;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
+            gap: 6px;
         }
 
-        .export-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(200, 16, 46, 0.5);
+        .status-indicator.complete {
+            color: #28a745;
         }
 
-        .export-btn svg {
-            width: 18px;
-            height: 18px;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse-dot 1.5s infinite;
         }
 
-        .export-btn-secondary {
-            background: linear-gradient(135deg, #1b365d 0%, #0f2442 100%);
-            box-shadow: 0 4px 15px rgba(27, 54, 93, 0.3);
+        .status-indicator.complete .status-dot {
+            animation: none;
         }
 
-        .export-btn-secondary:hover {
-            box-shadow: 0 6px 25px rgba(27, 54, 93, 0.5);
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
 
-        .report-content {
-            max-height: 70vh;
+        .chat-messages {
+            flex: 1;
             overflow-y: auto;
-            background: rgba(10, 10, 30, 0.98) !important;
-            padding: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        /* Override report HTML styles */
-        .report-content,
-        .report-content html,
-        .report-content body,
-        .report-content .report {
-            background: transparent !important;
-            background-color: transparent !important;
-        }
-
-        /* Set default text color for all elements */
-        .report-content,
-        .report-content p,
-        .report-content span,
-        .report-content div,
-        .report-content td,
-        .report-content th,
-        .report-content li,
-        .report-content label {
-            color: rgba(255, 255, 255, 0.9) !important;
-        }
-
-        .report-content body[style],
-        .report-content [style*="background: #fff"],
-        .report-content [style*="background:#fff"],
-        .report-content [style*="background: white"],
-        .report-content [style*="background-color: #fff"],
-        .report-content [style*="background-color:#fff"],
-        .report-content [style*="background-color: white"] {
-            background: transparent !important;
-            background-color: transparent !important;
-        }
-
-        /* Override any dark text colors */
-        .report-content [style*="color: #333"],
-        .report-content [style*="color:#333"],
-        .report-content [style*="color: #666"],
-        .report-content [style*="color:#666"],
-        .report-content [style*="color: #999"],
-        .report-content [style*="color:#999"],
-        .report-content [style*="color: black"],
-        .report-content [style*="color:black"] {
-            color: rgba(255, 255, 255, 0.85) !important;
-        }
-
-        .report-content h1,
-        .report-content h2,
-        .report-content h3,
-        .report-content h4 {
-            color: #fff !important;
-            border-bottom-color: rgba(255,255,255,0.2) !important;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .report-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-        }
-
-        .report-content th,
-        .report-content td {
-            padding: 12px 14px;
-            text-align: left;
-            border: 1px solid rgba(255,255,255,0.15) !important;
+        .message {
+            max-width: 90%;
+            padding: 12px 16px;
+            border-radius: 16px;
             font-size: 0.9rem;
             line-height: 1.5;
         }
 
-        .report-content th {
-            background: rgba(27, 54, 93, 0.6) !important;
-            font-weight: 600;
-            color: #fff !important;
-        }
-
-        .report-content tr:nth-child(even) {
-            background: rgba(255,255,255,0.03) !important;
-        }
-
-        .report-content tr:hover {
-            background: rgba(255,255,255,0.06) !important;
-        }
-
-        .report-content .info-table td:first-child {
-            background: rgba(27, 54, 93, 0.4) !important;
-            font-weight: 600;
-        }
-
-        /* Summary boxes */
-        .report-content .summary-box,
-        .report-content .summary {
-            background: rgba(27, 54, 93, 0.3) !important;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 10px 0;
-        }
-
-        .report-content .summary-box .count,
-        .report-content .summary .count {
-            font-size: 2rem !important;
-            font-weight: 700 !important;
-        }
-
-        .report-content .summary-box.pass,
-        .report-content .pass {
-            background: rgba(40, 167, 69, 0.25) !important;
-            border-color: #28a745 !important;
-        }
-
-        .report-content .summary-box.pass .count {
-            color: #5fd97e !important;
-        }
-
-        .report-content .summary-box.fail,
-        .report-content .fail {
-            background: rgba(220, 53, 69, 0.25) !important;
-            border-color: #dc3545 !important;
-        }
-
-        .report-content .summary-box.fail .count {
-            color: #f77 !important;
-        }
-
-        .report-content .summary-box.review {
-            background: rgba(255, 193, 7, 0.25) !important;
-            border-color: #ffc107 !important;
-        }
-
-        .report-content .summary-box.review .count {
-            color: #ffd54f !important;
-        }
-
-        .report-content .summary-box.na {
-            background: rgba(108, 117, 125, 0.25) !important;
-            border-color: #6c757d !important;
-        }
-
-        .report-content .summary-box.na .count {
-            color: #adb5bd !important;
-        }
-
-        .report-content .section-title {
-            background: rgba(27, 54, 93, 0.8) !important;
-            border-radius: 8px 8px 0 0;
-            color: #fff !important;
-        }
-
-        .report-content .checklist th {
-            background: rgba(27, 54, 93, 0.5) !important;
-            border-color: rgba(255,255,255,0.15) !important;
-            color: #fff !important;
-        }
-
-        .report-content .checklist td {
-            color: rgba(255, 255, 255, 0.9) !important;
-        }
-
-        /* Status badges - ensure text is always readable */
-        .report-content .badge,
-        .report-content .badge-pass,
-        .report-content .badge-fail,
-        .report-content .badge-review,
-        .report-content .badge-na {
-            padding: 4px 10px !important;
-            border-radius: 4px !important;
-            font-weight: 600 !important;
-            font-size: 0.75rem !important;
-            text-transform: uppercase !important;
-        }
-
-        .report-content .badge-pass {
-            background: #28a745 !important;
-            color: #fff !important;
-        }
-
-        .report-content .badge-fail {
-            background: #dc3545 !important;
-            color: #fff !important;
-        }
-
-        .report-content .badge-review {
-            background: #ffc107 !important;
-            color: #000 !important;
-        }
-
-        .report-content .badge-na {
-            background: #6c757d !important;
-            color: #fff !important;
-        }
-
-        /* Findings section */
-        .report-content .findings {
-            background: rgba(27, 54, 93, 0.3) !important;
-            border-left: 5px solid #C8102E !important;
-            border-radius: 0 12px 12px 0;
-            padding: 20px !important;
-            margin: 20px 0 !important;
-        }
-
-        .report-content .findings h2,
-        .report-content .findings h3 {
-            color: #fff !important;
-            margin-bottom: 12px !important;
-        }
-
-        .report-content .findings ul {
-            padding-left: 20px !important;
-        }
-
-        .report-content .findings li {
-            color: rgba(255, 255, 255, 0.9) !important;
-            margin: 8px 0 !important;
-            line-height: 1.6 !important;
-        }
-
-        .report-content .findings p {
-            color: rgba(255, 255, 255, 0.85) !important;
-            line-height: 1.6 !important;
-        }
-
-        /* Header section */
-        .report-content .header {
-            text-align: center;
-            border-bottom: 4px solid #C8102E !important;
-            padding-bottom: 20px !important;
-            margin-bottom: 25px !important;
-        }
-
-        .report-content .header h1 {
-            color: #fff !important;
-            font-size: 1.5rem !important;
-        }
-
-        .report-content .header .company {
-            color: rgba(255, 255, 255, 0.6) !important;
-            letter-spacing: 3px !important;
-        }
-
-        .report-content .header .phase,
-        .report-content .header .date {
-            color: rgba(255, 255, 255, 0.7) !important;
-        }
-
-        /* Info section */
-        .report-content .info-section h2 {
-            color: #fff !important;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3) !important;
-        }
-
-        /* Signatures section */
-        .report-content .signatures {
-            border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-            padding-top: 20px !important;
-            margin-top: 30px !important;
-        }
-
-        .report-content .sig-line {
-            border-bottom: 2px solid rgba(255, 255, 255, 0.5) !important;
-        }
-
-        .report-content .sig-label {
-            color: rgba(255, 255, 255, 0.6) !important;
-        }
-
-        /* Footer */
-        .report-content .footer {
-            color: rgba(255, 255, 255, 0.5) !important;
-            border-top: 2px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        /* ID column styling */
-        .report-content .id-col {
-            font-family: 'Consolas', 'Monaco', monospace !important;
-            color: rgba(255, 255, 255, 0.7) !important;
-            font-size: 0.8rem !important;
-        }
-
-        /* Item and comment columns */
-        .report-content .item-col,
-        .report-content .comment-col {
-            color: rgba(255, 255, 255, 0.9) !important;
-            line-height: 1.5 !important;
-        }
-
-        /* Critical/review/general findings headers */
-        .report-content h3.critical {
-            color: #f77 !important;
-        }
-
-        .report-content h3.review {
-            color: #ffd54f !important;
-        }
-
-        .report-content h3.general {
-            color: #64b5f6 !important;
-        }
-
-        /* First h1 (title) */
-        .report-content h1:first-of-type {
-            color: #C8102E !important;
-        }
-
-        /* Progress Bar */
-        .progress-bar {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 16px;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #C8102E, #1B365D, #C8102E);
-            background-size: 200% 100%;
-            width: 0%;
-            transition: width 0.3s;
-            animation: progressGradient 2s linear infinite;
-        }
-
-        @keyframes progressGradient {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 30px 20px;
-            color: rgba(255,255,255,0.3);
-            font-size: 0.85rem;
-        }
-
-        footer a {
-            color: #C8102E;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        footer a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: #C8102E;
-            transition: width 0.3s;
-        }
-
-        footer a:hover::after {
-            width: 100%;
-        }
-
-        footer a:hover {
-            color: #ff4466;
-            text-shadow: 0 0 20px rgba(200, 16, 46, 0.5);
-        }
-
-        /* Chat Input Container */
-        .chat-input-container {
-            display: none;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 20px;
-            animation: slideIn 0.3s ease;
-        }
-
-        .chat-input-container.visible {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chat-input-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .chat-input-title {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-        }
-
-        .turns-counter {
-            font-size: 0.8rem;
-            padding: 4px 12px;
-            border-radius: 20px;
-            background: rgba(200, 16, 46, 0.2);
-            color: #C8102E;
-            font-weight: 600;
-        }
-
-        .turns-counter.exhausted {
-            background: rgba(108, 117, 125, 0.3);
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .review-id-display {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.4);
-            font-family: monospace;
-        }
-
-        .quick-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .quick-action-btn {
+        .message.ai {
             background: rgba(27, 54, 93, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
         }
 
-        .quick-action-btn:hover {
+        .message.user {
             background: rgba(200, 16, 46, 0.3);
-            border-color: rgba(200, 16, 46, 0.5);
-            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
         }
 
-        .quick-action-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .chat-input-wrapper {
+        .chat-input-area {
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.08);
             display: flex;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .chat-input {
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
-            padding: 14px 18px;
+            padding: 12px 16px;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-family: inherit;
             resize: none;
-            min-height: 50px;
+            min-height: 46px;
             max-height: 120px;
-            transition: all 0.3s;
         }
 
         .chat-input:focus {
             outline: none;
             border-color: #C8102E;
-            background: rgba(255, 255, 255, 0.08);
         }
 
         .chat-input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .chat-input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            color: rgba(255,255,255,0.3);
         }
 
         .chat-send-btn {
-            background: linear-gradient(135deg, #C8102E 0%, #a00d25 100%);
+            background: #C8102E;
             border: none;
             color: #fff;
-            padding: 14px 20px;
+            width: 46px;
+            height: 46px;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
         }
 
-        .chat-send-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(200, 16, 46, 0.4);
-        }
-
-        .chat-send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .chat-send-btn:hover {
+            background: #a00d25;
         }
 
         .chat-send-btn svg {
@@ -1142,436 +458,512 @@
             height: 20px;
         }
 
-        .limit-message {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.85rem;
-            padding: 12px;
-            background: rgba(108, 117, 125, 0.2);
-            border-radius: 10px;
-            margin-top: 10px;
+        /* Report Panel */
+        .report-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
         }
 
-        /* Hidden Elements */
+        .report-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .report-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .export-btn {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .export-btn:hover:not(:disabled) {
+            background: rgba(40, 167, 69, 0.3);
+        }
+
+        .export-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .export-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .report-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin-bottom: 24px;
+        }
+
+        .progress-bar-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #C8102E, #28a745);
+            border-radius: 8px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 16px 20px;
+            background: rgba(27, 54, 93, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .section-status {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-status.loading {
+            color: #ffc107;
+        }
+
+        .section-status.complete {
+            color: #28a745;
+        }
+
+        .section-status.pending {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .section-body {
+            padding: 16px 20px;
+            display: none;
+        }
+
+        .section-card.expanded .section-body {
+            display: block;
+        }
+
+        /* Checklist Items */
+        .checklist-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .checklist-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.05);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .checklist-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: top;
+        }
+
+        .checklist-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pass { background: #28a745; color: #fff; }
+        .badge-fail { background: #dc3545; color: #fff; }
+        .badge-review { background: #ffc107; color: #000; }
+        .badge-skipped { background: #fd7e14; color: #fff; }
+        .badge-na { background: #6c757d; color: #fff; }
+
+        /* Page refs */
+        .page-ref {
+            display: inline-block;
+            padding: 2px 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-right: 4px;
+            font-family: monospace;
+        }
+
+        /* Summary Box */
+        .summary-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .summary-box {
+            flex: 1;
+            min-width: 80px;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-box.pass { background: rgba(40, 167, 69, 0.15); border: 1px solid rgba(40, 167, 69, 0.3); }
+        .summary-box.fail { background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.3); }
+        .summary-box.review { background: rgba(255, 193, 7, 0.15); border: 1px solid rgba(255, 193, 7, 0.3); }
+        .summary-box.skipped { background: rgba(253, 126, 20, 0.15); border: 1px solid rgba(253, 126, 20, 0.3); }
+        .summary-box.na { background: rgba(108, 117, 125, 0.15); border: 1px solid rgba(108, 117, 125, 0.3); }
+
+        .summary-count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .summary-box.pass .summary-count { color: #28a745; }
+        .summary-box.fail .summary-count { color: #dc3545; }
+        .summary-box.review .summary-count { color: #ffc107; }
+        .summary-box.skipped .summary-count { color: #fd7e14; }
+        .summary-box.na .summary-count { color: #6c757d; }
+
+        .summary-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Measurement Questions */
+        .measurement-question {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .measurement-question label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .measurement-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 0.85rem;
+            width: 150px;
+            margin-right: 10px;
+        }
+
+        .measurement-input:focus {
+            outline: none;
+            border-color: #ffc107;
+        }
+
+        .threshold-hint {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 6px;
+        }
+
+        .skip-checkbox {
+            margin-left: 16px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .skip-checkbox input {
+            margin-right: 6px;
+        }
+
+        .submit-answers-btn {
+            margin-top: 24px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-answers-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        /* Hidden file input */
         #fileInput {
             display: none;
         }
 
-        /* Install Button */
-        .install-btn {
-            background: linear-gradient(135deg, #C8102E 0%, #a00d25 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(200, 16, 46, 0.4);
-        }
-
-        .install-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(200, 16, 46, 0.6);
-        }
-
-        .install-btn svg {
-            flex-shrink: 0;
-        }
-
-        /* Scrollbar Styling */
+        /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.02);
+            background: rgba(255,255,255,0.05);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.2);
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.3);
         }
 
-        /* Responsive */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 1.6rem;
-            }
+        /* Spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
 
-            .message-content {
-                max-width: 90%;
-                padding: 14px 18px;
-            }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-            .review-options {
-                justify-content: center;
-            }
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
 
-            .review-btn {
-                flex: 1;
-                min-width: 90px;
-            }
-
-            #logo-container {
-                width: 100px;
-                height: 100px;
-            }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
 <body>
-    <!-- Three.js Space Background -->
-    <canvas id="space-bg"></canvas>
+    <div class="bg-gradient"></div>
     
-    <!-- Gradient Overlay -->
-    <div class="gradient-overlay"></div>
-    
-    <!-- Floating Particles -->
-    <div class="particles-overlay" id="particles"></div>
-
     <div class="app-container">
-        <!-- Header with 3D Logo -->
-        <header>
-            <div class="logo-glow"></div>
-            <div id="logo-container"></div>
-            <h1>Plan Set <span class="highlight">Review Agent</span></h1>
-            <p class="subtitle">AI-Powered QA/QC for Civil Engineering</p>
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                REDLINE<span>.AI</span>
+            </div>
+            <div class="header-actions">
+                <span class="project-info" id="projectInfo"></span>
+                <button class="install-btn" id="installBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Install
+                </button>
+            </div>
         </header>
 
-        <!-- Chat Interface -->
-        <div class="chat-container">
-            <div class="messages" id="messages">
-                <!-- Initial AI Message -->
-                <div class="message ai">
-                    <div class="message-content">
-                        <div class="upload-prompt">
-                            <p>Welcome! I'm your Plan Review Agent. Upload a planset PDF to get started with your QA/QC review.</p>
-                            <div class="upload-zone" id="uploadZone">
-                                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="17 8 12 3 7 8"/>
-                                    <line x1="12" y1="3" x2="12" y2="15"/>
-                                </svg>
-                                <p class="upload-text"><strong>Click to upload</strong> or drag & drop</p>
-                                <p class="file-name" id="fileName"></p>
-                                <div class="pdf-preview-container" id="pdfPreviewContainer">
-                                    <canvas class="pdf-preview-canvas" id="pdfPreviewCanvas"></canvas>
-                                </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Upload View -->
+            <div class="upload-view" id="uploadView">
+                <div class="upload-container">
+                    <h1 class="upload-title">QA/QC Plan Review</h1>
+                    <p class="upload-subtitle">Upload a planset and select your review type</p>
+                    
+                    <div class="upload-zone" id="uploadZone">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <p class="upload-text">Click to upload or drag & drop</p>
+                        <p class="file-name" id="fileName"></p>
+                        <div class="pdf-preview" id="pdfPreview"></div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf">
+
+                    <div class="review-selector" id="reviewSelector">
+                        <h3>Select Review Type</h3>
+                        <div class="review-options">
+                            <div class="review-option" data-review="30_percent">
+                                <div class="review-option-title">30% Review</div>
+                                <div class="review-option-desc">Early design validation</div>
                             </div>
-                            <div class="demo-divider">
-                                <span>or try a demo</span>
+                            <div class="review-option" data-review="60_percent">
+                                <div class="review-option-title">60% Review</div>
+                                <div class="review-option-desc">Design development</div>
                             </div>
-                            <button class="demo-btn" id="demoBtn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                                    <polygon points="5 3 19 12 5 21 5 3"/>
-                                </svg>
-                                Try Demo with Sample Plans
-                            </button>
+                            <div class="review-option" data-review="90_percent">
+                                <div class="review-option-title">90% Review</div>
+                                <div class="review-option-desc">Final QC before bid</div>
+                            </div>
+                            <div class="review-option" data-review="full_review">
+                                <div class="review-option-title">Full Review</div>
+                                <div class="review-option-desc">All 146 checklist items</div>
+                            </div>
                         </div>
+                        <button class="start-review-btn" id="startReviewBtn">Start Review</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Chat Input for Follow-up Questions -->
-            <div class="chat-input-container" id="chatInputContainer">
-                <div class="chat-input-header">
-                    <span class="chat-input-title">Continue the conversation</span>
-                    <span class="turns-counter" id="turnsCounter">5 turns remaining</span>
+            <!-- Split View (hidden until review starts) -->
+            <div class="split-view" id="splitView">
+                <!-- Chat Panel -->
+                <div class="chat-panel">
+                    <div class="panel-header">
+                        <h2>Chat</h2>
+                        <span class="status-indicator" id="statusIndicator">
+                            <span class="status-dot"></span>
+                            <span id="statusText">Analyzing...</span>
+                        </span>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Messages will be added here -->
+                    </div>
+                    <div class="chat-input-area">
+                        <textarea class="chat-input" id="chatInput" placeholder="Ask questions or provide instructions..." rows="1"></textarea>
+                        <button class="chat-send-btn" id="chatSendBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="review-id-display" id="reviewIdDisplay"></div>
-                <div class="quick-actions" id="quickActions">
-                    <button class="quick-action-btn" data-action="recheck">Re-check failed items</button>
-                    <button class="quick-action-btn" data-action="priority">List by importance</button>
-                    <button class="quick-action-btn" data-action="page">Analyze specific page</button>
-                    <button class="quick-action-btn" data-action="explain">Explain a finding</button>
-                </div>
-                <div class="chat-input-wrapper">
-                    <textarea class="chat-input" id="chatInput" placeholder="Ask a follow-up question about the review..." rows="1"></textarea>
-                    <button class="chat-send-btn" id="chatSendBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="22" y1="2" x2="11" y2="13"/>
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="limit-message" id="limitMessage" style="display: none;">
-                    Follow-up limit reached. Please fix the identified issues and start a new review for further analysis.
+
+                <!-- Report Panel -->
+                <div class="report-panel">
+                    <div class="report-header">
+                        <h2>QA/QC Report</h2>
+                        <button class="export-btn" id="exportBtn" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="12" y1="18" x2="12" y2="12"/>
+                                <polyline points="9 15 12 12 15 15"/>
+                            </svg>
+                            Export PDF
+                        </button>
+                    </div>
+                    <div class="report-content" id="reportContent">
+                        <!-- Report will be populated here -->
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Footer -->
-        <footer>
-            <button class="install-btn" id="installBtn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Install App
-            </button>
-            <p>Questions or feedback? <a href="https://teams.microsoft.com/l/chat/0/0?users=jknip@abonmarche.com" target="_blank">Contact the Creator</a></p>
-        </footer>
     </div>
-
-    <input type="file" id="fileInput" accept=".pdf">
 
     <script>
         // ============================================
-        // FLOATING PARTICLES
+        // STATE
         // ============================================
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = (15 + Math.random() * 20) + 's';
-            particle.style.width = (2 + Math.random() * 4) + 'px';
-            particle.style.height = particle.style.width;
-            particlesContainer.appendChild(particle);
-        }
+        let uploadedFile = null;
+        let selectedReviewType = null;
+        let currentReviewId = null;
+        let currentProjectName = '';
+        let currentEvalData = null;
+        let reviewInProgress = false;
+        let eventSource = null;
 
-        // ============================================
-        // THREE.JS SPACE BACKGROUND
-        // ============================================
-        const canvas = document.getElementById('space-bg');
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 5;
-
-        // Stars - More dense and varied
-        const starGeometry = new THREE.BufferGeometry();
-        const starCount = 5000;
-        const positions = new Float32Array(starCount * 3);
-        const colors = new Float32Array(starCount * 3);
-        const sizes = new Float32Array(starCount);
-
-        for (let i = 0; i < starCount; i++) {
-            const i3 = i * 3;
-            positions[i3] = (Math.random() - 0.5) * 150;
-            positions[i3 + 1] = (Math.random() - 0.5) * 150;
-            positions[i3 + 2] = (Math.random() - 0.5) * 150;
-            
-            // Color variety
-            const colorChoice = Math.random();
-            if (colorChoice > 0.95) {
-                colors[i3] = 0.9; colors[i3 + 1] = 0.3; colors[i3 + 2] = 0.4; // Red
-            } else if (colorChoice > 0.85) {
-                colors[i3] = 0.3; colors[i3 + 1] = 0.5; colors[i3 + 2] = 1.0; // Blue
-            } else if (colorChoice > 0.75) {
-                colors[i3] = 1.0; colors[i3 + 1] = 0.9; colors[i3 + 2] = 0.6; // Yellow
-            } else {
-                colors[i3] = 1; colors[i3 + 1] = 1; colors[i3 + 2] = 1; // White
-            }
-            
-            sizes[i] = Math.random() * 2;
-        }
-
-        starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-
-        const starMaterial = new THREE.PointsMaterial({
-            size: 0.15,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.9,
-            sizeAttenuation: true
-        });
-
-        const stars = new THREE.Points(starGeometry, starMaterial);
-        scene.add(stars);
-
-        // Multiple nebula layers for depth
-        const nebulaColors = [0x1B365D, 0xC8102E, 0x4a1a6b];
-        nebulaColors.forEach((color, index) => {
-            const nebulaGeo = new THREE.SphereGeometry(25 + index * 10, 32, 32);
-            const nebulaMat = new THREE.MeshBasicMaterial({
-                color: color,
-                transparent: true,
-                opacity: 0.02,
-                side: THREE.BackSide
-            });
-            const nebula = new THREE.Mesh(nebulaGeo, nebulaMat);
-            nebula.rotation.x = Math.random() * Math.PI;
-            nebula.rotation.y = Math.random() * Math.PI;
-            scene.add(nebula);
-        });
-
-        // Mouse interaction
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
-            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
-        });
-
-        // Animation
-        function animateSpace() {
-            requestAnimationFrame(animateSpace);
-            
-            stars.rotation.y += 0.0003;
-            stars.rotation.x += 0.0001;
-            
-            // Subtle mouse parallax
-            camera.position.x += (mouseX - camera.position.x) * 0.02;
-            camera.position.y += (-mouseY - camera.position.y) * 0.02;
-            camera.lookAt(scene.position);
-            
-            renderer.render(scene, camera);
-        }
-        animateSpace();
-
-        // Resize handler
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        // Review type labels
+        const reviewLabels = {
+            '30_percent': '30% Engineering Review',
+            '60_percent': '60% Engineering Review',
+            '90_percent': '90% Engineering Review',
+            'full_review': 'Full Engineering Review'
+        };
 
         // ============================================
-        // 3D SPINNING LOGO - Abonmarche "A" design
+        // DOM ELEMENTS
         // ============================================
-        const logoContainer = document.getElementById('logo-container');
-        const logoRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        logoRenderer.setSize(140, 140);
-        logoRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        logoContainer.appendChild(logoRenderer.domElement);
-
-        const logoScene = new THREE.Scene();
-        const logoCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        logoCamera.position.z = 4.5;
-
-        const logoGroup = new THREE.Group();
-
-        // Materials with better lighting response
-        const redMaterial = new THREE.MeshPhongMaterial({
-            color: 0xC8102E,
-            shininess: 100,
-            specular: 0x666666
-        });
-
-        const navyMaterial = new THREE.MeshPhongMaterial({
-            color: 0x1B365D,
-            shininess: 100,
-            specular: 0x444444
-        });
-
-        // Background circle (navy ring only - no white fill)
-        const ringGeo = new THREE.TorusGeometry(1.5, 0.1, 16, 64);
-        const ring = new THREE.Mesh(ringGeo, navyMaterial);
-        ring.position.z = -0.2;
-        logoGroup.add(ring);
-
-        // Red rectangles forming the "A" pattern
-        const boxDepth = 0.15;
-        
-        // Top-left box
-        const box1Geo = new THREE.BoxGeometry(0.5, 0.5, boxDepth);
-        const box1 = new THREE.Mesh(box1Geo, redMaterial);
-        box1.position.set(-0.45, 0.45, 0);
-        logoGroup.add(box1);
-
-        // Bottom-left box
-        const box2Geo = new THREE.BoxGeometry(0.5, 0.5, boxDepth);
-        const box2 = new THREE.Mesh(box2Geo, redMaterial);
-        box2.position.set(-0.45, -0.15, 0);
-        logoGroup.add(box2);
-
-        // Top-right box (wider)
-        const box3Geo = new THREE.BoxGeometry(0.8, 0.5, boxDepth);
-        const box3 = new THREE.Mesh(box3Geo, redMaterial);
-        box3.position.set(0.35, 0.45, 0);
-        logoGroup.add(box3);
-
-        // Bottom-right box (smaller, offset)
-        const box4Geo = new THREE.BoxGeometry(0.4, 0.5, boxDepth);
-        const box4 = new THREE.Mesh(box4Geo, redMaterial);
-        box4.position.set(0.05, -0.15, 0);
-        logoGroup.add(box4);
-
-        logoScene.add(logoGroup);
-
-        // Enhanced lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        logoScene.add(ambientLight);
-
-        const pointLight1 = new THREE.PointLight(0xffffff, 1.2);
-        pointLight1.position.set(3, 3, 5);
-        logoScene.add(pointLight1);
-
-        const pointLight2 = new THREE.PointLight(0xC8102E, 0.6);
-        pointLight2.position.set(-3, -2, 4);
-        logoScene.add(pointLight2);
-
-        const pointLight3 = new THREE.PointLight(0x1B365D, 0.4);
-        pointLight3.position.set(0, 3, 3);
-        logoScene.add(pointLight3);
-
-        // Animate logo with slight wobble
-        let logoTime = 0;
-        function animateLogo() {
-            requestAnimationFrame(animateLogo);
-            logoTime += 0.02;
-            logoGroup.rotation.y = Math.sin(logoTime * 0.5) * 0.3 + logoTime * 0.3;
-            logoGroup.rotation.x = Math.sin(logoTime * 0.3) * 0.1;
-            logoRenderer.render(logoScene, logoCamera);
-        }
-        animateLogo();
-
-        // ============================================
-        // CHAT FUNCTIONALITY
-        // ============================================
-        const messages = document.getElementById('messages');
+        const uploadView = document.getElementById('uploadView');
+        const splitView = document.getElementById('splitView');
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
-        const fileNameDisplay = document.getElementById('fileName');
+        const fileName = document.getElementById('fileName');
+        const pdfPreview = document.getElementById('pdfPreview');
+        const reviewSelector = document.getElementById('reviewSelector');
+        const reviewOptions = document.querySelectorAll('.review-option');
+        const startReviewBtn = document.getElementById('startReviewBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+        const reportContent = document.getElementById('reportContent');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const exportBtn = document.getElementById('exportBtn');
+        const projectInfo = document.getElementById('projectInfo');
 
-        let uploadedFile = null;
-        let currentReport = null;
-        let currentProjectName = '';
-        let currentReviewType = '';
-        let currentEvalData = null;  // Stores checklist evaluation data with page_refs
-        let currentReviewId = null;  // Database review ID for follow-up conversations
-        let turnsRemaining = 5;      // Max 5 follow-up turns per review
-
-        const reviewLabels = {
-            '30_percent': '30% Engineering QA/QC Review',
-            '60_percent': '60% Engineering QA/QC Review',
-            '90_percent': '90% Engineering QA/QC Review',
-            'full_review': 'Full Engineering QA/QC Review'
-        };
-        
-        const reviewItemCounts = {
-            '30_percent': 45,
-            '60_percent': 66,
-            '90_percent': 105,
-            'full_review': 146
-        };
-
-        // Upload handlers
+        // ============================================
+        // FILE UPLOAD
+        // ============================================
         uploadZone.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                handleFileUpload(this.files[0]);
-            }
-        });
-
+        
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadZone.classList.add('dragover');
@@ -1584,423 +976,41 @@
         uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                const file = e.dataTransfer.files[0];
-                if (file.type === 'application/pdf') {
-                    handleFileUpload(file);
-                } else {
-                    addMessage('ai', 'Please upload a PDF file. Other file types are not supported.');
-                }
-            }
-        });
-
-        // Demo button handler
-        const demoBtn = document.getElementById('demoBtn');
-        demoBtn.addEventListener('click', async () => {
-            // Show loading state
-            demoBtn.innerHTML = `
-                <svg class="spinner" viewBox="0 0 24 24" width="20" height="20">
-                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30 70" />
-                </svg>
-                Loading Demo Plans...
-            `;
-            demoBtn.style.pointerEvents = 'none';
-            
-            try {
-                // Fetch the demo PDF
-                const response = await fetch('/static/demo/SR19-Demo-Planset.pdf');
-                const blob = await response.blob();
-                const file = new File([blob], 'SR19-Demo-Planset.pdf', { type: 'application/pdf' });
-                
-                // Handle as if user uploaded it
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
                 handleFileUpload(file);
-            } catch (error) {
-                console.error('Error loading demo:', error);
-                addMessage('ai', 'Sorry, there was an error loading the demo plans. Please try uploading your own PDF.');
             }
-            
-            // Reset button
-            demoBtn.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                    <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-                Try Demo with Sample Plans
-            `;
-            demoBtn.style.pointerEvents = 'auto';
         });
 
-        function handleFileUpload(file) {
-            // Clear previous review state when new file is uploaded
-            if (uploadedFile && uploadedFile.name !== file.name) {
-                // New file uploaded - reset everything
-                currentReport = null;
-                currentProjectName = '';
-                currentReviewType = '';
-                currentEvalData = null;
-                currentReviewId = null;
-                turnsRemaining = 5;
-                hideChatInput();
-                
-                // Add separator message for new review
-                addMessage('ai', `<hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;"><p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">New planset uploaded - starting fresh review</p>`, true);
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
             }
-            
+        });
+
+        async function handleFileUpload(file) {
             uploadedFile = file;
-            fileNameDisplay.textContent = file.name;
+            fileName.textContent = file.name;
             uploadZone.classList.add('has-file');
             
-            // Render PDF preview
-            renderPdfPreview(file);
-
-            // Add user message
-            addMessage('user', `Uploaded: ${file.name}`);
-
-            // Check if a review type was preselected via URL shortcut
-            if (window.preselectedReviewType) {
-                const preselected = window.preselectedReviewType;
-                window.preselectedReviewType = null; // Clear it
-                
-                // Auto-start the preselected review
-                setTimeout(() => {
-                    addMessage('ai', `<p>Got it! Starting <strong>${reviewLabels[preselected]}</strong> automatically...</p>`, true);
-                    setTimeout(() => startReview(preselected), 500);
-                }, 500);
-                return;
-            }
-
-            // Add AI response with review options
-            setTimeout(() => {
-                const optionsHtml = `
-                    <p>Got it! I received <strong>${file.name}</strong>. Which review phase would you like me to run?</p>
-                    <div class="review-options">
-                        <button class="review-btn" data-review="30_percent">
-                            <span class="percent">30%</span>
-                            <span class="items">${reviewItemCounts['30_percent']} items</span>
-                        </button>
-                        <button class="review-btn" data-review="60_percent">
-                            <span class="percent">60%</span>
-                            <span class="items">${reviewItemCounts['60_percent']} items</span>
-                        </button>
-                        <button class="review-btn" data-review="90_percent">
-                            <span class="percent">90%</span>
-                            <span class="items">${reviewItemCounts['90_percent']} items</span>
-                        </button>
-                        <button class="review-btn review-btn-full" data-review="full_review">
-                            <span class="percent">FULL</span>
-                            <span class="items">${reviewItemCounts['full_review']} items</span>
-                        </button>
-                    </div>
-                `;
-                addMessage('ai', optionsHtml, true);
-
-                // Attach click handlers to review buttons
-                document.querySelectorAll('.review-btn').forEach(btn => {
-                    btn.addEventListener('click', () => startReview(btn.dataset.review));
-                });
-            }, 500);
-        }
-
-        async function startReview(reviewType) {
-            if (!uploadedFile) return;
-
-            // Add user selection message
-            addMessage('user', `Run ${reviewLabels[reviewType]}`);
-
-            // Show typing indicator then progress
-            const typingMsg = addMessage('ai', `
-                <p>Starting ${reviewLabels[reviewType]}...</p>
-                <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
-                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 10px;">This may take 1-2 minutes depending on the planset size.</p>
-            `, true);
-
-            // Animate progress bar
-            let progress = 0;
-            const progressFill = document.getElementById('progressFill');
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 90) progress = 90;
-                if (progressFill) progressFill.style.width = progress + '%';
-            }, 2000);
-
-            try {
-                const formData = new FormData();
-                formData.append('file', uploadedFile);
-                formData.append('use_vision', 'true');
-                formData.append('checklist', reviewType);
-
-                const response = await fetch('/api/review', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                clearInterval(progressInterval);
-
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                // Remove the progress message
-                typingMsg.remove();
-
-                if (data.success) {
-                    currentReport = data.report;
-                    currentProjectName = data.project_name || 'Planset Review';
-                    currentReviewType = reviewType;
-                    currentEvalData = data.eval_data || null;  // Store evaluation data if returned
-                    currentReviewId = data.review_id || null;  // Store review ID for follow-ups
-                    turnsRemaining = 5;  // Reset turns for new review
-
-                    // Strip HTML wrapper from report
-                    let cleanReport = data.report;
-                    const bodyMatch = cleanReport.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-                    if (bodyMatch) {
-                        cleanReport = bodyMatch[1];
-                    }
-                    cleanReport = cleanReport.replace(/<html[^>]*>/gi, '');
-                    cleanReport = cleanReport.replace(/<\/html>/gi, '');
-                    cleanReport = cleanReport.replace(/<head>[\s\S]*?<\/head>/gi, '');
-                    cleanReport = cleanReport.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-
-                    // Count failed items for summary
-                    const failCount = currentEvalData ? Object.values(currentEvalData).filter(item => item.status === 'FAIL').length : 0;
-                    const reviewCount = currentEvalData ? Object.values(currentEvalData).filter(item => item.status === 'REVIEW').length : 0;
-                    
-                    // Add success message with report
-                    const reportHtml = `
-                        <p>Review complete! I analyzed <strong>${data.page_count} pages</strong> and found the following:</p>
-                        ${failCount > 0 || reviewCount > 0 ? `<p style="color: #dc3545; font-weight: 500;">Found ${failCount} failed items and ${reviewCount} items requiring review.</p>` : ''}
-                        <div class="report-wrapper">
-                            <div class="report-header">
-                                <h3>${currentProjectName}</h3>
-                                <button class="export-btn" onclick="exportPdfWithPlans()">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                        <polyline points="14 2 14 8 20 8"/>
-                                        <line x1="12" y1="18" x2="12" y2="12"/>
-                                        <polyline points="9 15 12 12 15 15"/>
-                                    </svg>
-                                    Export PDF Report
-                                </button>
-                            </div>
-                            <div class="report-content">${cleanReport}</div>
-                        </div>
-                    `;
-                    addMessage('ai', reportHtml, true);
-
-                    // Save to history
-                    saveToHistory(data, reviewType);
-                    
-                    // Show chat input for follow-up questions
-                    if (currentReviewId) {
-                        showChatInput();
-                    }
-                } else {
-                    addMessage('ai', `Something went wrong: ${data.error}. Please try again or contact support.`);
-                }
-            } catch (error) {
-                clearInterval(progressInterval);
-                typingMsg.remove();
-                addMessage('ai', `Network error: ${error.message}. Please check your connection and try again.`);
-            }
-        }
-
-        function addMessage(type, content, isHtml = false) {
-            const msg = document.createElement('div');
-            msg.className = `message ${type}`;
-            msg.innerHTML = `<div class="message-content">${isHtml ? content : escapeHtml(content)}</div>`;
-            messages.appendChild(msg);
-            messages.scrollTop = messages.scrollHeight;
-            return msg;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Export PDF function
-        window.exportPdf = function() {
-            if (!currentReport) return;
-
-            const printWindow = window.open('', '_blank');
-            const printHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>${currentProjectName} - QA/QC Review</title>
-<style>
-@media print {
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .no-print { display: none !important; }
-}
-.print-btn {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: #C8102E;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    z-index: 1000;
-}
-.print-btn:hover { background: #A00D25; }
-</style>
-</head>
-<body>
-<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
-${currentReport}
-</body>
-</html>`;
-            printWindow.document.write(printHtml);
-            printWindow.document.close();
-        };
-
-        // Export PDF with Plan Pages function
-        window.exportPdfWithPlans = async function() {
-            if (!currentReport || !uploadedFile) {
-                alert('Please complete a review first before exporting with plan pages.');
-                return;
-            }
-
-            // Show loading state
-            const exportBtns = document.querySelectorAll('.export-btn-secondary');
-            exportBtns.forEach(btn => {
-                btn.disabled = true;
-                btn.innerHTML = '<span>Generating...</span>';
-            });
-
-            try {
-                // Create form data with planset file and report data
-                const formData = new FormData();
-                formData.append('planset', uploadedFile);
-                formData.append('report', currentReport);
-                formData.append('project_name', currentProjectName);
-                formData.append('review_type', currentReviewType);
-                
-                // Include evaluation data with page references if available
-                if (currentEvalData) {
-                    // Extract failed items with page_refs
-                    const failedItems = Object.values(currentEvalData)
-                        .filter(item => item.status === 'FAIL' || item.status === 'REVIEW')
-                        .map(item => ({
-                            id: item.id,
-                            comment: item.comment || '',
-                            page_refs: item.page_refs || []
-                        }));
-                    formData.append('failed_items', JSON.stringify(failedItems));
-                }
-
-                const response = await fetch('/api/export/pdf-with-pages', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Export failed: ${response.status}`);
-                }
-
-                // Download the PDF
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${currentProjectName.replace(/[^a-zA-Z0-9\s-_]/g, '_')}_${currentReviewType}_with_plans.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
-
-            } catch (error) {
-                console.error('Export error:', error);
-                alert(`Export failed: ${error.message}`);
-            } finally {
-                // Restore button state
-                exportBtns.forEach(btn => {
-                    btn.disabled = false;
-                    btn.innerHTML = `
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="3" y1="9" x2="21" y2="9"/>
-                            <line x1="9" y1="21" x2="9" y2="9"/>
-                        </svg>
-                        PDF + Plan Pages
-                    `;
-                });
-            }
-        };
-
-        // Handle URL parameters for quick shortcuts (PWA right-click menu)
-        function handleUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const reviewType = urlParams.get('review');
+            // Show PDF preview
+            await renderPdfPreview(file);
             
-            if (reviewType && ['30_percent', '60_percent', '90_percent', 'full_review'].includes(reviewType)) {
-                // Show a message indicating which review was selected via shortcut
-                const reviewLabelsLocal = {
-                    '30_percent': '30% Engineering QA/QC Review',
-                    '60_percent': '60% Engineering QA/QC Review',
-                    '90_percent': '90% Engineering QA/QC Review',
-                    'full_review': 'Full Engineering QA/QC Review'
-                };
-                
-                // Add message indicating quick access was used
-                setTimeout(() => {
-                    addMessage('ai', `
-                        <p><strong>Quick Access:</strong> ${reviewLabelsLocal[reviewType]} selected.</p>
-                        <p>Please upload a planset PDF to begin the review, or try the demo.</p>
-                    `, true);
-                }, 800);
-                
-                // Store the selected review type to auto-start after file upload
-                window.preselectedReviewType = reviewType;
-            }
-        }
-        
-        // Call on page load
-        handleUrlParams();
-
-        // Save to history
-        async function saveToHistory(data, reviewType) {
-            try {
-                await fetch('/api/history', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        project_name: data.project_name || 'Unknown Project',
-                        page_count: data.page_count,
-                        report: data.report,
-                        is_html: data.is_html,
-                        review_type: reviewType
-                    })
-                });
-            } catch (err) {
-                console.error('Failed to save to history:', err);
-            }
+            // Show review type selector
+            reviewSelector.classList.add('visible');
         }
 
-        // ============================================
-        // PDF PREVIEW FUNCTIONALITY
-        // ============================================
         async function renderPdfPreview(file) {
-            const previewContainer = document.getElementById('pdfPreviewContainer');
-            const canvas = document.getElementById('pdfPreviewCanvas');
-            
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 const page = await pdf.getPage(1);
                 
-                const scale = 1.5;
+                const scale = 1.0;
                 const viewport = page.getViewport({ scale });
                 
+                const canvas = document.createElement('canvas');
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 
@@ -2010,97 +1020,204 @@ ${currentReport}
                     viewport: viewport
                 }).promise;
                 
-                previewContainer.classList.add('visible');
+                pdfPreview.innerHTML = '';
+                pdfPreview.appendChild(canvas);
             } catch (error) {
-                console.error('Error rendering PDF preview:', error);
-                // If preview fails, just don't show it - not critical
+                console.error('PDF preview error:', error);
             }
         }
 
         // ============================================
-        // CHAT CONTINUATION FUNCTIONALITY
+        // REVIEW TYPE SELECTION
         // ============================================
-        const chatInputContainer = document.getElementById('chatInputContainer');
-        const chatInput = document.getElementById('chatInput');
-        const chatSendBtn = document.getElementById('chatSendBtn');
-        const turnsCounter = document.getElementById('turnsCounter');
-        const reviewIdDisplay = document.getElementById('reviewIdDisplay');
-        const limitMessage = document.getElementById('limitMessage');
-        const quickActions = document.getElementById('quickActions');
+        reviewOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                reviewOptions.forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedReviewType = option.dataset.review;
+                startReviewBtn.classList.add('enabled');
+            });
+        });
 
-        function showChatInput() {
-            if (!currentReviewId) return;
-            
-            chatInputContainer.classList.add('visible');
-            updateTurnsDisplay();
-            reviewIdDisplay.textContent = `Review ID: ${currentReviewId.substring(0, 8)}...`;
-            
-            // Enable/disable based on turns remaining
-            const exhausted = turnsRemaining <= 0;
-            chatInput.disabled = exhausted;
-            chatSendBtn.disabled = exhausted;
-            quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = exhausted);
-            limitMessage.style.display = exhausted ? 'block' : 'none';
-        }
-
-        function hideChatInput() {
-            chatInputContainer.classList.remove('visible');
-        }
-
-        function updateTurnsDisplay() {
-            turnsCounter.textContent = `${turnsRemaining} turn${turnsRemaining !== 1 ? 's' : ''} remaining`;
-            if (turnsRemaining <= 0) {
-                turnsCounter.classList.add('exhausted');
-            } else {
-                turnsCounter.classList.remove('exhausted');
-            }
-        }
-
-        // Quick action handlers
-        quickActions.addEventListener('click', (e) => {
-            if (e.target.classList.contains('quick-action-btn') && !e.target.disabled) {
-                const action = e.target.dataset.action;
-                handleQuickAction(action);
+        startReviewBtn.addEventListener('click', () => {
+            if (uploadedFile && selectedReviewType) {
+                startReview();
             }
         });
 
-        function handleQuickAction(action) {
-            let query = '';
-            switch (action) {
-                case 'recheck':
-                    query = 'Please re-check the failed items with more detail and confirm if they are correct.';
-                    break;
-                case 'priority':
-                    query = 'List all failed and review items in order of importance/criticality, with the most urgent issues first.';
-                    break;
-                case 'page':
-                    const pageNum = prompt('Which page number would you like me to analyze more closely?');
-                    if (pageNum) {
-                        query = `Please analyze page ${pageNum} more closely and tell me if there are any issues I should be aware of.`;
-                    }
-                    break;
-                case 'explain':
-                    const itemId = prompt('Enter the item ID (e.g., 90-GEN-001) or describe the finding you want explained:');
-                    if (itemId) {
-                        query = `Please explain the finding for ${itemId} in more detail. Why did it fail or need review?`;
-                    }
-                    break;
-            }
+        // ============================================
+        // START REVIEW
+        // ============================================
+        async function startReview() {
+            reviewInProgress = true;
             
-            if (query) {
-                chatInput.value = query;
-                sendFollowup();
+            // Switch to split view
+            uploadView.classList.add('hidden');
+            splitView.classList.add('active');
+            
+            // Add initial AI message
+            addChatMessage('ai', `Working on your ${reviewLabels[selectedReviewType]}. Is there anything specific we should check for today?`);
+            
+            // Initialize report with loading state
+            reportContent.innerHTML = `
+                <div class="progress-section">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="progressLabel">Analyzing planset...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                </div>
+                <div class="summary-section" id="summarySection" style="display: none;">
+                    <div class="summary-box pass"><span class="summary-count" id="passCount">0</span><span class="summary-label">Pass</span></div>
+                    <div class="summary-box fail"><span class="summary-count" id="failCount">0</span><span class="summary-label">Fail</span></div>
+                    <div class="summary-box review"><span class="summary-count" id="reviewCount">0</span><span class="summary-label">Review</span></div>
+                    <div class="summary-box na"><span class="summary-count" id="naCount">0</span><span class="summary-label">N/A</span></div>
+                </div>
+                <div id="sectionsContainer"></div>
+            `;
+            
+            // Upload file and start review
+            const formData = new FormData();
+            formData.append('planset', uploadedFile);
+            formData.append('checklist_id', selectedReviewType);
+            
+            try {
+                const response = await fetch('/api/review', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentReviewId = data.review_id;
+                    currentProjectName = data.project_name || 'Plan Review';
+                    currentEvalData = data.eval_data || {};
+                    
+                    projectInfo.textContent = currentProjectName;
+                    
+                    // Update progress to 100%
+                    document.getElementById('progressBar').style.width = '100%';
+                    document.getElementById('progressPercent').textContent = '100%';
+                    document.getElementById('progressLabel').textContent = 'Review complete!';
+                    
+                    // Mark as complete
+                    statusIndicator.classList.add('complete');
+                    statusText.textContent = 'Complete';
+                    reviewInProgress = false;
+                    
+                    // Enable export
+                    exportBtn.disabled = false;
+                    
+                    // Render full report
+                    renderReport(data);
+                    
+                    // Add completion message
+                    addChatMessage('ai', `Review complete! I analyzed ${data.page_count} pages and found ${countStatus('FAIL')} issues and ${countStatus('REVIEW')} items needing verification. You can ask me questions about the findings or export the report.`);
+                } else {
+                    addChatMessage('ai', `Sorry, there was an error: ${data.error}`);
+                    statusText.textContent = 'Error';
+                }
+            } catch (error) {
+                addChatMessage('ai', `Network error: ${error.message}`);
+                statusText.textContent = 'Error';
             }
         }
 
-        // Send button click handler
-        chatSendBtn.addEventListener('click', sendFollowup);
+        function countStatus(status) {
+            if (!currentEvalData) return 0;
+            return Object.values(currentEvalData).filter(item => item.status === status).length;
+        }
 
-        // Enter key to send (Shift+Enter for new line)
+        // ============================================
+        // RENDER REPORT
+        // ============================================
+        function renderReport(data) {
+            const sectionsContainer = document.getElementById('sectionsContainer');
+            const summarySection = document.getElementById('summarySection');
+            
+            // Show and update summary
+            summarySection.style.display = 'flex';
+            document.getElementById('passCount').textContent = countStatus('PASS');
+            document.getElementById('failCount').textContent = countStatus('FAIL');
+            document.getElementById('reviewCount').textContent = countStatus('REVIEW');
+            document.getElementById('naCount').textContent = countStatus('N/A');
+            
+            // Group items by section
+            const sections = {};
+            Object.entries(currentEvalData).forEach(([id, item]) => {
+                const section = item.section || 'General';
+                if (!sections[section]) sections[section] = [];
+                sections[section].push({ id, ...item });
+            });
+            
+            // Render sections
+            sectionsContainer.innerHTML = '';
+            Object.entries(sections).forEach(([sectionName, items]) => {
+                const sectionHtml = `
+                    <div class="section-card expanded">
+                        <div class="section-header" onclick="this.parentElement.classList.toggle('expanded')">
+                            <span class="section-title">${sectionName}</span>
+                            <span class="section-status complete">${items.length} items</span>
+                        </div>
+                        <div class="section-body">
+                            <table class="checklist-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 70px;">Status</th>
+                                        <th style="width: 60px;">Page</th>
+                                        <th style="width: 100px;">ID</th>
+                                        <th>Item</th>
+                                        <th>Comments</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${items.map(item => renderChecklistRow(item)).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                sectionsContainer.innerHTML += sectionHtml;
+            });
+        }
+
+        function renderChecklistRow(item) {
+            const statusClass = `badge-${item.status.toLowerCase().replace('/', '')}`;
+            const pageRefs = item.page_refs && item.page_refs.length > 0 
+                ? item.page_refs.map(p => `<span class="page-ref">${p}</span>`).join('') 
+                : '-';
+            
+            return `
+                <tr>
+                    <td><span class="badge ${statusClass}">${item.status}</span></td>
+                    <td>${pageRefs}</td>
+                    <td style="font-family: monospace; font-size: 0.8rem; color: rgba(255,255,255,0.6);">${item.id}</td>
+                    <td>${item.text || ''}</td>
+                    <td>${item.comment || ''}</td>
+                </tr>
+            `;
+        }
+
+        // ============================================
+        // CHAT FUNCTIONALITY
+        // ============================================
+        function addChatMessage(type, content) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.innerHTML = content;
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        chatSendBtn.addEventListener('click', sendChatMessage);
+        
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                sendFollowup();
+                sendChatMessage();
             }
         });
 
@@ -2110,31 +1227,26 @@ ${currentReport}
             chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
         });
 
-        async function sendFollowup() {
+        async function sendChatMessage() {
             const query = chatInput.value.trim();
-            if (!query || !currentReviewId || turnsRemaining <= 0) return;
-            
-            // Disable input while sending
-            chatInput.disabled = true;
-            chatSendBtn.disabled = true;
-            quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = true);
+            if (!query) return;
             
             // Clear input
             chatInput.value = '';
             chatInput.style.height = 'auto';
             
             // Add user message
-            addMessage('user', query);
+            addChatMessage('user', escapeHtml(query));
+            
+            // If review hasn't started yet, just acknowledge
+            if (!currentReviewId) {
+                addChatMessage('ai', "I'll keep that in mind for the review. The analysis will begin once you select a review type and click Start Review.");
+                return;
+            }
             
             // Add typing indicator
-            const typingMsg = addMessage('ai', `
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <svg class="spinner" viewBox="0 0 24 24" width="16" height="16">
-                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30 70" />
-                    </svg>
-                    <span>Analyzing...</span>
-                </div>
-            `, true);
+            const typingId = 'typing-' + Date.now();
+            addChatMessage('ai', `<span id="${typingId}">Thinking...</span>`);
             
             try {
                 const response = await fetch(`/api/review/${currentReviewId}/followup`, {
@@ -2146,183 +1258,155 @@ ${currentReport}
                 const data = await response.json();
                 
                 // Remove typing indicator
-                typingMsg.remove();
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.parentElement.remove();
                 
                 if (data.success) {
-                    // Update turns remaining
-                    turnsRemaining = data.turns_remaining;
-                    updateTurnsDisplay();
+                    addChatMessage('ai', escapeHtml(data.response).replace(/\n/g, '<br>'));
                     
-                    // Format response
-                    let responseHtml = `<p>${escapeHtml(data.response).replace(/\n/g, '<br>')}</p>`;
-                    
-                    // Show evaluation updates if any
+                    // Update eval data if there were changes
                     if (data.eval_updates && Object.keys(data.eval_updates).length > 0) {
-                        responseHtml += `<div style="margin-top: 12px; padding: 10px; background: rgba(200, 16, 46, 0.1); border-radius: 8px; border-left: 3px solid #C8102E;">`;
-                        responseHtml += `<strong style="color: #C8102E;">Evaluation Updates:</strong><ul style="margin: 8px 0 0 20px;">`;
-                        for (const [itemId, update] of Object.entries(data.eval_updates)) {
-                            responseHtml += `<li>${itemId}: Now marked as <strong>${update.status}</strong></li>`;
-                            // Update local eval data
-                            if (currentEvalData && currentEvalData[itemId]) {
-                                currentEvalData[itemId] = update;
-                            }
-                        }
-                        responseHtml += `</ul></div>`;
-                    }
-                    
-                    // Show if vision was used
-                    if (data.used_vision) {
-                        responseHtml += `<p style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px;">📄 Analyzed plan pages for this response</p>`;
-                    }
-                    
-                    addMessage('ai', responseHtml, true);
-                    
-                    // Check if limit reached
-                    if (turnsRemaining <= 0) {
-                        chatInput.disabled = true;
-                        chatSendBtn.disabled = true;
-                        quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = true);
-                        limitMessage.style.display = 'block';
-                    } else {
-                        chatInput.disabled = false;
-                        chatSendBtn.disabled = false;
-                        quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = false);
+                        Object.assign(currentEvalData, data.eval_updates);
+                        // Re-render report with updates
+                        renderReport({ eval_data: currentEvalData });
                     }
                 } else {
-                    addMessage('ai', `Sorry, there was an error: ${data.error}`);
-                    chatInput.disabled = false;
-                    chatSendBtn.disabled = false;
-                    quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = false);
+                    addChatMessage('ai', `Sorry, there was an error: ${data.error}`);
                 }
             } catch (error) {
-                typingMsg.remove();
-                addMessage('ai', `Network error: ${error.message}. Please try again.`);
-                chatInput.disabled = false;
-                chatSendBtn.disabled = false;
-                quickActions.querySelectorAll('.quick-action-btn').forEach(btn => btn.disabled = false);
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.parentElement.remove();
+                addChatMessage('ai', `Network error: ${error.message}`);
             }
         }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // ============================================
-        // PWA INSTALL FUNCTIONALITY
+        // EXPORT
         // ============================================
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-        
-        // Detect platform for appropriate install instructions
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isAndroid = /Android/.test(navigator.userAgent);
-        const isMac = /Macintosh/.test(navigator.userAgent);
-        const isWindows = /Windows/.test(navigator.userAgent);
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
-        const isEdge = /Edg/.test(navigator.userAgent);
-        const isFirefox = /Firefox/.test(navigator.userAgent);
-        
-        // Check if already installed as PWA
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                           window.navigator.standalone === true;
-        
-        if (isStandalone) {
-            // Hide install button if already installed
-            installBtn.style.display = 'none';
-            console.log('Running as installed PWA');
-        } else {
-            // Always show install button (will show instructions if native prompt unavailable)
-            installBtn.style.display = 'inline-flex';
+        exportBtn.addEventListener('click', exportPdf);
+
+        async function exportPdf() {
+            if (!currentReviewId) return;
             
-            // Customize button text for iOS
-            if (isIOS) {
-                installBtn.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-                        <polyline points="16 6 12 2 8 6"/>
-                        <line x1="12" y1="2" x2="12" y2="15"/>
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = '<span class="spinner">⏳</span> Generating...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('planset', uploadedFile);
+                formData.append('review_id', currentReviewId);
+                
+                const response = await fetch('/api/export/pdf-with-pages', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${currentProjectName.replace(/[^a-zA-Z0-9\s-_]/g, '_')}_QA_QC_Report.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } else {
+                    alert('Export failed. Please try again.');
+                }
+            } catch (error) {
+                alert('Export error: ' + error.message);
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <polyline points="9 15 12 12 15 15"/>
                     </svg>
-                    Add to Home Screen
+                    Export PDF
                 `;
             }
         }
 
-        // Listen for the beforeinstallprompt event (Chrome, Edge, etc.)
+        // ============================================
+        // PWA INSTALL
+        // ============================================
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBtn.style.display = 'inline-flex';
-            console.log('PWA install prompt available');
+            installBtn.style.display = 'flex';
         });
 
-        // Handle install button click
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
-                // Use native install prompt
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to install prompt: ${outcome}`);
-                deferredPrompt = null;
                 if (outcome === 'accepted') {
                     installBtn.style.display = 'none';
                 }
-            } else {
-                // Show platform-specific instructions
-                let instructions = '';
-                
-                if (isIOS) {
-                    instructions = 'To install this app on your iPhone/iPad:\n\n' +
-                        '1. Tap the Share button (square with arrow) at the bottom of Safari\n' +
-                        '2. Scroll down and tap "Add to Home Screen"\n' +
-                        '3. Tap "Add" in the top right corner';
-                } else if (isMac && isSafari) {
-                    instructions = 'To install this app on macOS:\n\n' +
-                        '1. Click the Share button in the Safari toolbar\n' +
-                        '2. Click "Add to Dock"';
-                } else if (isChrome || isEdge) {
-                    instructions = 'To install this app:\n\n' +
-                        '1. Click the menu icon (⋮) in the top right corner\n' +
-                        '2. Click "Install Plan Set Review Agent" or "Install app"\n\n' +
-                        'Or look for the install icon (⊕) in the address bar';
-                } else if (isFirefox) {
-                    instructions = 'Firefox doesn\'t fully support PWA installation.\n\n' +
-                        'For the best experience, open this page in Chrome, Edge, or Safari.';
-                } else {
-                    instructions = 'To install this app:\n\n' +
-                        'Chrome/Edge: Click menu (⋮) > "Install app"\n' +
-                        'Safari (iOS): Tap Share > "Add to Home Screen"\n' +
-                        'Safari (Mac): Click Share > "Add to Dock"';
-                }
-                
-                alert(instructions);
+                deferredPrompt = null;
             }
         });
 
-        // Listen for successful install
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
+        // Check if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
             installBtn.style.display = 'none';
-            deferredPrompt = null;
-        });
-
-        // Register Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .then(reg => {
-                        console.log('SW registered:', reg.scope);
-                        
-                        // Check for updates
-                        reg.addEventListener('updatefound', () => {
-                            const newWorker = reg.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New content available, show refresh prompt
-                                    console.log('New version available! Refresh to update.');
-                                }
-                            });
-                        });
-                    })
-                    .catch(err => console.log('SW registration failed:', err));
-            });
         }
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW registration failed:', err));
+        }
+
+        // ============================================
+        // URL PARAMS (for PWA shortcuts)
+        // ============================================
+        function handleUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reviewType = urlParams.get('review');
+            
+            if (reviewType && ['30_percent', '60_percent', '90_percent', 'full_review'].includes(reviewType)) {
+                // Pre-select review type when file is uploaded
+                window.preselectedReviewType = reviewType;
+                
+                // Auto-open file picker
+                setTimeout(() => {
+                    fileInput.click();
+                }, 300);
+                
+                // Clean URL
+                window.history.replaceState({}, '', '/');
+            }
+        }
+
+        // Handle preselected review type after file upload
+        const originalHandleFileUpload = handleFileUpload;
+        handleFileUpload = async function(file) {
+            await originalHandleFileUpload(file);
+            
+            if (window.preselectedReviewType) {
+                const option = document.querySelector(`[data-review="${window.preselectedReviewType}"]`);
+                if (option) {
+                    option.click();
+                }
+                window.preselectedReviewType = null;
+            }
+        };
+
+        handleUrlParams();
     </script>
 </body>
 </html>
