@@ -19,6 +19,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='none' stroke='%231B365D' stroke-width='4'/><rect x='22' y='25' width='22' height='22' fill='%23C8102E'/><rect x='22' y='50' width='22' height='22' fill='%23C8102E'/><rect x='47' y='25' width='30' height='22' fill='%23C8102E'/><rect x='47' y='50' width='16' height='22' fill='%23C8102E'/></svg>">
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     
+    <!-- Three.js for 3D background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <!-- PDF.js for preview -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
@@ -45,18 +48,64 @@
             overflow: hidden;
         }
 
-        /* Background */
-        .bg-gradient {
+        /* Three.js Canvas */
+        #space-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Animated gradient overlay */
+        .gradient-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(ellipse at 20% 20%, rgba(200, 16, 46, 0.12) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(27, 54, 93, 0.15) 0%, transparent 50%);
-            z-index: 0;
+                radial-gradient(ellipse at 20% 20%, rgba(200, 16, 46, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(27, 54, 93, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(100, 50, 150, 0.1) 0%, transparent 70%);
+            z-index: 1;
             pointer-events: none;
+            animation: gradientShift 15s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        /* Floating particles overlay */
+        .particles-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 20s infinite;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
         }
 
         /* App Container */
@@ -89,16 +138,54 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         .logo span {
             color: #C8102E;
         }
 
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .project-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #fff 0%, #C8102E 50%, #fff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-title.visible {
+            opacity: 1;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
         .header-actions {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
         }
 
         .project-info {
@@ -1105,7 +1192,14 @@
     </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
+    <!-- Three.js Space Background -->
+    <canvas id="space-bg"></canvas>
+    
+    <!-- Gradient Overlay -->
+    <div class="gradient-overlay"></div>
+    
+    <!-- Floating Particles -->
+    <div class="particles-overlay" id="particles"></div>
     
     <div class="app-container">
         <!-- Header -->
@@ -1113,8 +1207,10 @@
             <div class="logo">
                 REDLINE<span> - Abonmarche</span>
             </div>
+            <div class="header-center">
+                <span class="project-title" id="projectTitle"></span>
+            </div>
             <div class="header-actions">
-                <span class="project-info" id="projectInfo"></span>
                 <button class="install-btn" id="installBtn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -1260,7 +1356,7 @@
         const statusIndicator = document.getElementById('statusIndicator');
         const statusText = document.getElementById('statusText');
         const exportBtn = document.getElementById('exportBtn');
-        const projectInfo = document.getElementById('projectInfo');
+        const projectTitle = document.getElementById('projectTitle');
 
         // ============================================
         // FILE UPLOAD
@@ -1411,7 +1507,8 @@
                     currentReportHtml = data.report || '';
                     currentPageCount = data.page_count || 0;
                     
-                    projectInfo.textContent = currentProjectName;
+                    projectTitle.textContent = currentProjectName;
+                    projectTitle.classList.add('visible');
                     
                     // Mark as complete
                     statusIndicator.classList.add('complete');
@@ -2232,6 +2329,120 @@
         };
 
         handleUrlParams();
+
+        // ============================================
+        // FLOATING PARTICLES
+        // ============================================
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 15) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // ============================================
+        // THREE.JS SPACE BACKGROUND
+        // ============================================
+        const canvas = document.getElementById('space-bg');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        // Stars - Dense and varied
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 5000;
+        const positions = new Float32Array(starCount * 3);
+        const colors = new Float32Array(starCount * 3);
+        const sizes = new Float32Array(starCount);
+
+        for (let i = 0; i < starCount; i++) {
+            const i3 = i * 3;
+            positions[i3] = (Math.random() - 0.5) * 150;
+            positions[i3 + 1] = (Math.random() - 0.5) * 150;
+            positions[i3 + 2] = (Math.random() - 0.5) * 150;
+            
+            // Color variety
+            const colorChoice = Math.random();
+            if (colorChoice > 0.95) {
+                colors[i3] = 0.9; colors[i3 + 1] = 0.3; colors[i3 + 2] = 0.4; // Red
+            } else if (colorChoice > 0.85) {
+                colors[i3] = 0.3; colors[i3 + 1] = 0.5; colors[i3 + 2] = 1.0; // Blue
+            } else if (colorChoice > 0.75) {
+                colors[i3] = 1.0; colors[i3 + 1] = 0.9; colors[i3 + 2] = 0.6; // Yellow
+            } else {
+                colors[i3] = 1; colors[i3 + 1] = 1; colors[i3 + 2] = 1; // White
+            }
+            
+            sizes[i] = Math.random() * 2;
+        }
+
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+        const starMaterial = new THREE.PointsMaterial({
+            size: 0.15,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.9,
+            sizeAttenuation: true
+        });
+
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // Multiple nebula layers for depth
+        const nebulaColors = [0x1B365D, 0xC8102E, 0x4a1a6b];
+        nebulaColors.forEach((color, index) => {
+            const nebulaGeo = new THREE.SphereGeometry(25 + index * 10, 32, 32);
+            const nebulaMat = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.02,
+                side: THREE.BackSide
+            });
+            const nebula = new THREE.Mesh(nebulaGeo, nebulaMat);
+            nebula.rotation.x = Math.random() * Math.PI;
+            nebula.rotation.y = Math.random() * Math.PI;
+            scene.add(nebula);
+        });
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
+        });
+
+        // Animation
+        function animateSpace() {
+            requestAnimationFrame(animateSpace);
+            
+            stars.rotation.y += 0.0003;
+            stars.rotation.x += 0.0001;
+            
+            // Subtle mouse parallax
+            camera.position.x += (mouseX - camera.position.x) * 0.02;
+            camera.position.y += (-mouseY - camera.position.y) * 0.02;
+            camera.lookAt(scene.position);
+            
+            renderer.render(scene, camera);
+        }
+        animateSpace();
+
+        // Resize handler for Three.js
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
