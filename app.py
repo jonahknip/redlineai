@@ -671,6 +671,65 @@ relevant plan set pages for items that failed or require attention.
                         from_page=page_num,
                         to_page=page_num
                     )
+                    
+                    # Add red markup annotations to the copied page
+                    if referencing_items:
+                        # Get the page we just added (last page)
+                        marked_page = output_doc[-1]
+                        page_rect = marked_page.rect
+                        
+                        # Add red border around the page to indicate issues
+                        border_color = (0.863, 0.063, 0.271)  # Red
+                        marked_page.draw_rect(
+                            fitz.Rect(5, 5, page_rect.width - 5, page_rect.height - 5),
+                            color=border_color,
+                            width=3
+                        )
+                        
+                        # Add "REVIEW REQUIRED" stamp at top
+                        stamp_rect = fitz.Rect(page_rect.width - 250, 10, page_rect.width - 10, 50)
+                        marked_page.draw_rect(stamp_rect, color=border_color, fill=border_color)
+                        marked_page.insert_text(
+                            (page_rect.width - 245, 35),
+                            "REVIEW REQUIRED",
+                            fontsize=14,
+                            fontname="helvB",
+                            color=(1, 1, 1)  # White text
+                        )
+                        
+                        # Add issue callouts at bottom of page
+                        callout_y = page_rect.height - 120
+                        callout_rect = fitz.Rect(10, callout_y, page_rect.width - 10, page_rect.height - 10)
+                        marked_page.draw_rect(callout_rect, color=border_color, fill=(1, 0.95, 0.95))  # Light red bg
+                        
+                        marked_page.insert_text(
+                            (20, callout_y + 20),
+                            "FAILED CHECKLIST ITEMS:",
+                            fontsize=11,
+                            fontname="helvB",
+                            color=border_color
+                        )
+                        
+                        issue_y = callout_y + 40
+                        for idx, item in enumerate(referencing_items[:4]):  # Max 4 items
+                            issue_text = f"{item.get('id', 'N/A')}: {item.get('comment', 'See checklist')[:60]}"
+                            marked_page.insert_text(
+                                (25, issue_y),
+                                issue_text,
+                                fontsize=9,
+                                fontname="helv",
+                                color=border_color
+                            )
+                            issue_y += 15
+                        
+                        if len(referencing_items) > 4:
+                            marked_page.insert_text(
+                                (25, issue_y),
+                                f"... and {len(referencing_items) - 4} more items",
+                                fontsize=8,
+                                fontname="helv",
+                                color=(0.5, 0.5, 0.5)
+                            )
                 
                 source_doc.close()
                 

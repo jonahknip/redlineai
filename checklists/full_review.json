@@ -1,0 +1,937 @@
+{
+  "name": "Full Engineering QA/QC Review",
+  "phase": "Full",
+  "description": "Comprehensive review combining all 30%, 60%, and 90% checklist items for complete plan set verification",
+  "sections": [
+    {
+      "title": "GENERAL REVIEW / ALL SHEETS",
+      "items": [
+        {
+          "id": "FULL-30-GEN-001",
+          "text": "Survey completed topographic QA checklist with surface elevation review",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-002",
+          "text": "Has the project been scoped with ADA ramps and utility replacement identified?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-003",
+          "text": "Confirm utilities provided match GIS and utility maps (if applicable)",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-004",
+          "text": "Do all drawings have a north arrow shown correctly?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-005",
+          "text": "Do all drawings have scale shown correctly?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-006",
+          "text": "Print and complete scale check",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-007",
+          "text": "Plan has uniform size of text and line weights",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-008",
+          "text": "Are north arrow and scale in same location near title block?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-009",
+          "text": "Run spell check on each sheet",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-010",
+          "text": "Check north arrow rotation",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-011",
+          "text": "Check bar scale and scale listed in title block to match",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-012",
+          "text": "Check for overlapping text & misplaced text/leaders",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-013",
+          "text": "Check for missing layers and verify current layer state",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-014",
+          "text": "Check labels on centerline stations",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-015",
+          "text": "Are existing contours shown and labeled?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-016",
+          "text": "Check labels on streets and bodies of water",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-017",
+          "text": "Update Band elevations in profiles",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-018",
+          "text": "Is the title block consistent on each sheet in the plan set?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-019",
+          "text": "Is the date in the title block correct?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-020",
+          "text": "Is the project number correct?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-021",
+          "text": "Provide the correct initials in the title block for drawn and designed by",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-022",
+          "text": "Are city/village/municipality/owner information/phone/address correct on title sheet?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-023",
+          "text": "Is the underground utility locator note present?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-024",
+          "text": "Is the project title stated clearly and correctly?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-025",
+          "text": "Is the client name stated clearly and correctly?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-026",
+          "text": "Is the location and vicinity map shown correctly?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-027",
+          "text": "Is the project area shown correctly on the title sheet?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-028",
+          "text": "Confirm the map on the title sheet is legible",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-029",
+          "text": "Confirm the POB and POE are correctly shown on the project location map",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-030",
+          "text": "Does the sheet index correspond with all the sheets in the set?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-031",
+          "text": "Is all sheet numbering correct?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-032",
+          "text": "Confirm Right of Way and Property boundaries are shown on existing conditions",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-033",
+          "text": "Are the project limits clearly shown and labeled?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-034",
+          "text": "Are the adjacent property lines clearly shown and labeled?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-035",
+          "text": "Are the existing benchmarks clearly shown and labeled?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-036",
+          "text": "Is the horizontal control provided and listed?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-037",
+          "text": "Is the survey disclaimer shown (if applicable)?",
+          "required": false,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-038",
+          "text": "Verify phasing areas (if applicable)",
+          "required": false,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-039",
+          "text": "Check POB and POE is located properly throughout the plan set",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-040",
+          "text": "Are all existing structures clearly identified and labeled?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-041",
+          "text": "Are all existing underground utilities shown and labeled?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-042",
+          "text": "Caution boxes have been placed with critical utilities identified",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-043",
+          "text": "Is the legend provided with all line types for existing conditions?",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-044",
+          "text": "Confirm all spelling on plan notes, keynotes, and utility callouts (spell check)",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-30-GEN-045",
+          "text": "Confirm bands in profile have been updated to show correct elevation",
+          "required": true,
+          "source_phase": "30%"
+        },
+        {
+          "id": "FULL-60-GEN-002",
+          "text": "Check boring & coring log listed properly and located on the plans",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-003",
+          "text": "Check Excel table sheet numbers are correct",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-004",
+          "text": "Review and confirm notes and details are modified with municipal requirements",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-005",
+          "text": "Confirm municipality is listed properly on notes and details and plan set",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-006",
+          "text": "Verify locations and sizes of existing utilities and that inverts are correct",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-007",
+          "text": "Are all elements being removed clearly identified?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-008",
+          "text": "Are all elements remaining clearly identified?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-009",
+          "text": "Provide notes to protect any resources to remain",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-010",
+          "text": "Review and coordinate the removal and demolition plan with the design layout",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-011",
+          "text": "Are all keynotes cross reference on the drawings correctly?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-012",
+          "text": "Are the keynotes easily understood?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-013",
+          "text": "Is all product information that is referenced thorough?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-014",
+          "text": "Are site furnishings identified in pay items/keynotes and included in the specifications?",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-015",
+          "text": "Are the site materials from appropriate climatic region?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-016",
+          "text": "Check lighting spacing (if applicable)",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-017",
+          "text": "Is irrigation required?",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-GEN-018",
+          "text": "Has draft of maintenance of traffic been created and discussed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-90-GEN-002",
+          "text": "Are all of the technician's initials correct for 'Design By', 'QA/QC', and 'PM'?",
+          "required": true,
+          "source_phase": "90%"
+        }
+      ]
+    },
+    {
+      "title": "UTILITIES & STRUCTURES",
+      "items": [
+        {
+          "id": "FULL-60-UTL-001",
+          "text": "Check Rim elevations are correct and listed # of structures reviewed in comments",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-002",
+          "text": "Verify that the proposed sewer and water is > 10 feet from each other",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-003",
+          "text": "Provided 18\" vertical separation between sewer and water",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-004",
+          "text": "Verify manholes can accommodate pipe sizes and alignment",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-005",
+          "text": "Verify Storm and Sanitary Sewer includes inverts, structure elevations, pipes slopes, STA",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-006",
+          "text": "Is potholing required to identify existing utility information and depths?",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-007",
+          "text": "Confirm existing and proposed utilities do not have conflicts",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-008",
+          "text": "Verify proper proposed covers are labeled on structure notes",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-UTL-009",
+          "text": "Provide minimum cover callouts on proposed water main",
+          "required": true,
+          "source_phase": "60%"
+        }
+      ]
+    },
+    {
+      "title": "CROSS SECTIONS & ALIGNMENT",
+      "items": [
+        {
+          "id": "FULL-60-XS-001",
+          "text": "Typical existing cross-section(s) reviewed and labeled",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-XS-002",
+          "text": "Typical proposed cross-sections(s) reviewed and labeled properly",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-XS-003",
+          "text": "Verify that the pavement sections are correct in existing and proposed cross-sections",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-XS-004",
+          "text": "Has the HMA Application Table been provided and updated?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-XS-005",
+          "text": "Review Vertical Alignment (K Values & % Grade)",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-XS-006",
+          "text": "Review Horizontal Alignment (Radius & Super Elevation)",
+          "required": true,
+          "source_phase": "60%"
+        }
+      ]
+    },
+    {
+      "title": "GRADING & MOT",
+      "items": [
+        {
+          "id": "FULL-90-GRD-001",
+          "text": "Provide final Maintenance of Traffic plan. Has phasing been approved by owner?",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-GRD-002",
+          "text": "Review grading plan. Review ADA routes, slopes, trip hazards, drainage, etc.",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-GRD-003",
+          "text": "Review and compare proposed grading with adjacent properties and streets",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-GRD-004",
+          "text": "Review intersection details for drainage, minimum slope, and ADA grades",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-GRD-005",
+          "text": "Review all building door openings are accounted for in design",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-GRD-006",
+          "text": "Are the proposed and existing contours easy to identify?",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-GRD-007",
+          "text": "Have all requirements been met for site amenities and playground items?",
+          "required": false,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-GRD-008",
+          "text": "Has the final layer state been applied before printing and layers reviewed on paper?",
+          "required": true,
+          "source_phase": "90%"
+        }
+      ]
+    },
+    {
+      "title": "ADA & ACCESSIBILITY",
+      "items": [
+        {
+          "id": "FULL-60-ADA-001",
+          "text": "Are proposed ADA ramps shown with proper removals limits identified for ADA work?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-90-ADA-002",
+          "text": "Is running slope < 5%, and ramps identified with proper slopes/handrails (if applicable)?",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-ADA-003",
+          "text": "Are handrails proper diameter, height, and proper slope?",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-ADA-004",
+          "text": "Handrails extend 12\" minimum beyond level landing?",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-ADA-005",
+          "text": "Are all proposed non-motorized paths follow AASHTO guidelines?",
+          "required": true,
+          "source_phase": "90%"
+        }
+      ]
+    },
+    {
+      "title": "TRAFFIC & EROSION CONTROL",
+      "items": [
+        {
+          "id": "FULL-60-TRF-001",
+          "text": "Provide traffic signal data on plans",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-TRF-002",
+          "text": "Provide SESC Design plan with proposed quantities",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-TRF-003",
+          "text": "Provide Stormwater Pollution Prevention Plan (SWPPP)",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-TRF-004",
+          "text": "Do details coordinate with local design ordinances?",
+          "required": true,
+          "source_phase": "60%"
+        }
+      ]
+    },
+    {
+      "title": "GENERAL CHECKS",
+      "items": []
+    },
+    {
+      "title": "CALCULATIONS",
+      "items": [
+        {
+          "id": "FULL-60-CALC-001",
+          "text": "Calculations - Review geotechnical report",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-002",
+          "text": "Calculations - If site lighting has been proposed, review photometric requirements",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-003",
+          "text": "Calculations - Have the storm sewer calculations been completed and reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-004",
+          "text": "Calculations - Have the retention/detention calculations been reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-005",
+          "text": "Calculations - Has the sanitary sewer basis of design calculations been reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-006",
+          "text": "Calculations - Has the water main basis of design calculations been reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-007",
+          "text": "Calculations - Has the pavement design been reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-008",
+          "text": "Calculations - After reviewing the geotechnical report, are there any concerns?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-009",
+          "text": "Calculations - Review site distances and calculations",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-010",
+          "text": "Calculations - Review guardrail calculations if applicable",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-011",
+          "text": "Calculations - Review all taper lengths and include them on plans",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-CALC-012",
+          "text": "Calculations - Has retaining wall calculations been completed and reviewed?",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-90-CALC-012",
+          "text": "Calculations - Have retaining walls been calculated and reviewed?",
+          "required": false,
+          "source_phase": "90%"
+        }
+      ]
+    },
+    {
+      "title": "COST ESTIMATES",
+      "items": [
+        {
+          "id": "FULL-60-COST-001",
+          "text": "Cost Estimates - Have calculations on quantities been reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-COST-002",
+          "text": "Cost Estimates - Pay item descriptions match the plans, specs, and special provision",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-COST-003",
+          "text": "Cost Estimates - Review units vs. plans and specifications are industry standards",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-COST-004",
+          "text": "Cost Estimates - Review unit pricing compares to industry standards",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-COST-005",
+          "text": "Cost Estimates - Is the proper contingency been applied to the cost estimate?",
+          "required": true,
+          "source_phase": "60%"
+        }
+      ]
+    },
+    {
+      "title": "PERMITS",
+      "items": [
+        {
+          "id": "FULL-60-PER-001",
+          "text": "Permits - Sanitary Sewer: has the permit application been developed and reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-PER-002",
+          "text": "Permits - Water Main: has the permit application been developed and reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-PER-003",
+          "text": "Permits - Rule 5/SESC: has the permit application been developed and reviewed?",
+          "required": true,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-PER-004",
+          "text": "Permits - MDOT: is an MDOT permit required and been developed and reviewed?",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-PER-005",
+          "text": "Permits - Drainage Board/Commissioner: Drain permits developed and reviewed?",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-PER-006",
+          "text": "Permits - Joint Permit Application: is a permit needed, or not required?",
+          "required": false,
+          "source_phase": "60%"
+        },
+        {
+          "id": "FULL-60-PER-007",
+          "text": "Permit - SHPO: has the SHPO application been applied for?",
+          "required": false,
+          "source_phase": "60%"
+        }
+      ]
+    },
+    {
+      "title": "SPECIFICATIONS",
+      "items": [
+        {
+          "id": "FULL-90-SPEC-001",
+          "text": "Specifications: 00200.3.01 Add Requirements from Bidders",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-002",
+          "text": "Specifications: 00200.5.01 Revise Pre-Bid Conference Notes",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-003",
+          "text": "Specifications: 00200.8.01 Change City/Client Name for Bid Security, etc. (Std = Owner)",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-004",
+          "text": "Specifications: 00200.8.01 Review requirements for Bid Bond % (Std = 5%)",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-005",
+          "text": "Specifications: 00200.13.01 review or change if copies can be obtained elsewhere",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-006",
+          "text": "Specifications: 00200.15.01 Provide/Revise Requirements from Bidders",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-007",
+          "text": "Specifications: 00200.15.02 Revise/Review recipient is deleted or is correct",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-008",
+          "text": "Specifications: 00410.1.01 Insert Recipient of Bid",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-009",
+          "text": "Specifications: 00410.5.01 Non-Collusion, Debarment (Federal), Familial (School)",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-010",
+          "text": "Specifications: 00410.5.01 Add list of subcontractors and suppliers if required",
+          "required": false,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-011",
+          "text": "Specifications: 00410.6.01 Revise Completion Dates",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-012",
+          "text": "Specifications: 00410.7.01 Adjust Requirements from Bidders (Only if different)",
+          "required": false,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-013",
+          "text": "Specifications: 00520.1.01 Add Description of Work",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-014",
+          "text": "Specifications: 00520.2.01 Add Project Title",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-015",
+          "text": "Specifications: 00520.3.01 Adjust Project Engineer",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-016",
+          "text": "Specifications: 00520.4.02 Add Dates for Substantial Completion",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-017",
+          "text": "Specifications: 00520.4.03 Adjust Liquidated Damages",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-018",
+          "text": "Specifications: 00520.5.01 Add the words 'See Attached Bid' or revise",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-019",
+          "text": "Specifications: 00520.6.02 Adjust Contract Pay Schedule (if applicable)",
+          "required": false,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-020",
+          "text": "Specifications: 00520.6.02 Adjust Retainage % (if applicable)",
+          "required": false,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-021",
+          "text": "Specifications: 00520.7.01 Adjust Interest Rate (if applicable, Std = 0%)",
+          "required": false,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-022",
+          "text": "Specifications: 00520.8.01 Review and revise Supplementary Conditions",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-023",
+          "text": "Specifications: have technical specifications and special provisions been reviewed?",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-024",
+          "text": "Specifications: Review the Table of Contents with all specifications sections",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-025",
+          "text": "Specifications: Has the advertisement for bids been reviewed and provided?",
+          "required": true,
+          "source_phase": "90%"
+        },
+        {
+          "id": "FULL-90-SPEC-026",
+          "text": "Specifications: Have copies of water, sanitary, SESC permit been included?",
+          "required": true,
+          "source_phase": "90%"
+        }
+      ]
+    }
+  ]
+}

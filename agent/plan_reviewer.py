@@ -159,22 +159,66 @@ class CivilEngineeringPMAgent:
             print(f"[DEBUG] Error reading cover page: {e}")
             cover_text = ""
 
-        # Extract project name - look for common patterns
+        # Extract project/job number FIRST - this is most reliable
+        job_patterns = [
+            r'JOB\s*(?:#|NO\.?|NUMBER)?:?\s*(\d{2,3}-\d{3,4})',  # JOB #: 23-1001
+            r'JOB\s*(?:#|NO\.?|NUMBER)?:?\s*(\d+)',  # JOB #: 12345
+            r'PROJECT\s*(?:#|NO\.?|NUMBER)?:?\s*(\d{2,3}-\d{3,4})',  # PROJECT #: 23-1001
+            r'PROJECT\s*(?:#|NO\.?|NUMBER)?:?\s*(\d+)',  # PROJECT NO: 12345
+            r'(?:PA|PROJ)\s*(?:NO\.?|#)?:?\s*(\d+)',  # PA 12345
+        ]
+        for pattern in job_patterns:
+            match = re.search(pattern, cover_text, re.IGNORECASE)
+            if match:
+                info.project_number = match.group(1).strip()
+                break
+        
+        # Extract project name - look for common title patterns
         project_patterns = [
-            r'([A-Z][A-Z\s\d\.\-]+(?:IMPROVEMENTS|PROJECT|CONSTRUCTION|DEVELOPMENT))',
+            # Look for city/location followed by project description
+            r'(?:CITY\s+OF\s+[A-Z\s,]+)\n+([A-Z][A-Z\s\d\.\-&]+(?:IMPROVEMENTS|PROJECT|RECONSTRUCTION|CONSTRUCTION|DEVELOPMENT)[A-Z\s\d\.\-&]*)',
+            # Standard project title patterns
+            r'([A-Z][A-Z\s\d\.\-&]+(?:STREET|AVENUE|ROAD|DRIVE|BOULEVARD)\s+(?:IMPROVEMENTS|RECONSTRUCTION|PROJECT)[A-Z\s\d\.\-&]*)',
+            r'([A-Z][A-Z\s\d\.\-&]+(?:IMPROVEMENTS|PROJECT|CONSTRUCTION|DEVELOPMENT|RECONSTRUCTION))',
             r'(S\.?R\.?\s*\d+[^\n]+)',
-            r'PROJECT:\s*([^\n]+)',
+            r'PROJECT\s*(?:NAME)?:?\s*([^\n]+)',
         ]
         for pattern in project_patterns:
             match = re.search(pattern, cover_text, re.IGNORECASE)
             if match:
-                info.project_name = match.group(1).strip()
-                break
-
-        # Extract project number
-        project_num_match = re.search(r'(?:PA|PROJECT\s*(?:NO\.?|#)?)\s*(\d+)', cover_text, re.IGNORECASE)
-        if project_num_match:
-            info.project_number = project_num_match.group(1)
+                name = match.group(1).strip()
+                # Clean up the name
+                name = re.sub(r'\s+', ' ', name)  # Normalize whitespace
+                if len(name) > 10:  # Only accept if reasonably long
+                    info.project_name = name
+                    break
+        
+        # If no project name found but we have a job number, use that as fallback
+        if not info.project_name and info.project_number:
+            info.project_name = f"Project {info.project_number}"
+        
+        # Try to extract a more complete project title from multi-line text
+        # Look for patterns like "CITY OF X\nSTREET NAME\nIMPROVEMENTS"
+        if not info.project_name or len(info.project_name) < 20:
+            lines = cover_text.split('\n')
+            for i, line in enumerate(lines):
+                line = line.strip()
+                # Look for city line
+                if re.match(r'CITY\s+OF\s+[A-Z\s,]+', line, re.IGNORECASE):
+                    # Collect next few lines until we hit something that's not a title
+                    title_parts = [line]
+                    for j in range(i+1, min(i+5, len(lines))):
+                        next_line = lines[j].strip()
+                        # Stop if we hit job #, date, engineer info, etc.
+                        if re.match(r'(JOB|PROJECT|DATE|ENGINEER|SCALE|SHEET|DRAWN|CHECKED)', next_line, re.IGNORECASE):
+                            break
+                        if next_line and len(next_line) > 3:
+                            title_parts.append(next_line)
+                    if len(title_parts) > 1:
+                        full_title = ' - '.join(title_parts[:3])  # Max 3 parts
+                        if len(full_title) > len(info.project_name or ''):
+                            info.project_name = full_title
+                    break
 
         # Extract location
         location_patterns = [

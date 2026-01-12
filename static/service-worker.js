@@ -1,5 +1,5 @@
 // Plan Set Review Agent Service Worker
-const CACHE_NAME = 'plan-review-agent-v3';
+const CACHE_NAME = 'plan-review-agent-v4';
 const STATIC_ASSETS = [
   '/',
   '/static/manifest.json',

@@ -506,6 +506,20 @@
             z-index: 1;
         }
 
+        .review-btn-full {
+            background: linear-gradient(135deg, #1b365d 0%, #C8102E 100%);
+            border: 2px solid rgba(200, 16, 46, 0.5);
+        }
+
+        .review-btn-full::before {
+            background: linear-gradient(135deg, #C8102E 0%, #1b365d 100%);
+        }
+
+        .review-btn-full:hover {
+            border-color: rgba(200, 16, 46, 0.8);
+            box-shadow: 0 8px 25px rgba(200, 16, 46, 0.4);
+        }
+
         /* Report Wrapper - Full width */
         .report-wrapper {
             background: rgba(10, 10, 30, 0.9);
@@ -1310,7 +1324,15 @@
         const reviewLabels = {
             '30_percent': '30% Engineering QA/QC Review',
             '60_percent': '60% Engineering QA/QC Review',
-            '90_percent': '90% Engineering QA/QC Review'
+            '90_percent': '90% Engineering QA/QC Review',
+            'full_review': 'Full Engineering QA/QC Review'
+        };
+        
+        const reviewItemCounts = {
+            '30_percent': 45,
+            '60_percent': 66,
+            '90_percent': 105,
+            'full_review': 146
         };
 
         // Upload handlers
@@ -1380,6 +1402,18 @@
         });
 
         function handleFileUpload(file) {
+            // Clear previous review state when new file is uploaded
+            if (uploadedFile && uploadedFile.name !== file.name) {
+                // New file uploaded - reset everything
+                currentReport = null;
+                currentProjectName = '';
+                currentReviewType = '';
+                currentEvalData = null;
+                
+                // Add separator message for new review
+                addMessage('ai', `<hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;"><p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">New planset uploaded - starting fresh review</p>`, true);
+            }
+            
             uploadedFile = file;
             fileNameDisplay.textContent = file.name;
             uploadZone.classList.add('has-file');
@@ -1407,15 +1441,19 @@
                     <div class="review-options">
                         <button class="review-btn" data-review="30_percent">
                             <span class="percent">30%</span>
-                            <span class="items">45 items</span>
+                            <span class="items">${reviewItemCounts['30_percent']} items</span>
                         </button>
                         <button class="review-btn" data-review="60_percent">
                             <span class="percent">60%</span>
-                            <span class="items">66 items</span>
+                            <span class="items">${reviewItemCounts['60_percent']} items</span>
                         </button>
                         <button class="review-btn" data-review="90_percent">
                             <span class="percent">90%</span>
-                            <span class="items">105 items</span>
+                            <span class="items">${reviewItemCounts['90_percent']} items</span>
+                        </button>
+                        <button class="review-btn review-btn-full" data-review="full_review">
+                            <span class="percent">FULL</span>
+                            <span class="items">${reviewItemCounts['full_review']} items</span>
                         </button>
                     </div>
                 `;
@@ -1489,28 +1527,25 @@
                     cleanReport = cleanReport.replace(/<head>[\s\S]*?<\/head>/gi, '');
                     cleanReport = cleanReport.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
 
+                    // Count failed items for summary
+                    const failCount = currentEvalData ? Object.values(currentEvalData).filter(item => item.status === 'FAIL').length : 0;
+                    const reviewCount = currentEvalData ? Object.values(currentEvalData).filter(item => item.status === 'REVIEW').length : 0;
+                    
                     // Add success message with report
                     const reportHtml = `
                         <p>Review complete! I analyzed <strong>${data.page_count} pages</strong> and found the following:</p>
+                        ${failCount > 0 || reviewCount > 0 ? `<p style="color: #dc3545; font-weight: 500;">Found ${failCount} failed items and ${reviewCount} items requiring review.</p>` : ''}
                         <div class="report-wrapper">
                             <div class="report-header">
                                 <h3>${currentProjectName}</h3>
-                                <button class="export-btn" onclick="exportPdf()">
+                                <button class="export-btn" onclick="exportPdfWithPlans()">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                         <polyline points="14 2 14 8 20 8"/>
                                         <line x1="12" y1="18" x2="12" y2="12"/>
                                         <polyline points="9 15 12 12 15 15"/>
                                     </svg>
-                                    Export PDF
-                                </button>
-                                <button class="export-btn export-btn-secondary" onclick="exportPdfWithPlans()">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                        <line x1="3" y1="9" x2="21" y2="9"/>
-                                        <line x1="9" y1="21" x2="9" y2="9"/>
-                                    </svg>
-                                    PDF + Plan Pages
+                                    Export PDF Report
                                 </button>
                             </div>
                             <div class="report-content">${cleanReport}</div>
@@ -1666,12 +1701,13 @@ ${currentReport}
             const urlParams = new URLSearchParams(window.location.search);
             const reviewType = urlParams.get('review');
             
-            if (reviewType && ['30_percent', '60_percent', '90_percent'].includes(reviewType)) {
+            if (reviewType && ['30_percent', '60_percent', '90_percent', 'full_review'].includes(reviewType)) {
                 // Show a message indicating which review was selected via shortcut
                 const reviewLabelsLocal = {
                     '30_percent': '30% Engineering QA/QC Review',
                     '60_percent': '60% Engineering QA/QC Review',
-                    '90_percent': '90% Engineering QA/QC Review'
+                    '90_percent': '90% Engineering QA/QC Review',
+                    'full_review': 'Full Engineering QA/QC Review'
                 };
                 
                 // Add message indicating quick access was used

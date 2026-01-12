@@ -61,6 +61,13 @@
       "description": "Start a 90% engineering QA/QC review - final QC before bid",
       "url": "/?review=90_percent",
       "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Start Full Review",
+      "short_name": "Full Review",
+      "description": "Complete QA/QC review - all 146 items from 30%, 60%, and 90% phases",
+      "url": "/?review=full_review",
+      "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
