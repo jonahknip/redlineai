@@ -909,6 +909,7 @@ def load_checklist_from_file(checklist_id: str) -> dict:
         '30_percent': '30_percent.json',
         '60_percent': '60_percent.json',
         '90_percent': '90_percent.json',
+        'full_review': 'full_review.json',
         'cadd': 'cadd_review.json'
     }
     
@@ -955,7 +956,7 @@ def get_checklists():
     checklists = {}
     
     # Load each checklist from JSON files
-    checklist_ids = ['30_percent', '60_percent', '90_percent', 'cadd']
+    checklist_ids = ['30_percent', '60_percent', '90_percent', 'full_review', 'cadd']
     
     for checklist_id in checklist_ids:
         checklist = load_checklist_from_file(checklist_id)
